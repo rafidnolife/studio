@@ -55,81 +55,85 @@ export function ProductCard({ product }: { product: Product }) {
 
   return (
     <Card className={cn(
-      "group relative overflow-hidden border-none transition-all duration-700 bg-white rounded-[2.5rem] flex flex-col h-full",
-      product.isFeatured ? "shadow-2xl ring-2 ring-primary/20 scale-[1.01] z-10" : "shadow-xl hover:shadow-2xl shadow-slate-200/50"
+      "group relative overflow-hidden border-none transition-all duration-1000 bg-white rounded-[3rem] flex flex-col h-full",
+      product.isFeatured ? "shadow-[0_20px_50px_rgba(16,185,129,0.15)] ring-1 ring-primary/10 scale-[1.02] z-10" : "shadow-xl hover:shadow-[0_30px_60px_rgba(0,0,0,0.08)] hover:-translate-y-2"
     )}>
-      {/* Badges Overlay - Positioned carefully to not hide image center */}
-      <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+      {/* Badges Overlay - Now perfectly in corners to not obscure image */}
+      <div className="absolute top-6 left-6 z-20 flex flex-col gap-2">
         {hasDiscount && (
-          <Badge className="bg-red-500 text-white border-none px-3 py-1 rounded-xl font-black text-[9px] shadow-lg">
+          <Badge className="bg-red-500 text-white border-none px-4 py-1.5 rounded-xl font-black text-[10px] shadow-lg shadow-red-500/20">
             -{discountPercent}%
           </Badge>
         )}
       </div>
       
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-6 right-6 z-20">
         <Button 
           size="icon" 
           variant="ghost" 
           className={cn(
-            "rounded-xl h-10 w-10 glass border-none shadow-sm transition-all hover:scale-110",
-            isWishlisted ? "text-red-500 bg-red-50" : "text-slate-400 bg-white/50"
+            "rounded-2xl h-11 w-11 glass border-none shadow-sm transition-all hover:scale-110 active:scale-90",
+            isWishlisted ? "text-red-500 bg-red-50/80" : "text-slate-400 bg-white/60"
           )}
           onClick={toggleWishlist}
         >
-          <Heart className={cn("w-5 h-5", isWishlisted && "fill-current")} />
+          <Heart className={cn("w-5 h-5 transition-transform duration-500", isWishlisted && "fill-current scale-110")} />
         </Button>
       </div>
 
-      {/* Image Container with Padding so Badges don't obscure content */}
-      <div className="relative aspect-[1/1] overflow-hidden bg-slate-50 p-6 md:p-8">
-        <Link href={`/product/${product.id}`} className="block w-full h-full relative">
+      {/* Image Container with large padding to center product image perfectly */}
+      <div className="relative aspect-square overflow-hidden bg-slate-50/30 p-10 md:p-12">
+        <Link href={`/product/${product.id}`} className="block w-full h-full relative z-10">
           <ImageWithFallback
             src={product.imageUrls[0]}
             alt={product.name}
             fill
-            className="group-hover:scale-110 transition-transform duration-[2s] object-contain"
+            className="group-hover:scale-110 transition-transform duration-[2s] object-contain drop-shadow-2xl"
           />
         </Link>
         
         {product.stock <= 0 && (
-          <div className="absolute inset-0 bg-black/60 flex items-center justify-center backdrop-blur-[4px] z-30">
-            <Badge variant="outline" className="text-white border-white border-2 font-black text-lg px-6 py-2 rounded-2xl">
+          <div className="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[2px] z-30">
+            <Badge variant="outline" className="text-slate-900 border-slate-900 border-2 font-black text-lg px-8 py-3 rounded-2xl shadow-xl">
               স্টক শেষ
             </Badge>
           </div>
         )}
       </div>
 
-      <CardContent className="p-6 md:p-8 flex flex-col flex-grow space-y-4">
-        <div className="space-y-1.5">
+      <CardContent className="p-8 md:p-10 flex flex-col flex-grow space-y-6">
+        <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <span className="text-[9px] font-black text-primary uppercase tracking-widest">{product.category}</span>
-            {product.isFeatured && <Badge className="bg-amber-100 text-amber-600 border-none px-2 py-0 h-4 rounded-full font-black text-[7px] uppercase tracking-tighter">Featured</Badge>}
+            <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">{product.category}</span>
+            {product.isFeatured && (
+              <Badge className="bg-amber-50 text-amber-600 border border-amber-100 px-3 py-0.5 h-5 rounded-full font-black text-[8px] uppercase tracking-tighter">
+                <Sparkles className="w-2.5 h-2.5 mr-1" /> Featured
+              </Badge>
+            )}
           </div>
           <Link href={`/product/${product.id}`}>
-            <h3 className="font-black text-lg text-slate-900 line-clamp-1 leading-tight group-hover:text-primary transition-colors">
+            <h3 className="font-black text-xl text-slate-900 line-clamp-1 leading-tight group-hover:text-primary transition-colors duration-500">
               {product.name}
             </h3>
           </Link>
         </div>
         
-        <div className="pt-4 mt-auto flex items-center justify-between border-t border-slate-50">
+        <div className="pt-6 mt-auto flex items-center justify-between border-t border-slate-50">
           <div className="flex flex-col">
             <div className="flex items-baseline gap-2">
-              <span className="font-black text-xl text-slate-900">
+              <span className="font-black text-2xl text-slate-900">
                 ৳{hasDiscount ? product.discountPrice : product.price}
               </span>
               {hasDiscount && (
-                <span className="text-xs text-slate-300 line-through font-bold">
+                <span className="text-sm text-slate-300 line-through font-bold">
                   ৳{product.price}
                 </span>
               )}
             </div>
           </div>
-          <Button size="icon" className="h-12 w-12 rounded-2xl shadow-xl shadow-primary/20 hover:scale-110 transition-transform" asChild>
+          <Button size="icon" className="h-14 w-14 rounded-2xl shadow-2xl shadow-primary/30 hover:scale-110 transition-all duration-500 bg-primary hover:bg-primary/90" asChild>
              <Link href={`/product/${product.id}`}>
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-6 h-6" />
              </Link>
           </Button>
         </div>
