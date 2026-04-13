@@ -1,9 +1,10 @@
+
 "use client";
 
 import Link from 'next/link';
 import { useAuth } from '@/hooks/use-auth';
 import { Button } from '@/components/ui/button';
-import { Home, ShoppingBag, User, ShieldCheck, Heart, LogIn, Menu, X } from 'lucide-react';
+import { Home, ShoppingBag, User, ShieldCheck, Heart, LogIn, Sparkles } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
@@ -32,19 +33,32 @@ export function Navbar() {
   return (
     <nav className={cn(
       "sticky top-0 z-50 w-full transition-all duration-500",
-      scrolled ? "bg-white/80 backdrop-blur-xl shadow-lg h-16" : "bg-white/50 h-24"
+      scrolled ? "bg-white/80 backdrop-blur-xl shadow-lg h-16" : "bg-white/40 h-24"
     )}>
       <div className="container mx-auto px-4 h-full flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
-          <div className="w-10 h-10 md:w-12 md:h-12 bg-primary rounded-[1rem] md:rounded-[1.25rem] flex items-center justify-center text-white font-black text-xl md:text-2xl shadow-xl shadow-primary/20 group-hover:scale-110 transition-all duration-500">
-            ড
-          </div>
-          <div className="flex flex-col leading-none hidden sm:flex">
-            <span className="font-black text-xl md:text-2xl tracking-tighter text-slate-900 uppercase">
-              DOKAAN <span className="text-primary">EXPRESS</span>
-            </span>
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Luxury Shopping</span>
-          </div>
+          {user ? (
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em] flex items-center gap-1">
+                <Sparkles className="w-3 h-3" /> স্বাগতম
+              </span>
+              <span className="font-black text-lg md:text-xl text-slate-900 tracking-tighter truncate max-w-[150px] md:max-w-[250px]">
+                {user.displayName || user.phoneNumber}
+              </span>
+            </div>
+          ) : (
+            <>
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-primary rounded-[1rem] md:rounded-[1.25rem] flex items-center justify-center text-white font-black text-xl md:text-2xl shadow-xl shadow-primary/20 group-hover:scale-110 transition-all duration-500">
+                ড
+              </div>
+              <div className="flex flex-col leading-none hidden sm:flex">
+                <span className="font-black text-xl md:text-2xl tracking-tighter text-slate-900 uppercase">
+                  DOKAAN <span className="text-primary">EXPRESS</span>
+                </span>
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">Luxury Shopping</span>
+              </div>
+            </>
+          )}
         </Link>
 
         {/* Desktop Nav */}

@@ -15,7 +15,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Settings, ShoppingBag, Users, Star, Save, Phone, Eye, EyeOff, Sparkles, TrendingUp, Package, Image as ImageIcon, CheckCircle2, ChevronRight, LayoutDashboard } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, Users, Star, Save, Eye, EyeOff, Sparkles, TrendingUp, Package, Image as ImageIcon } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -129,7 +129,7 @@ export default function AdminDashboard() {
   if (authLoading || !user || user.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen pb-24 md:pb-12 bg-slate-50/30 overflow-x-hidden">
+    <div className="min-h-screen pb-24 md:pb-12 overflow-x-hidden">
       <Navbar />
       <main className="container mx-auto px-4 py-6 md:py-10 max-w-7xl">
         <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -146,7 +146,7 @@ export default function AdminDashboard() {
                 <Plus className="mr-2 h-6 w-6" /> নতুন পণ্য যোগ
               </Button>
             </DialogTrigger>
-            <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] overflow-y-auto rounded-[2rem] md:rounded-[3rem] border-none shadow-2xl p-6 md:p-10">
+            <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] overflow-y-auto rounded-[3rem] border-none shadow-2xl p-6 md:p-10">
               <DialogHeader>
                 <DialogTitle className="text-3xl font-black tracking-tight">পণ্যের তথ্য দিন</DialogTitle>
                 <DialogDescription className="font-bold text-slate-500">সঠিক তথ্য দিয়ে ইনভেন্টরি আপডেট রাখুন।</DialogDescription>
@@ -192,7 +192,7 @@ export default function AdminDashboard() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label className="font-black text-slate-700 ml-1">লাইভ প্রিভিউ</Label>
-                    <div className="aspect-square rounded-[2rem] overflow-hidden bg-slate-50 border-2 border-dashed border-slate-200 flex items-center justify-center relative">
+                    <div className="aspect-square rounded-[2rem] overflow-hidden bg-white border-2 border-dashed border-slate-200 flex items-center justify-center relative shadow-inner">
                       {formData.imageUrls[0] ? (
                         <ImageWithFallback 
                           src={formData.imageUrls[0]} 
@@ -362,7 +362,7 @@ export default function AdminDashboard() {
                     </div>
                     <div>
                       <h3 className="text-3xl font-black tracking-tight text-slate-900">সাইট কাস্টমাইজ</h3>
-                      <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">Manage your global site configuration</p>
+                      <p className="text-slate-400 font-bold uppercase text-[10px] tracking-[0.2em]">Global site configuration</p>
                     </div>
                   </div>
                   
@@ -370,10 +370,6 @@ export default function AdminDashboard() {
                     <div className="space-y-2">
                       <Label className="font-black text-slate-700 ml-1">হোম পেজ হেডলাইন</Label>
                       <Input value={siteSettings.heroTitle} onChange={e => setSiteSettings({...siteSettings, heroTitle: e.target.value})} className="h-16 rounded-2xl bg-slate-50 border-slate-100 focus:bg-white text-xl font-black" />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-black text-slate-700 ml-1">হোম পেজ সাব-টাইটেল</Label>
-                      <Textarea value={siteSettings.heroSubtitle} onChange={e => setSiteSettings({...siteSettings, heroSubtitle: e.target.value})} className="min-h-[120px] rounded-2xl bg-slate-50 border-slate-100 text-lg font-bold" />
                     </div>
                     <div className="space-y-2">
                       <Label className="font-black text-slate-700 ml-1">অর্ডার হোয়াটসঅ্যাপ নম্বর</Label>
@@ -394,15 +390,11 @@ export default function AdminDashboard() {
                   <div className="space-y-8">
                     <div className="flex gap-6">
                       <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center font-black text-primary shrink-0 text-xl shadow-lg">১</div>
-                      <p className="font-bold text-slate-300 text-lg leading-snug">পণ্যের ছবি এইচডি হওয়ার জন্য অরিজিনাল ইউআরএল ব্যবহার করুন।</p>
+                      <p className="font-bold text-slate-300 text-lg leading-snug">এইচডি ছবির জন্য অরিজিনাল লিঙ্ক ব্যবহার করুন।</p>
                     </div>
                     <div className="flex gap-6">
                       <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center font-black text-primary shrink-0 text-xl shadow-lg">২</div>
-                      <p className="font-bold text-slate-300 text-lg leading-snug">স্টক জিরো হয়ে গেলে পণ্যটি অটোমেটিক "Sold Out" দেখাবে।</p>
-                    </div>
-                    <div className="flex gap-6">
-                      <div className="w-10 h-10 rounded-2xl bg-white/10 flex items-center justify-center font-black text-primary shrink-0 text-xl shadow-lg">৩</div>
-                      <p className="font-bold text-slate-300 text-lg leading-snug">কাস্টমারের ফোন ও পাসওয়ার্ড দেখার জন্য আইকনটি ক্লিক করুন।</p>
+                      <p className="font-bold text-slate-300 text-lg leading-snug">স্টক শেষ হলে "Sold Out" অটো দেখাবে।</p>
                     </div>
                   </div>
                 </div>
