@@ -1,3 +1,4 @@
+
 /**
  * Firebase configuration object.
  * Updated with user provided production credentials.
