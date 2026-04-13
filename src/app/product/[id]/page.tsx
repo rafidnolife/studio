@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MessageCircle, Heart, Share2, ChevronLeft, ShieldCheck, ShoppingCart, Info, CheckCircle, Zap } from 'lucide-react';
+import { MessageCircle, Heart, ShieldCheck, Info, CheckCircle, Zap } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -56,16 +56,36 @@ export default function ProductDetail() {
     const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
     const msg = `আসসালামু আলাইকুম,\nআমি দোকান এক্সপ্রেস থেকে এই পণ্যটি অর্ডার করতে চাই:\n\n🛍️ পণ্য: ${product.name}\n📦 পরিমাণ: ${qty}\n💰 মোট মূল্য: ৳${finalPrice}\n🔗 লিঙ্ক: ${currentUrl}\n\nঅনুগ্রহ করে অর্ডারটি কনফার্ম করুন। ধন্যবাদ।`;
     
-    // Using 88 prefix as default for BD
     const url = `https://wa.me/${whatsappNum}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };
 
-  if (loading) return <div className="min-h-screen bg-slate-50 flex items-center justify-center p-20"><Skeleton className="h-[600px] w-full max-w-5xl rounded-[3rem]" /></div>;
-  if (!product) return <div className="min-h-screen bg-slate-50 flex flex-col items-center justify-center p-20 space-y-4">
-    <h2 className="text-2xl font-black">পণ্যটি খুঁজে পাওয়া যায়নি!</h2>
-    <Button onClick={() => window.history.back()} className="rounded-full">পিছনে যান</Button>
-  </div>;
+  if (loading) return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Navbar />
+      <div className="container mx-auto px-4 py-8 lg:py-16 max-w-7xl">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
+          <Skeleton className="aspect-square w-full rounded-[3rem]" />
+          <div className="space-y-8">
+            <Skeleton className="h-10 w-3/4" />
+            <Skeleton className="h-6 w-1/4" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-16 w-full" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  if (!product) return (
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <Navbar />
+      <div className="flex-grow flex flex-col items-center justify-center p-20 space-y-4">
+        <h2 className="text-2xl font-black">পণ্যটি খুঁজে পাওয়া যায়নি!</h2>
+        <Button onClick={() => window.history.back()} className="rounded-full">পিছনে যান</Button>
+      </div>
+    </div>
+  );
 
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
   const savings = hasDiscount ? product.price - product.discountPrice! : 0;
@@ -75,17 +95,16 @@ export default function ProductDetail() {
       <Navbar />
       <main className="container mx-auto px-4 py-8 lg:py-16 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
-          {/* Product Images */}
           <div className="space-y-6">
-            <div className="relative aspect-square rounded-[3rem] overflow-hidden bg-white border border-slate-100 shadow-2xl group">
+            <div className="relative aspect-square rounded-[3rem] overflow-hidden bg-white border border-slate-100 shadow-2xl group min-h-[300px]">
               <ImageWithFallback 
-                src={product.imageUrls[activeImage] || 'https://picsum.photos/seed/p/600/600'} 
+                src={product.imageUrls[activeImage] || 'https://placehold.co/600x400?text=No+Image'} 
                 alt={product.name} 
                 fill 
-                className="object-contain p-6 sm:p-12 transition-transform duration-700 group-hover:scale-105"
+                className="object-contain p-4 sm:p-8 transition-transform duration-700 group-hover:scale-105"
               />
               {hasDiscount && (
-                <Badge className="absolute top-8 left-8 bg-primary text-white text-lg font-black px-6 py-2 rounded-2xl shadow-xl">
+                <Badge className="absolute top-8 left-8 bg-primary text-white text-lg font-black px-6 py-2 rounded-2xl shadow-xl z-20">
                   {Math.round((savings / product.price) * 100)}% ছাড়
                 </Badge>
               )}
@@ -97,18 +116,17 @@ export default function ProductDetail() {
                     key={i} 
                     onClick={() => setActiveImage(i)} 
                     className={cn(
-                      "relative w-24 h-24 rounded-2xl overflow-hidden border-4 transition-all shrink-0",
-                      activeImage === i ? "border-primary shadow-lg shadow-primary/20 scale-105" : "border-white opacity-60 hover:opacity-100"
+                      "relative w-24 h-24 rounded-2xl overflow-hidden border-4 transition-all shrink-0 bg-white",
+                      activeImage === i ? "border-primary shadow-lg scale-105" : "border-transparent opacity-60 hover:opacity-100"
                     )}
                   >
-                    <ImageWithFallback src={url} alt="thumbnail" fill />
+                    <ImageWithFallback src={url} alt="thumbnail" fill className="object-cover" />
                   </button>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Product Info */}
           <div className="flex flex-col justify-center space-y-8">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
