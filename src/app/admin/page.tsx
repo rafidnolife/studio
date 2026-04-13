@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
 import { useFirestore } from '@/firebase';
-import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, getDoc, query, orderBy, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, updateDoc, deleteDoc, doc, getDocs, getDoc, query, orderBy, setDoc, serverTimestamp } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -22,6 +22,9 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
+import { addDoc } from 'firebase/firestore';
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -82,48 +85,78 @@ export default function AdminDashboard() {
   }, [user, db]);
 
   const handleSaveSettings = () => {
+    const docRef = doc(db, 'settings', 'site');
     const data = {
       ...siteSettings,
       whatsappNumber: siteSettings.whatsappNumber.replace(/\D/g, '')
     };
-    setDoc(doc(db, 'settings', 'site'), data)
+    setDoc(docRef, data, { merge: true })
       .then(() => toast({ title: 'সেটিংস আপডেট হয়েছে' }))
-      .catch(() => toast({ variant: 'destructive', title: 'ত্রুটি' }));
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'write',
+          requestResourceData: data,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
-  const handleProductSubmit = async (e: React.FormEvent) => {
+  const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    const data = {
+    const data: any = {
       ...formData,
       price: Number(formData.price),
       discountPrice: formData.discountPrice ? Number(formData.discountPrice) : null,
       stock: Number(formData.stock),
       imageUrls: formData.imageUrls.filter(u => u.trim() !== ''),
       updatedAt: serverTimestamp(),
-      createdAt: editingProduct ? undefined : serverTimestamp(),
     };
 
-    try {
-      if (editingProduct) {
-        await updateDoc(doc(db, 'products', editingProduct.id), data);
-        toast({ title: 'পণ্য আপডেট সফল' });
-      } else {
-        await addDoc(collection(db, 'products'), data);
-        toast({ title: 'নতুন পণ্য যোগ করা হয়েছে' });
-      }
-      setProductDialogOpen(false);
-      setEditingProduct(null);
-      setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''] });
-      fetchData();
-    } catch (err) {
-      toast({ variant: 'destructive', title: 'ব্যর্থ হয়েছে' });
+    if (!editingProduct) {
+      data.createdAt = serverTimestamp();
     }
+
+    const docRef = editingProduct ? doc(db, 'products', editingProduct.id) : null;
+    const colRef = collection(db, 'products');
+
+    const action = editingProduct 
+      ? updateDoc(docRef!, data) 
+      : addDoc(colRef, data);
+
+    action
+      .then(() => {
+        toast({ title: editingProduct ? 'পণ্য আপডেট সফল' : 'নতুন পণ্য যোগ করা হয়েছে' });
+        setProductDialogOpen(false);
+        setEditingProduct(null);
+        setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''] });
+        fetchData();
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: editingProduct ? docRef!.path : 'products',
+          operation: editingProduct ? 'update' : 'create',
+          requestResourceData: data,
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
-  const deleteProduct = async (id: string) => {
+  const deleteProduct = (id: string) => {
     if (!confirm('আপনি কি নিশ্চিতভাবে এই পণ্যটি মুছে ফেলতে চান?')) return;
-    await deleteDoc(doc(db, 'products', id));
-    fetchData();
+    const docRef = doc(db, 'products', id);
+    deleteDoc(docRef)
+      .then(() => {
+        toast({ title: 'পণ্যটি মুছে ফেলা হয়েছে' });
+        fetchData();
+      })
+      .catch(async (error) => {
+        const permissionError = new FirestorePermissionError({
+          path: docRef.path,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
   if (authLoading || !user || user.role !== 'admin') return null;

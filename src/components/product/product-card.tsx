@@ -86,7 +86,7 @@ export function ProductCard({ product }: { product: Product }) {
         </Button>
       </div>
 
-      {/* LARGE Image Container with increased padding to avoid subject overlap */}
+      {/* Image Container with high padding to prevent badge overlap */}
       <div className="relative aspect-square overflow-hidden bg-slate-50/10 flex items-center justify-center">
         <Link href={`/product/${product.id}`} className="block w-full h-full relative z-10">
           <ImageWithFallback
@@ -94,7 +94,7 @@ export function ProductCard({ product }: { product: Product }) {
             alt={product.name}
             fill
             unoptimized={true}
-            className="group-hover:scale-110 transition-transform duration-700 object-contain drop-shadow-2xl p-6 md:p-10"
+            className="group-hover:scale-110 transition-transform duration-700 object-contain drop-shadow-2xl p-8 md:p-12"
           />
         </Link>
         
