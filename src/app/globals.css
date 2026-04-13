@@ -34,12 +34,12 @@
   }
   body {
     @apply text-foreground font-body antialiased;
-    /* Creative & Colorful Background: Premium Silk Mesh Gradient with Vibrant Tones */
-    background: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.22) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.18) 0px, transparent 50%),
-                radial-gradient(at 50% 100%, rgba(15, 23, 42, 0.12) 0px, transparent 50%),
-                radial-gradient(at 0% 100%, rgba(236, 72, 153, 0.1) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(139, 92, 246, 0.08) 0px, transparent 50%),
+    /* Ultra-Vibrant & Colorful Premium Mesh Gradient Background */
+    background: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.25) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.25) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(236, 72, 153, 0.15) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.2) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.15) 0px, transparent 50%),
                 #f8fafc;
     background-attachment: fixed;
     overflow-x: hidden;
@@ -47,9 +47,9 @@
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
