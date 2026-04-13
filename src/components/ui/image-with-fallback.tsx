@@ -15,7 +15,14 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
   const fallbackSrc = 'https://placehold.co/600x400?text=ইমেজ+পাওয়া+যায়নি';
 
   // Basic validation to prevent immediate crash on empty/malformed URLs
-  const validSrc = (src && typeof src === 'string' && src.startsWith('http')) ? src : fallbackSrc;
+  const getValidSrc = (url: string) => {
+    if (!url || typeof url !== 'string' || !url.startsWith('http')) {
+      return fallbackSrc;
+    }
+    return url;
+  };
+
+  const validSrc = getValidSrc(src);
 
   // Reset states when src changes
   useEffect(() => {

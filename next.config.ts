@@ -20,6 +20,10 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'static-01.daraz.com.bd' },
       { protocol: 'https', hostname: 'www.startech.com.bd' },
       { protocol: 'https', hostname: 'framerusercontent.com' },
+      { protocol: 'https', hostname: 'images.pexels.com' },
+      { protocol: 'https', hostname: 'assets.fbstatic.com' },
+      { protocol: 'https', hostname: '**.gstatic.com' },
+      { protocol: 'https', hostname: '**.googleusercontent.com' },
     ],
   },
 };
