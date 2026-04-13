@@ -1,0 +1,16 @@
+{
+  "placeholderImages": [
+    {
+      "id": "hero-banner",
+      "description": "Dokaan Express Banner",
+      "imageUrl": "https://picsum.photos/seed/dokaan-banner/1200/400",
+      "imageHint": "ecommerce banner"
+    },
+    {
+      "id": "broken-fallback",
+      "description": "Broken image fallback",
+      "imageUrl": "https://placehold.co/600x400?text=Image+Not+Found",
+      "imageHint": "placeholder fallback"
+    }
+  ]
+}

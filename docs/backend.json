@@ -1,0 +1,47 @@
+
+{
+  "entities": {
+    "Product": {
+      "title": "Product",
+      "description": "A product available in the store",
+      "type": "object",
+      "properties": {
+        "name": { "type": "string" },
+        "price": { "type": "number" },
+        "discountPrice": { "type": "number" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "stock": { "type": "number" },
+        "imageUrls": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "createdAt": { "type": "string", "format": "date-time" },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["name", "price", "category", "stock"]
+    },
+    "UserProfile": {
+      "title": "User Profile",
+      "description": "Additional information for a user",
+      "type": "object",
+      "properties": {
+        "phoneNumber": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] }
+      }
+    }
+  },
+  "auth": {
+    "providers": ["phone"]
+  },
+  "firestore": {
+    "/products/{productId}": {
+      "schema": "Product",
+      "description": "Collection of products"
+    },
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "User profile data"
+    }
+  }
+}
