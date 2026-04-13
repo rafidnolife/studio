@@ -29,6 +29,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.static-amazon.com' },
       { protocol: 'https', hostname: '**.media-amazon.com' },
       { protocol: 'https', hostname: '**.framer.com' },
+      { protocol: 'https', hostname: '**.fb.com' },
+      { protocol: 'https', hostname: '**.google.com' },
     ],
   },
 };

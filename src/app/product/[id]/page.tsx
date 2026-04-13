@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
 import { useFirestore } from '@/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -35,16 +35,17 @@ export default function ProductDetail() {
           setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
         }
         
-        const sSnap = await getDoc(doc(doc(db, 'settings', 'site').parent, 'settings', 'site'));
-        // Re-fetching settings correctly
         const settingsSnap = await getDoc(doc(db, 'settings', 'site'));
         if (settingsSnap.exists()) {
-          let num = settingsSnap.data().whatsappNumber.replace(/\D/g, '');
-          if (num.startsWith('01')) num = '88' + num;
-          setWhatsappNum(num);
+          const data = settingsSnap.data();
+          if (data.whatsappNumber) {
+            let num = data.whatsappNumber.replace(/\D/g, '');
+            if (num.startsWith('01')) num = '88' + num;
+            setWhatsappNum(num);
+          }
         }
       } catch (err) {
-        console.error(err);
+        console.error('Error fetching product detail:', err);
       } finally {
         setLoading(false);
       }
@@ -83,14 +84,17 @@ export default function ProductDetail() {
     <div className="min-h-screen bg-slate-50 flex flex-col">
       <Navbar />
       <div className="flex-grow flex flex-col items-center justify-center p-20 space-y-4">
-        <h2 className="text-2xl font-black">পণ্যটি খুঁজে পাওয়া যায়নি!</h2>
-        <Button onClick={() => window.history.back()} className="rounded-full">পিছনে যান</Button>
+        <h2 className="text-2xl font-black text-slate-800">পণ্যটি খুঁজে পাওয়া যায়নি!</h2>
+        <Button onClick={() => window.history.back()} className="rounded-full px-8">পিছনে যান</Button>
       </div>
     </div>
   );
 
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
   const savings = hasDiscount ? product.price - product.discountPrice! : 0;
+  const mainImage = product.imageUrls && product.imageUrls.length > 0 
+    ? product.imageUrls[activeImage] 
+    : 'https://placehold.co/600x400?text=No+Image';
 
   return (
     <div className="min-h-screen bg-slate-50/50 pb-20">
@@ -100,18 +104,18 @@ export default function ProductDetail() {
           <div className="space-y-6">
             <div className="relative aspect-square rounded-[3rem] overflow-hidden bg-white border border-slate-100 shadow-2xl group min-h-[300px]">
               <ImageWithFallback 
-                src={product.imageUrls[activeImage] || 'https://placehold.co/600x400?text=No+Image'} 
+                src={mainImage} 
                 alt={product.name} 
                 fill 
                 className="object-contain p-4 sm:p-8 transition-transform duration-700 group-hover:scale-105"
               />
               {hasDiscount && (
-                <Badge className="absolute top-8 left-8 bg-primary text-white text-lg font-black px-6 py-2 rounded-2xl shadow-xl z-20">
+                <Badge className="absolute top-8 left-8 bg-primary text-white text-lg font-black px-6 py-2 rounded-2xl shadow-xl z-20 border-none">
                   {Math.round((savings / product.price) * 100)}% ছাড়
                 </Badge>
               )}
             </div>
-            {product.imageUrls.length > 1 && (
+            {product.imageUrls && product.imageUrls.length > 1 && (
               <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                 {product.imageUrls.map((url, i) => (
                   <button 
