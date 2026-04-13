@@ -38,25 +38,32 @@ export default function Home() {
 
   const { data: featuredProducts, loading: featLoading } = useCollection<Product>(featuredQuery);
   const { data: recentProducts, loading: recentLoading } = useCollection<Product>(recentProductsQuery);
+  const { data: allProducts } = useCollection<Product>(collection(db, 'products'));
 
-  const categories = [
-    { name: 'ইলেকট্রনিক্স', icon: '📱' },
-    { name: 'লাইফস্টাইল', icon: '👕' },
-    { name: 'গ্যাজেট', icon: '🎧' },
-    { name: 'হোম অ্যাপ্লায়েন্স', icon: '🏠' },
-    { name: 'অন্যান্য', icon: '📦' },
-  ];
+  // Filter category buttons to only show categories that actually have products
+  const availableCategories = useMemo(() => {
+    const hardcodedCats = [
+      { name: 'ইলেকট্রনিক্স', icon: '📱' },
+      { name: 'লাইফস্টাইল', icon: '👕' },
+      { name: 'গ্যাজেট', icon: '🎧' },
+      { name: 'হোম অ্যাপ্লায়েন্স', icon: '🏠' },
+      { name: 'অন্যান্য', icon: '📦' },
+    ];
+    
+    const existingCatNames = new Set(allProducts.map(p => p.category));
+    return hardcodedCats.filter(cat => existingCatNames.has(cat.name));
+  }, [allProducts]);
 
   return (
     <div className="flex flex-col min-h-screen selection:bg-primary/20">
       <Navbar />
       
       <main className="flex-grow pb-20 pt-4">
-        {/* Minimal Headline - Only the text */}
+        {/* Minimal Headline - Only the text as requested */}
         <section className="container mx-auto px-4 mb-10">
           <div className="flex items-center gap-2">
             <Sparkles className="w-5 h-5 text-primary" />
-            <h1 className="text-lg md:text-2xl font-black text-slate-800 tracking-tighter">
+            <h1 className="text-lg md:text-2xl font-black text-slate-800 tracking-tighter uppercase">
               {settings.heroTitle}
             </h1>
           </div>
@@ -86,21 +93,23 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Categories Section */}
-        <section className="py-12 bg-primary/5 mb-16">
-          <div className="container mx-auto px-4 overflow-x-auto scrollbar-hide">
-            <div className="flex items-center justify-start gap-6 min-w-max pb-4">
-              {categories.map((cat, i) => (
-                <Link key={i} href={`/products?category=${cat.name}`} className="group flex flex-col items-center gap-4">
-                  <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-[2rem] flex items-center justify-center text-4xl shadow-xl border border-slate-100 transition-all group-hover:bg-primary group-hover:scale-110">
-                    {cat.icon}
-                  </div>
-                  <span className="font-black text-[10px] md:text-xs text-slate-700 uppercase tracking-tighter">{cat.name}</span>
-                </Link>
-              ))}
+        {/* Categories Section - Only shows active categories */}
+        {availableCategories.length > 0 && (
+          <section className="py-12 bg-primary/5 mb-16">
+            <div className="container mx-auto px-4 overflow-x-auto scrollbar-hide">
+              <div className="flex items-center justify-start gap-6 min-w-max pb-4">
+                {availableCategories.map((cat, i) => (
+                  <Link key={i} href={`/products?category=${cat.name}`} className="group flex flex-col items-center gap-4">
+                    <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-[2rem] flex items-center justify-center text-4xl shadow-xl border border-slate-100 transition-all group-hover:bg-primary group-hover:scale-110">
+                      {cat.icon}
+                    </div>
+                    <span className="font-black text-[10px] md:text-xs text-slate-700 uppercase tracking-tighter">{cat.name}</span>
+                  </Link>
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
+        )}
 
         {/* Recent Arrivals */}
         <section className="container mx-auto px-4 mb-16">
