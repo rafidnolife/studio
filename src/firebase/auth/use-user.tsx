@@ -9,6 +9,7 @@ import { useAuth, useFirestore } from '../provider';
 export type UserRole = 'admin' | 'user';
 export interface ExtendedUser extends User {
   role: UserRole;
+  displayName: string | null;
   phoneNumber: string | null;
 }
 
@@ -23,7 +24,6 @@ export function useUser() {
 
     const unsubscribeAuth = onAuthStateChanged(auth, (firebaseUser) => {
       if (firebaseUser) {
-        // Listen to Firestore document for user profile (phone and role)
         const userDocRef = doc(db, 'users', firebaseUser.uid);
         unsubscribeDoc = onSnapshot(userDocRef, (docSnap) => {
           if (docSnap.exists()) {
@@ -31,19 +31,19 @@ export function useUser() {
             setUser({
               ...firebaseUser,
               role: data.role || 'user',
+              displayName: data.name || firebaseUser.displayName,
               phoneNumber: data.phoneNumber || firebaseUser.phoneNumber,
             } as ExtendedUser);
           } else {
-            // Default profile if not found in Firestore
             setUser({
               ...firebaseUser,
               role: 'user',
+              displayName: firebaseUser.displayName,
               phoneNumber: firebaseUser.phoneNumber,
             } as ExtendedUser);
           }
           setLoading(false);
         }, (err) => {
-          console.error("Error fetching user profile:", err);
           setLoading(false);
         });
       } else {

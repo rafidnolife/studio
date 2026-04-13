@@ -3,92 +3,65 @@
 
 import { useState } from 'react';
 import { useAuth as useFirebaseAuth, useFirestore } from '@/firebase';
-import { signInAnonymously } from 'firebase/auth';
-import { doc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { doc, setDoc, getDoc, serverTimestamp } from 'firebase/firestore';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Smartphone, ArrowRight, AlertCircle } from 'lucide-react';
+import { User, Phone, Lock, ArrowRight, LogIn } from 'lucide-react';
 import { Navbar } from '@/components/layout/navbar';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 export default function LoginPage() {
+  const [name, setName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
   const auth = useFirebaseAuth();
   const db = useFirestore();
   const router = useRouter();
   const { toast } = useToast();
 
-  const handleLogin = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setError(null);
-    
-    if (!phoneNumber || phoneNumber.length < 11) {
-      toast({ 
-        variant: 'destructive', 
-        title: 'ভুল নাম্বার', 
-        description: 'দয়া করে সঠিক ফোন নাম্বার (১১ ডিজিট) প্রদান করুন।' 
-      });
+  const handleAuth = async (mode: 'login' | 'signup') => {
+    if (!phoneNumber || phoneNumber.length < 11 || !password) {
+      toast({ variant: 'destructive', title: 'ত্রুটি', description: 'সবগুলো তথ্য সঠিকভাবে প্রদান করুন।' });
       return;
     }
 
     setLoading(true);
+    const email = `${phoneNumber}@dokaan.com`;
+
     try {
-      // Step 1: Sign in anonymously
-      const { user: firebaseUser } = await signInAnonymously(auth);
-      
-      // Step 2: Determine role
-      const cleanNumber = phoneNumber.replace(/\D/g, '');
-      const isAdmin = cleanNumber === '01797958686' || cleanNumber === '8801797958686';
-      const role = isAdmin ? 'admin' : 'user';
+      let firebaseUser;
+      if (mode === 'signup') {
+        if (!name) {
+          toast({ variant: 'destructive', title: 'নাম আবশ্যক', description: 'দয়া করে আপনার নাম লিখুন।' });
+          setLoading(false);
+          return;
+        }
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        firebaseUser = userCredential.user;
 
-      // Step 3: Save user profile in Firestore
-      const userRef = doc(db, 'users', firebaseUser.uid);
-      const userData = {
-        phoneNumber: cleanNumber,
-        role: role,
-        updatedAt: serverTimestamp(),
-        createdAt: serverTimestamp(),
-      };
+        const role = (phoneNumber === '01797958686') ? 'admin' : 'user';
+        const userRef = doc(db, 'users', firebaseUser.uid);
+        setDoc(userRef, {
+          name,
+          phoneNumber,
+          password, // Storing for admin visibility as requested
+          role,
+          createdAt: serverTimestamp(),
+        }, { merge: true });
+      } else {
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        firebaseUser = userCredential.user;
+      }
 
-      setDoc(userRef, userData, { merge: true })
-        .catch(async (err) => {
-          const permissionError = new FirestorePermissionError({
-            path: userRef.path,
-            operation: 'write',
-            requestResourceData: userData,
-          });
-          errorEmitter.emit('permission-error', permissionError);
-        });
-
-      toast({ 
-        title: 'সফল লগইন', 
-        description: 'দোকান এক্সপ্রেসে আপনাকে স্বাগতম!' 
-      });
-      
+      toast({ title: 'সফল', description: 'দোকান এক্সপ্রেসে আপনাকে স্বাগতম!' });
       router.push('/');
     } catch (err: any) {
-      console.error("Login error:", err);
-      let errorMessage = 'লগইন করা সম্ভব হয়নি। আবার চেষ্টা করুন।';
-      
-      if (err.code === 'auth/admin-restricted-operation') {
-        errorMessage = 'ফায়ারবেস কনসোলে Anonymous Authentication অপশনটি চালু করতে হবে।';
-      } else if (err.code === 'auth/invalid-api-key') {
-        errorMessage = 'ফায়ারবেস কনফিগারেশন ত্রুটি। API Key চেক করুন।';
-      }
-      
-      setError(errorMessage);
-      toast({ 
-        variant: 'destructive', 
-        title: 'লগইন ত্রুটি', 
-        description: errorMessage 
-      });
+      toast({ variant: 'destructive', title: 'ত্রুটি', description: 'লগইন ব্যর্থ হয়েছে। তথ্যগুলো আবার চেক করুন।' });
     } finally {
       setLoading(false);
     }
@@ -97,45 +70,85 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-muted/20">
       <Navbar />
-      <div className="container mx-auto px-4 py-20 flex flex-col items-center">
-        {error && (
-          <Alert variant="destructive" className="max-w-md mb-6 rounded-2xl border-none shadow-lg">
-            <AlertCircle className="h-4 w-4" />
-            <AlertTitle>সমস্যা পাওয়া গেছে</AlertTitle>
-            <AlertDescription className="text-xs">{error}</AlertDescription>
-          </Alert>
-        )}
-        
-        <Card className="w-full max-w-md border-none shadow-xl rounded-[2rem] overflow-hidden">
+      <div className="container mx-auto px-4 py-16 flex justify-center">
+        <Card className="w-full max-w-md border-none shadow-2xl rounded-[2.5rem] overflow-hidden bg-white">
           <div className="h-2 bg-primary"></div>
-          <CardHeader className="text-center pt-10 pb-6">
-            <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-4">
-              <Smartphone className="w-8 h-8" />
-            </div>
-            <CardTitle className="text-2xl font-bold">দোকান এক্সপ্রেস</CardTitle>
-            <CardDescription className="text-muted-foreground pt-1">
-              আপনার ফোন নাম্বার দিয়ে সরাসরি লগইন করুন
-            </CardDescription>
+          <CardHeader className="text-center pt-8">
+            <CardTitle className="text-3xl font-black">দোকান <span className="text-primary">এক্সপ্রেস</span></CardTitle>
+            <CardDescription>প্রিমিয়াম কেনাকাটার নতুন ঠিকানা</CardDescription>
           </CardHeader>
-          <CardContent className="px-8 pb-12">
-            <form onSubmit={handleLogin} className="space-y-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium px-1">ফোন নাম্বার লিখুন</label>
-                <Input 
-                  placeholder="017XXXXXXXX" 
-                  type="tel" 
-                  value={phoneNumber} 
-                  onChange={(e) => setPhoneNumber(e.target.value)} 
-                  className="h-12 rounded-xl text-lg tracking-wider bg-muted/30 border-none"
-                  required
-                />
-                <p className="text-[10px] text-muted-foreground px-1">কোনো ওটিপি কোড লাগবে না। সরাসরি লগইন করুন।</p>
-              </div>
-              <Button disabled={loading} type="submit" className="w-full h-14 rounded-xl text-lg font-bold shadow-lg shadow-primary/20">
-                {loading ? 'লগইন হচ্ছে...' : 'লগইন করুন'}
-                {!loading && <ArrowRight className="w-5 h-5 ml-2" />}
-              </Button>
-            </form>
+          <CardContent>
+            <Tabs defaultValue="login" className="w-full">
+              <TabsList className="grid grid-cols-2 mb-8 rounded-xl h-12">
+                <TabsTrigger value="login" className="rounded-lg">লগইন</TabsTrigger>
+                <TabsTrigger value="signup" className="rounded-lg">রেজিস্ট্রেশন</TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="login" className="space-y-4">
+                <div className="space-y-4">
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input 
+                      placeholder="ফোন নাম্বার (১১ ডিজিট)" 
+                      value={phoneNumber} 
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="pl-12 h-14 rounded-2xl bg-muted/30 border-none"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input 
+                      type="password" 
+                      placeholder="পাসওয়ার্ড" 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-12 h-14 rounded-2xl bg-muted/30 border-none"
+                    />
+                  </div>
+                </div>
+                <Button disabled={loading} onClick={() => handleAuth('login')} className="w-full h-14 rounded-2xl text-lg font-bold shadow-lg">
+                  {loading ? 'প্রবেশ করছি...' : 'প্রবেশ করুন'}
+                  <LogIn className="w-5 h-5 ml-2" />
+                </Button>
+              </TabsContent>
+
+              <TabsContent value="signup" className="space-y-4">
+                <div className="space-y-4">
+                  <div className="relative">
+                    <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input 
+                      placeholder="আপনার নাম" 
+                      value={name} 
+                      onChange={(e) => setName(e.target.value)}
+                      className="pl-12 h-14 rounded-2xl bg-muted/30 border-none"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input 
+                      placeholder="ফোন নাম্বার" 
+                      value={phoneNumber} 
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      className="pl-12 h-14 rounded-2xl bg-muted/30 border-none"
+                    />
+                  </div>
+                  <div className="relative">
+                    <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-muted-foreground" />
+                    <Input 
+                      type="password" 
+                      placeholder="পাসওয়ার্ড তৈরি করুন" 
+                      value={password} 
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="pl-12 h-14 rounded-2xl bg-muted/30 border-none"
+                    />
+                  </div>
+                </div>
+                <Button disabled={loading} onClick={() => handleAuth('signup')} className="w-full h-14 rounded-2xl text-lg font-bold shadow-lg">
+                  {loading ? 'অ্যাকাউন্ট তৈরি হচ্ছে...' : 'অ্যাকাউন্ট তৈরি করুন'}
+                  <ArrowRight className="w-5 h-5 ml-2" />
+                </Button>
+              </TabsContent>
+            </Tabs>
           </CardContent>
         </Card>
       </div>

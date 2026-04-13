@@ -12,10 +12,8 @@
         "description": { "type": "string" },
         "category": { "type": "string" },
         "stock": { "type": "number" },
-        "imageUrls": {
-          "type": "array",
-          "items": { "type": "string" }
-        },
+        "imageUrls": { "type": "array", "items": { "type": "string" } },
+        "isFeatured": { "type": "boolean" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
@@ -26,13 +24,27 @@
       "description": "Additional information for a user",
       "type": "object",
       "properties": {
+        "name": { "type": "string" },
         "phoneNumber": { "type": "string" },
-        "role": { "type": "string", "enum": ["user", "admin"] }
+        "password": { "type": "string" },
+        "role": { "type": "string", "enum": ["user", "admin"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
+    "SiteSettings": {
+      "title": "Site Settings",
+      "description": "Customizable content for the website",
+      "type": "object",
+      "properties": {
+        "heroTitle": { "type": "string" },
+        "heroSubtitle": { "type": "string" },
+        "whatsappNumber": { "type": "string" },
+        "primaryColor": { "type": "string" }
       }
     }
   },
   "auth": {
-    "providers": ["phone", "anonymous"]
+    "providers": ["email"]
   },
   "firestore": {
     "/products/{productId}": {
@@ -41,7 +53,11 @@
     },
     "/users/{userId}": {
       "schema": "UserProfile",
-      "description": "User profile data"
+      "description": "User profiles and customer details"
+    },
+    "/settings/site": {
+      "schema": "SiteSettings",
+      "description": "Global site configuration"
     }
   }
 }
