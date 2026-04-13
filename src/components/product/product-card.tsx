@@ -49,7 +49,7 @@ export function ProductCard({ product }: { product: Product }) {
       updated = [...wishlist, product];
       toast({ title: 'যুক্ত করা হয়েছে', description: 'পণ্যটি আপনার উইশলিস্টে যুক্ত হয়েছে।' });
     }
-    localStorage.setItem('wishlist', JSON.stringify(updated));
+    localStorage.setItem('wishlist', updated);
     setIsWishlisted(!isWishlisted);
   };
 

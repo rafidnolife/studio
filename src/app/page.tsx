@@ -81,7 +81,7 @@ export default function Home() {
             </Link>
           </div>
           
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+          <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 md:gap-10">
             {featLoading ? (
               Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2.5rem]" />)
             ) : featuredProducts.length > 0 ? (
@@ -117,7 +117,7 @@ export default function Home() {
           <div className="flex items-center justify-between mb-8 border-b border-slate-200/50 pb-4">
             <h2 className="text-2xl md:text-5xl font-black tracking-tighter">নতুন <span className="text-primary">পণ্যসমূহ</span></h2>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+          <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 md:gap-10">
             {recentLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2.5rem]" />) : 
               recentProducts.map(p => <ProductCard key={p.id} product={p} />)
             }

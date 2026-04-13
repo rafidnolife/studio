@@ -93,7 +93,7 @@ export default function ProductListing() {
 
         <section>
           {loading ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 md:gap-10">
               {Array(6).fill(0).map((_, i) => (
                 <div key={i} className="space-y-6">
                   <Skeleton className="aspect-square w-full rounded-[2.5rem]" />
@@ -105,7 +105,7 @@ export default function ProductListing() {
               ))}
             </div>
           ) : filteredProducts.length > 0 ? (
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
+            <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 md:gap-10">
               {filteredProducts.map(product => (
                 <ProductCard key={product.id} product={product} />
               ))}
