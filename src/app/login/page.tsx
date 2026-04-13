@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -9,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { User, Phone, Lock, ArrowRight, LogIn, ShoppingBag } from 'lucide-react';
+import { User, Phone, Lock, ArrowRight, LogIn, ShoppingBag, ShieldAlert } from 'lucide-react';
 import { Navbar } from '@/components/layout/navbar';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -61,7 +62,15 @@ export default function LoginPage() {
       router.push('/');
     } catch (err: any) {
       console.error(err);
-      toast({ variant: 'destructive', title: 'ব্যর্থ', description: 'লগইন বা রেজিস্ট্রেশন তথ্য সঠিক নয়।' });
+      if (err.code === 'auth/operation-not-allowed') {
+        toast({ 
+          variant: 'destructive', 
+          title: 'সেটআপ প্রয়োজন', 
+          description: 'ফায়ারবেস কনসোলে Email/Password Authentication চালু করুন।' 
+        });
+      } else {
+        toast({ variant: 'destructive', title: 'ব্যর্থ', description: 'লগইন বা রেজিস্ট্রেশন তথ্য সঠিক নয়।' });
+      }
     } finally {
       setLoading(false);
     }

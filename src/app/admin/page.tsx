@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -14,7 +15,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Settings, ShoppingBag, Users, LayoutDashboard, Star, Save, Phone, Eye, EyeOff, CheckCircle2, Sparkles, TrendingUp, Package, Box } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, ShoppingBag, Users, LayoutDashboard, Star, Save, Phone, Eye, EyeOff, CheckCircle2, Sparkles, TrendingUp, Package, Box, ShieldCheck, Zap } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
