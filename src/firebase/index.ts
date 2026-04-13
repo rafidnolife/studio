@@ -11,6 +11,7 @@ export function initializeFirebase(): {
   auth: Auth;
   db: Firestore;
 } {
+  // Ensure we don't initialize multiple times
   const app = getApps().length > 0 ? getApp() : initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);

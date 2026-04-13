@@ -23,34 +23,56 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!phoneNumber || phoneNumber.length < 10) {
-      toast({ variant: 'destructive', title: 'ভুল নাম্বার', description: 'দয়া করে সঠিক ফোন নাম্বার প্রদান করুন।' });
+    
+    // Basic validation
+    if (!phoneNumber || phoneNumber.length < 11) {
+      toast({ 
+        variant: 'destructive', 
+        title: 'ভুল নাম্বার', 
+        description: 'দয়া করে সঠিক ফোন নাম্বার (১১ ডিজিট) প্রদান করুন।' 
+      });
       return;
     }
 
     setLoading(true);
     try {
-      // Sign in anonymously to create a session
+      // Step 1: Sign in anonymously
       const { user: firebaseUser } = await signInAnonymously(auth);
       
-      // Determine role (Admin number: 01797958686)
+      // Step 2: Determine role
       const cleanNumber = phoneNumber.replace(/\D/g, '');
+      // Admin numbers can be added here
       const isAdmin = cleanNumber === '01797958686' || cleanNumber === '8801797958686';
       const role = isAdmin ? 'admin' : 'user';
 
-      // Save user profile in Firestore
-      setDoc(doc(db, 'users', firebaseUser.uid), {
-        phoneNumber: phoneNumber,
+      // Step 3: Save user profile in Firestore
+      // We use the UID from anonymous auth to link the phone number
+      await setDoc(doc(db, 'users', firebaseUser.uid), {
+        phoneNumber: cleanNumber,
         role: role,
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp(),
       }, { merge: true });
 
-      toast({ title: 'সফল লগইন', description: 'দোকান এক্সপ্রেসে আপনাকে স্বাগতম!' });
+      toast({ 
+        title: 'সফল লগইন', 
+        description: 'দোকান এক্সপ্রেসে আপনাকে স্বাগতম!' 
+      });
+      
       router.push('/');
     } catch (err: any) {
-      console.error(err);
-      toast({ variant: 'destructive', title: 'ত্রুটি', description: 'লগইন করা সম্ভব হয়নি। আবার চেষ্টা করুন।' });
+      console.error("Login error:", err);
+      let errorMessage = 'লগইন করা সম্ভব হয়নি। আবার চেষ্টা করুন।';
+      
+      if (err.code === 'auth/api-key-not-valid') {
+        errorMessage = 'ফায়ারবেস কনফিগারেশনে ত্রুটি আছে। অ্যাডমিনকে জানান।';
+      }
+      
+      toast({ 
+        variant: 'destructive', 
+        title: 'ত্রুটি', 
+        description: errorMessage 
+      });
     } finally {
       setLoading(false);
     }
@@ -83,7 +105,7 @@ export default function LoginPage() {
                   className="h-12 rounded-xl text-lg tracking-wider"
                   required
                 />
-                <p className="text-[10px] text-muted-foreground px-1">এখন আর কোনো ওটিপি কোড লাগবে না।</p>
+                <p className="text-[10px] text-muted-foreground px-1">কোনো ওটিপি কোড লাগবে না। সরাসরি বাটনে ক্লিক করুন।</p>
               </div>
               <Button disabled={loading} type="submit" className="w-full h-12 rounded-xl text-lg font-bold">
                 {loading ? 'লগইন হচ্ছে...' : 'লগইন করুন'}
