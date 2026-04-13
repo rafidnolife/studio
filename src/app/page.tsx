@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { ChevronRight, Star, ShieldCheck, Zap, Award, Sparkles } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Badge } from '@/components/ui/badge';
 
 export default function Home() {
   const db = useFirestore();
@@ -33,7 +32,7 @@ export default function Home() {
   }, [db]);
 
   const recentProductsQuery = useMemo(() => {
-    return query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(8));
+    return query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(10));
   }, [db]);
 
   const { data: featuredProducts, loading: featLoading } = useCollection<Product>(featuredQuery);
@@ -51,103 +50,83 @@ export default function Home() {
     <div className="flex flex-col min-h-screen selection:bg-primary/20">
       <Navbar />
       
-      <main className="flex-grow space-y-24 pb-20">
-        {/* Simplified Header with corner text as requested */}
-        <section className="container mx-auto px-4 pt-12">
-          <div className="flex justify-start">
-            <div className="inline-flex items-center gap-3 bg-white/80 backdrop-blur-xl border border-slate-200/50 shadow-2xl shadow-slate-200/50 px-10 py-5 rounded-[2.5rem] animate-in fade-in slide-in-from-left-4 duration-1000">
-               <div className="w-12 h-12 bg-primary rounded-[1.25rem] flex items-center justify-center text-white shadow-lg shadow-primary/30">
-                  <Sparkles className="w-6 h-6" />
-               </div>
-               <h1 className="text-2xl md:text-4xl font-black text-slate-900 tracking-tighter">
-                  {settings.heroTitle}
-               </h1>
-            </div>
+      <main className="flex-grow pb-20 pt-8">
+        {/* Minimal Headline */}
+        <section className="container mx-auto px-4 mb-8">
+          <div className="inline-flex items-center gap-2 bg-white/40 glass px-6 py-3 rounded-full border border-slate-200/50 shadow-sm">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <h1 className="text-sm md:text-lg font-black text-slate-800 tracking-tight">
+              {settings.heroTitle}
+            </h1>
           </div>
         </section>
 
-        {/* SPECIAL COLLECTION - MOVED TO THE VERY TOP AFTER HEADER */}
-        <section className="container mx-auto px-4 space-y-12">
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-            <div className="space-y-2">
-              <div className="flex items-center gap-2 text-primary font-black uppercase tracking-widest text-[11px] px-1">
-                <Star className="w-5 h-5 fill-current" /> Premium Picks
-              </div>
-              <h2 className="text-4xl md:text-6xl font-black tracking-tighter text-slate-900 leading-tight">
-                স্পেশাল <span className="text-primary">কালেকশন</span>
-              </h2>
-              <p className="text-slate-500 text-lg font-medium px-1">আপনার জন্য নির্বাচিত সেরা এবং সব থেকে জনপ্রিয় পণ্যসমূহ।</p>
-            </div>
-            <Button variant="ghost" className="text-primary font-black h-auto p-0 group hidden md:flex text-lg" asChild>
-              <Link href="/products" className="flex items-center gap-2">সব দেখুন <ChevronRight className="w-6 h-6 group-hover:translate-x-1 transition-transform" /></Link>
-            </Button>
+        {/* SPECIAL COLLECTION - ABSOLUTE TOP */}
+        <section className="container mx-auto px-4 mb-16">
+          <div className="flex items-center justify-between mb-8 border-b border-slate-200/50 pb-4">
+            <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-slate-900">
+              স্পেশাল <span className="text-primary">কালেকশন</span>
+            </h2>
+            <Link href="/products" className="text-primary font-black text-xs md:text-sm flex items-center gap-1 uppercase tracking-widest">
+              সব দেখুন <ChevronRight className="w-4 h-4" />
+            </Link>
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
             {featLoading ? (
-              Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-[500px] rounded-[4rem]" />)
+              Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2rem]" />)
             ) : featuredProducts.length > 0 ? (
               featuredProducts.map(p => <ProductCard key={p.id} product={p} />)
             ) : (
-              <div className="col-span-full py-24 text-center text-slate-400 font-bold bg-white/50 rounded-[4rem] border-4 border-dashed border-slate-100">
-                বর্তমানে কোনো হাইলাইটেড পণ্য নেই।
+              <div className="col-span-full py-12 text-center text-slate-400 font-bold bg-white/30 rounded-[2.5rem] border-2 border-dashed border-slate-200">
+                কোনো হাইলাইটেড পণ্য নেই।
               </div>
             )}
           </div>
         </section>
 
         {/* Categories Section */}
-        <section className="py-24 bg-slate-900/5 relative overflow-hidden">
-          <div className="container mx-auto px-4 space-y-16 relative z-10">
-            <div className="text-center space-y-3">
-              <h2 className="text-3xl md:text-5xl font-black tracking-tighter text-slate-800">ক্যাটাগরি অনুযায়ী খুঁজুন</h2>
-              <p className="text-slate-500 font-medium text-lg">আপনার পছন্দের ক্যাটাগরি বেছে নিন।</p>
-            </div>
-            <div className="flex flex-wrap justify-center gap-6 md:gap-14">
+        <section className="py-12 bg-primary/5 mb-16">
+          <div className="container mx-auto px-4 overflow-x-auto scrollbar-hide">
+            <div className="flex items-center justify-start gap-6 min-w-max pb-4">
               {categories.map((cat, i) => (
-                <Link key={i} href={`/products?category=${cat.name}`} className="group flex flex-col items-center gap-5">
-                  <div className="w-20 h-20 md:w-32 md:h-32 bg-white rounded-[2.5rem] md:rounded-[3.5rem] flex items-center justify-center text-5xl shadow-xl border border-slate-100 transition-all duration-500 group-hover:-translate-y-4 group-hover:bg-primary group-hover:text-white group-hover:shadow-primary/30 group-hover:border-primary">
+                <Link key={i} href={`/products?category=${cat.name}`} className="group flex flex-col items-center gap-3">
+                  <div className="w-16 h-16 md:w-20 md:h-20 bg-white rounded-3xl flex items-center justify-center text-3xl shadow-md border border-slate-100 transition-all group-hover:bg-primary group-hover:text-white">
                     {cat.icon}
                   </div>
-                  <span className="font-black text-sm md:text-base text-slate-700 group-hover:text-primary transition-colors tracking-wide uppercase">{cat.name}</span>
+                  <span className="font-bold text-[10px] md:text-xs text-slate-700 uppercase tracking-tighter">{cat.name}</span>
                 </Link>
               ))}
             </div>
           </div>
         </section>
 
-        {/* Recent Arrivals */}
-        <section className="container mx-auto px-4 space-y-12">
-          <div className="flex items-end justify-between border-b-4 border-slate-100 pb-8">
-            <h2 className="text-3xl md:text-5xl font-black tracking-tighter">নতুন <span className="text-primary">পণ্যসমূহ</span></h2>
-            <Button variant="link" className="text-primary font-black h-auto p-0 group" asChild>
-              <Link href="/products" className="flex items-center gap-2 text-xl">সব দেখুন <ChevronRight className="w-7 h-7 group-hover:translate-x-1 transition-transform" /></Link>
-            </Button>
+        {/* Recent Arrivals - grid-cols-2 */}
+        <section className="container mx-auto px-4 mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl md:text-4xl font-black tracking-tighter">নতুন <span className="text-primary">পণ্যসমূহ</span></h2>
           </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
-            {recentLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="h-[450px] rounded-[4rem]" />) : 
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+            {recentLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2rem]" />) : 
               recentProducts.map(p => <ProductCard key={p.id} product={p} />)
             }
           </div>
         </section>
 
         {/* Value Props */}
-        <section className="container mx-auto px-4 pt-12">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
+        <section className="container mx-auto px-4">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
             {[
-              { icon: Zap, title: 'দ্রুত ডেলিভারি', desc: '২৪-৪৮ ঘণ্টায় শিপিং', color: 'bg-emerald-50 text-emerald-500' },
-              { icon: ShieldCheck, title: 'নিরাপদ পেমেন্ট', desc: 'ক্যাশ অন ডেলিভারি', color: 'bg-primary/10 text-primary' },
-              { icon: Star, title: 'সেরা কোয়ালিটি', desc: 'অরিজিনাল পণ্য গ্যারান্টি', color: 'bg-amber-50 text-amber-500' },
-              { icon: Award, title: 'বিশ্বস্ত বাজার', desc: 'হাজারো সন্তুষ্ট কাস্টমার', color: 'bg-indigo-50 text-indigo-500' }
+              { icon: Zap, title: 'দ্রুত ডেলিভারি', color: 'bg-emerald-50 text-emerald-500' },
+              { icon: ShieldCheck, title: 'নিরাপদ পেমেন্ট', color: 'bg-primary/10 text-primary' },
+              { icon: Star, title: 'সেরা কোয়ালিটি', color: 'bg-amber-50 text-amber-500' },
+              { icon: Award, title: 'বিশ্বস্ত বাজার', color: 'bg-indigo-50 text-indigo-500' }
             ].map((v, i) => (
-              <div key={i} className="bg-white p-10 rounded-[3rem] shadow-xl flex flex-col items-center text-center space-y-5 border border-slate-50 hover:-translate-y-2 transition-transform">
-                <div className={`w-16 h-16 ${v.color} rounded-[1.5rem] flex items-center justify-center`}>
-                  <v.icon className="w-8 h-8" />
+              <div key={i} className="bg-white/60 glass p-6 rounded-[2rem] flex flex-col items-center text-center space-y-3">
+                <div className={`w-10 h-10 ${v.color} rounded-xl flex items-center justify-center`}>
+                  <v.icon className="w-5 h-5" />
                 </div>
-                <div className="space-y-1">
-                  <h3 className="font-black text-base text-slate-900 uppercase tracking-tighter">{v.title}</h3>
-                  <p className="text-[11px] text-slate-400 font-bold uppercase tracking-widest">{v.desc}</p>
-                </div>
+                <h3 className="font-black text-[10px] md:text-xs text-slate-900 uppercase tracking-tighter">{v.title}</h3>
               </div>
             ))}
           </div>
