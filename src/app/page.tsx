@@ -8,8 +8,10 @@ import { collection, query, limit, where, getDoc, doc, orderBy } from 'firebase/
 import { Product, ProductCard } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronRight, Star, ShieldCheck, Zap, Award, Sparkles } from 'lucide-react';
+import { ChevronRight, Star, ShieldCheck, Zap, Award, Sparkles, TrendingUp } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
 
 export default function Home() {
   const db = useFirestore();
@@ -43,11 +45,11 @@ export default function Home() {
   // Filter category buttons to only show unique categories that actually have products
   const availableCategories = useMemo(() => {
     const hardcodedCats = [
-      { name: 'ইলেকট্রনিক্স', icon: '📱' },
-      { name: 'লাইফস্টাইল', icon: '👕' },
-      { name: 'গ্যাজেট', icon: '🎧' },
-      { name: 'হোম অ্যাপ্লায়েন্স', icon: '🏠' },
-      { name: 'অন্যান্য', icon: '📦' },
+      { name: 'ইলেকট্রনিক্স', icon: '📱', color: 'bg-blue-500' },
+      { name: 'লাইফস্টাইল', icon: '👕', color: 'bg-pink-500' },
+      { name: 'গ্যাজেট', icon: '🎧', color: 'bg-purple-500' },
+      { name: 'হোম অ্যাপ্লায়েন্স', icon: '🏠', color: 'bg-orange-500' },
+      { name: 'অন্যান্য', icon: '📦', color: 'bg-slate-500' },
     ];
     
     // Create a Set of unique, trimmed categories from existing products
@@ -59,35 +61,43 @@ export default function Home() {
     <div className="flex flex-col min-h-screen selection:bg-primary/20">
       <Navbar />
       
-      <main className="flex-grow pb-20 pt-4">
-        {/* Minimal Headline - Only the text as requested */}
-        <section className="container mx-auto px-4 mb-10">
-          <div className="flex items-center gap-2">
-            <Sparkles className="w-5 h-5 text-primary" />
-            <h1 className="text-lg md:text-2xl font-black text-slate-800 tracking-tighter uppercase">
+      <main className="flex-grow pb-20 pt-8">
+        {/* Minimal Headline - Luxury Badge Style */}
+        <section className="container mx-auto px-4 mb-12">
+          <div className="flex items-center gap-3 bg-white/60 glass w-fit px-8 py-4 rounded-[2rem] shadow-xl border-primary/10">
+            <div className="w-10 h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary">
+              <Sparkles className="w-6 h-6 animate-pulse" />
+            </div>
+            <h1 className="text-xl md:text-3xl font-black text-slate-800 tracking-tighter uppercase flex items-center gap-3">
               {settings.heroTitle}
+              <span className="w-2 h-2 bg-primary rounded-full hidden md:inline-block"></span>
             </h1>
           </div>
         </section>
 
         {/* SPECIAL COLLECTION - ABSOLUTE TOP */}
-        <section className="container mx-auto px-4 mb-16">
-          <div className="flex items-center justify-between mb-8 border-b border-slate-200/50 pb-4">
-            <h2 className="text-2xl md:text-5xl font-black tracking-tighter text-slate-900">
-              স্পেশাল <span className="text-primary">কালেকশন</span>
-            </h2>
-            <Link href="/products" className="text-primary font-black text-xs md:text-sm flex items-center gap-1 uppercase tracking-widest">
-              সব দেখুন <ChevronRight className="w-4 h-4" />
+        <section className="container mx-auto px-4 mb-20">
+          <div className="flex items-center justify-between mb-10 border-b border-primary/10 pb-6">
+            <div className="flex flex-col gap-1">
+               <h2 className="text-3xl md:text-6xl font-black tracking-tighter text-slate-900 flex items-center gap-4">
+                স্পেশাল <span className="text-primary">কালেকশন</span>
+                <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[10px] md:text-xs py-1 px-4 rounded-full flex items-center gap-1">
+                  <TrendingUp className="w-3 h-3" /> TRENDING
+                </Badge>
+              </h2>
+            </div>
+            <Link href="/products" className="group bg-primary text-white font-black text-xs md:text-sm flex items-center gap-2 px-6 py-3 rounded-full shadow-xl shadow-primary/20 hover:scale-105 transition-all uppercase tracking-widest">
+              সব দেখুন <ChevronRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
           
-          <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 md:gap-10">
+          <div className="grid grid-cols-2 lg:grid-cols-2 gap-6 md:gap-12">
             {featLoading ? (
-              Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2.5rem]" />)
+              Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[3rem]" />)
             ) : featuredProducts.length > 0 ? (
               featuredProducts.map(p => <ProductCard key={p.id} product={p} />)
             ) : (
-              <div className="col-span-full py-20 text-center text-slate-400 font-bold bg-white/30 rounded-[3rem] border-2 border-dashed border-slate-200">
+              <div className="col-span-full py-24 text-center text-slate-400 font-bold bg-white/40 glass rounded-[3rem] border-2 border-dashed border-slate-200">
                 কোনো হাইলাইটেড পণ্য নেই।
               </div>
             )}
@@ -96,48 +106,63 @@ export default function Home() {
 
         {/* Categories Section - Only shows active categories */}
         {availableCategories.length > 0 && (
-          <section className="py-12 bg-primary/5 mb-16">
-            <div className="container mx-auto px-4 overflow-x-auto scrollbar-hide">
-              <div className="flex items-center justify-start gap-6 min-w-max pb-4">
-                {availableCategories.map((cat, i) => (
-                  <Link key={i} href={`/products?category=${cat.name}`} className="group flex flex-col items-center gap-4">
-                    <div className="w-20 h-20 md:w-24 md:h-24 bg-white rounded-[2rem] flex items-center justify-center text-4xl shadow-xl border border-slate-100 transition-all group-hover:bg-primary group-hover:scale-110">
-                      {cat.icon}
-                    </div>
-                    <span className="font-black text-[10px] md:text-xs text-slate-700 uppercase tracking-tighter">{cat.name}</span>
-                  </Link>
-                ))}
+          <section className="py-20 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 mb-20">
+            <div className="container mx-auto px-4">
+              <div className="flex flex-col items-center mb-12">
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.4em] mb-2">Explore Your Style</span>
+                <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter">ক্যাটাগরি <span className="text-primary">অনুসারে</span></h2>
+              </div>
+              <div className="overflow-x-auto scrollbar-hide">
+                <div className="flex items-center justify-center gap-10 min-w-max pb-8 px-4">
+                  {availableCategories.map((cat, i) => (
+                    <Link key={i} href={`/products?category=${cat.name}`} className="group flex flex-col items-center gap-5">
+                      <div className={cn(
+                        "w-24 h-24 md:w-32 md:h-32 bg-white rounded-[2.5rem] flex items-center justify-center text-5xl shadow-2xl border border-slate-100 transition-all group-hover:-translate-y-4 group-hover:shadow-[0_25px_50px_rgba(0,0,0,0.1)]",
+                        "relative overflow-hidden"
+                      )}>
+                        <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity", cat.color)}></div>
+                        {cat.icon}
+                      </div>
+                      <span className="font-black text-xs md:text-sm text-slate-700 uppercase tracking-widest group-hover:text-primary transition-colors">{cat.name}</span>
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           </section>
         )}
 
         {/* Recent Arrivals */}
-        <section className="container mx-auto px-4 mb-16">
-          <div className="flex items-center justify-between mb-8 border-b border-slate-200/50 pb-4">
-            <h2 className="text-2xl md:text-5xl font-black tracking-tighter">নতুন <span className="text-primary">পণ্যসমূহ</span></h2>
+        <section className="container mx-auto px-4 mb-24">
+          <div className="flex items-center justify-between mb-10 border-b border-primary/10 pb-6">
+            <h2 className="text-3xl md:text-6xl font-black tracking-tighter text-slate-900">
+              নতুন <span className="text-primary">পণ্যসমূহ</span>
+            </h2>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 md:gap-10">
-            {recentLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2.5rem]" />) : 
+          <div className="grid grid-cols-2 lg:grid-cols-2 gap-6 md:gap-12">
+            {recentLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[3rem]" />) : 
               recentProducts.map(p => <ProductCard key={p.id} product={p} />)
             }
           </div>
         </section>
 
-        {/* Value Props */}
+        {/* Value Props - Ultra Colorful Style */}
         <section className="container mx-auto px-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 md:gap-10">
             {[
-              { icon: Zap, title: 'দ্রুত ডেলিভারি', color: 'bg-emerald-50 text-emerald-500' },
-              { icon: ShieldCheck, title: 'নিরাপদ পেমেন্ট', color: 'bg-primary/10 text-primary' },
-              { icon: Star, title: 'সেরা কোয়ালিটি', color: 'bg-amber-50 text-amber-500' },
-              { icon: Award, title: 'বিশ্বস্ত বাজার', color: 'bg-indigo-50 text-indigo-500' }
+              { icon: Zap, title: 'দ্রুত ডেলিভারি', color: 'bg-emerald-500', text: 'Fast Delivery' },
+              { icon: ShieldCheck, title: 'নিরাপদ পেমেন্ট', color: 'bg-primary', text: 'Secure' },
+              { icon: Star, title: 'সেরা কোয়ালিটি', color: 'bg-amber-500', text: 'Premium' },
+              { icon: Award, title: 'বিশ্বস্ত বাজার', color: 'bg-indigo-600', text: 'Trusted' }
             ].map((v, i) => (
-              <div key={i} className="bg-white/60 glass p-8 rounded-[3rem] flex flex-col items-center text-center space-y-4 shadow-xl">
-                <div className={`w-14 h-14 ${v.color} rounded-2xl flex items-center justify-center shadow-lg`}>
-                  <v.icon className="w-7 h-7" />
+              <div key={i} className="bg-white/70 glass p-10 rounded-[3rem] flex flex-col items-center text-center space-y-6 shadow-2xl hover:scale-105 transition-all border-none">
+                <div className={`w-20 h-20 ${v.color} rounded-[2rem] flex items-center justify-center shadow-2xl shadow-slate-200 text-white`}>
+                  <v.icon className="w-10 h-10" />
                 </div>
-                <h3 className="font-black text-xs md:text-sm text-slate-900 uppercase tracking-widest">{v.title}</h3>
+                <div className="space-y-1">
+                  <h3 className="font-black text-sm md:text-base text-slate-900 uppercase tracking-widest">{v.title}</h3>
+                  <p className="text-[9px] font-black text-slate-400 uppercase tracking-[0.3em]">{v.text}</p>
+                </div>
               </div>
             ))}
           </div>
