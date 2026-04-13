@@ -16,15 +16,15 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
 
   // Basic validation to prevent immediate crash on empty/malformed URLs
   const getValidSrc = (url: string) => {
-    if (!url || typeof url !== 'string' || !url.startsWith('http')) {
+    if (!url || typeof url !== 'string' || !url.trim() || !url.startsWith('http')) {
       return fallbackSrc;
     }
     return url;
   };
 
-  const validSrc = getValidSrc(src);
+  const currentSrc = error ? fallbackSrc : getValidSrc(src);
 
-  // Reset states when src changes
+  // Reset error state when src changes
   useEffect(() => {
     setError(false);
     setLoading(true);
@@ -38,9 +38,9 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
         </div>
       )}
       <Image
-        src={error ? fallbackSrc : validSrc}
+        src={currentSrc}
         alt={alt || "Product Image"}
-        className={`object-cover transition-all duration-700 ${loading ? 'scale-105 blur-sm opacity-0' : 'scale-100 blur-0 opacity-100'} ${error ? 'grayscale opacity-50' : ''}`}
+        className={`object-cover transition-all duration-500 ${loading ? 'blur-sm grayscale' : 'blur-0 grayscale-0'} ${error ? 'opacity-50' : 'opacity-100'}`}
         onError={() => {
           setError(true);
           setLoading(false);
