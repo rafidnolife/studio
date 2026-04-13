@@ -22,7 +22,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [activeImage, setActiveImage] = useState(0);
   const [qty, setQty] = useState(1);
-  const [whatsappNum, setWhatsappNum] = useState('01797958686');
+  const [whatsappNum, setWhatsappNum] = useState('8801797958686');
   const { toast } = useToast();
 
   useEffect(() => {
@@ -36,7 +36,11 @@ export default function ProductDetail() {
         }
         
         const sSnap = await getDoc(doc(db, 'settings', 'site'));
-        if (sSnap.exists()) setWhatsappNum(sSnap.data().whatsappNumber);
+        if (sSnap.exists()) {
+          let num = sSnap.data().whatsappNumber.replace(/\D/g, '');
+          if (num.startsWith('01')) num = '88' + num;
+          setWhatsappNum(num);
+        }
       } catch (err) {
         console.error(err);
       } finally {
@@ -49,9 +53,10 @@ export default function ProductDetail() {
   const handleOrder = () => {
     if (!product) return;
     const finalPrice = (product.discountPrice || product.price) * qty;
-    // Enhanced dynamic message including product details and link
     const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
     const msg = `আসসালামু আলাইকুম,\nআমি দোকান এক্সপ্রেস থেকে এই পণ্যটি অর্ডার করতে চাই:\n\n🛍️ পণ্য: ${product.name}\n📦 পরিমাণ: ${qty}\n💰 মোট মূল্য: ৳${finalPrice}\n🔗 লিঙ্ক: ${currentUrl}\n\nঅনুগ্রহ করে অর্ডারটি কনফার্ম করুন। ধন্যবাদ।`;
+    
+    // Using 88 prefix as default for BD
     const url = `https://wa.me/${whatsappNum}?text=${encodeURIComponent(msg)}`;
     window.open(url, '_blank');
   };

@@ -15,12 +15,13 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Settings, ShoppingBag, Users, LayoutDashboard, Star, Save, Phone, Eye, EyeOff, CheckCircle2, Sparkles, TrendingUp, Package, Box, ShieldCheck, Zap } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, ShoppingBag, Users, LayoutDashboard, Star, Save, Phone, Eye, EyeOff, CheckCircle2, Sparkles, TrendingUp, Package, Box, ShieldCheck, Zap, Image as ImageIcon } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -80,8 +81,20 @@ export default function AdminDashboard() {
     if (user?.role === 'admin') fetchData();
   }, [user, db]);
 
+  const formatWhatsAppNumber = (num: string) => {
+    let cleaned = num.replace(/\D/g, '');
+    if (cleaned.startsWith('01')) {
+      return '88' + cleaned;
+    }
+    return cleaned;
+  };
+
   const handleSaveSettings = () => {
-    setDoc(doc(db, 'settings', 'site'), siteSettings)
+    const data = {
+      ...siteSettings,
+      whatsappNumber: siteSettings.whatsappNumber.replace(/\D/g, '')
+    };
+    setDoc(doc(db, 'settings', 'site'), data)
       .then(() => toast({ title: 'সেটিংস আপডেট হয়েছে' }))
       .catch(() => toast({ variant: 'destructive', title: 'ত্রুটি' }));
   };
@@ -121,84 +134,100 @@ export default function AdminDashboard() {
     fetchData();
   };
 
-  const toggleFeatured = async (product: Product) => {
-    try {
-      await updateDoc(doc(db, 'products', product.id), {
-        isFeatured: !product.isFeatured,
-        updatedAt: serverTimestamp()
-      });
-      fetchData();
-      toast({ title: product.isFeatured ? 'হাইলাইট থেকে সরানো হয়েছে' : 'হাইলাইট করা হয়েছে' });
-    } catch (err) {
-      toast({ variant: 'destructive', title: 'ত্রুটি ঘটেছে' });
-    }
-  };
-
   if (authLoading || !user || user.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen bg-slate-50/50">
+    <div className="min-h-screen bg-slate-50/50 pb-20 md:pb-0">
       <Navbar />
       <main className="container mx-auto px-4 py-8 max-w-7xl">
         <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-1">
-            <h1 className="text-3xl md:text-4xl font-black text-slate-900 flex items-center gap-3">
+            <h1 className="text-3xl md:text-4xl font-black text-slate-900 flex items-center gap-3 tracking-tighter">
               কন্ট্রোল <span className="text-primary">সেন্টার</span>
-              <Badge variant="secondary" className="rounded-full px-4 py-1 text-[10px] uppercase tracking-widest bg-primary/10 text-primary border-none">Administrator</Badge>
+              <Badge className="rounded-full bg-primary/10 text-primary border-none text-[10px] py-0">ADMIN</Badge>
             </h1>
             <p className="text-slate-500 font-medium">ওয়েবসাইটের সবকিছু এক জায়গা থেকে পরিচালনা করুন।</p>
           </div>
-          <div className="flex gap-4">
-            <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
-              <DialogTrigger asChild>
-                <Button className="rounded-2xl px-6 h-12 bg-primary shadow-lg shadow-primary/20 hover:scale-105 transition-all font-bold">
-                  <Plus className="mr-2 h-5 w-5" /> নতুন পণ্য যোগ
-                </Button>
-              </DialogTrigger>
-              <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] border-none shadow-2xl p-8">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl font-black">পণ্যের বিস্তারিত তথ্য</DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleProductSubmit} className="space-y-6 py-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">পণ্যের নাম</Label>
-                      <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-slate-200" required />
-                    </div>
-                    <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">ক্যাটাগরি</Label>
-                      <Input value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-slate-200" required />
-                    </div>
+          <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
+            <DialogTrigger asChild>
+              <Button className="rounded-2xl px-6 h-12 bg-primary shadow-lg shadow-primary/20 hover:scale-105 transition-all font-bold">
+                <Plus className="mr-2 h-5 w-5" /> নতুন পণ্য যোগ
+              </Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2.5rem] border-none shadow-2xl p-8">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-black">পণ্যের বিস্তারিত তথ্য</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleProductSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8 py-4">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="font-bold text-slate-700">পণ্যের নাম</Label>
+                    <Input value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-slate-200" required />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label className="font-bold text-slate-700">মূল্য (৳)</Label>
                       <Input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-slate-200" required />
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">ডিসকাউন্ট মূল্য (৳ - ঐচ্ছিক)</Label>
+                      <Label className="font-bold text-slate-700">ডিসকাউন্ট মূল্য</Label>
                       <Input type="number" value={formData.discountPrice} onChange={e => setFormData({...formData, discountPrice: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-slate-200" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="font-bold text-slate-700">ক্যাটাগরি</Label>
+                      <Input value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-slate-200" required />
                     </div>
                     <div className="space-y-2">
                       <Label className="font-bold text-slate-700">স্টক পরিমাণ</Label>
                       <Input type="number" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} className="h-12 rounded-xl bg-slate-50 border-slate-200" required />
                     </div>
-                    <div className="flex items-center space-x-3 pt-8 bg-slate-50 p-4 rounded-2xl border border-slate-100">
-                      <Switch checked={formData.isFeatured} onCheckedChange={checked => setFormData({...formData, isFeatured: checked})} />
-                      <Label className="font-bold text-slate-700">হোম পেজে হাইলাইট করুন</Label>
-                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="font-bold text-slate-700">ইমেজ ইউআরএল (Image URL)</Label>
-                    <Input value={formData.imageUrls[0]} onChange={e => setFormData({...formData, imageUrls: [e.target.value]})} className="h-12 rounded-xl bg-slate-50 border-slate-200" placeholder="https://..." />
+                    <Input 
+                      value={formData.imageUrls[0]} 
+                      onChange={e => setFormData({...formData, imageUrls: [e.target.value]})} 
+                      className="h-12 rounded-xl bg-slate-50 border-slate-200" 
+                      placeholder="https://..." 
+                      required
+                    />
+                  </div>
+                  <div className="flex items-center space-x-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <Switch checked={formData.isFeatured} onCheckedChange={checked => setFormData({...formData, isFeatured: checked})} />
+                    <Label className="font-bold text-slate-700">হোম পেজে হাইলাইট করুন</Label>
+                  </div>
+                </div>
+
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="font-bold text-slate-700">ইমেজ প্রিভিউ</Label>
+                    <div className="aspect-square rounded-3xl overflow-hidden bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center relative">
+                      {formData.imageUrls[0] ? (
+                        <ImageWithFallback 
+                          src={formData.imageUrls[0]} 
+                          alt="Preview" 
+                          fill 
+                          className="object-contain p-4"
+                        />
+                      ) : (
+                        <div className="text-center text-slate-400">
+                          <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-20" />
+                          <p className="text-xs font-bold uppercase tracking-widest">ইউআরএল দিলে এখানে প্রিভিউ দেখাবে</p>
+                        </div>
+                      )}
+                    </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="font-bold text-slate-700">পণ্যের বিস্তারিত বিবরণ</Label>
-                    <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="min-h-[120px] rounded-xl bg-slate-50 border-slate-200" />
+                    <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="min-h-[150px] rounded-xl bg-slate-50 border-slate-200" />
                   </div>
                   <Button type="submit" className="w-full h-14 rounded-2xl text-lg font-black shadow-xl shadow-primary/20">পণ্য সেভ করুন</Button>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </div>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
         </header>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
@@ -259,39 +288,47 @@ export default function AdminDashboard() {
                 <Table>
                   <TableHeader className="bg-slate-50">
                     <TableRow>
-                      <TableHead className="py-5 px-6 font-black text-slate-700">পণ্যের নাম</TableHead>
-                      <TableHead className="font-black text-slate-700">ক্যাটাগরি</TableHead>
-                      <TableHead className="font-black text-slate-700">মূল্য</TableHead>
-                      <TableHead className="font-black text-slate-700">স্টক</TableHead>
-                      <TableHead className="text-center font-black text-slate-700">হাইলাইট</TableHead>
-                      <TableHead className="text-right px-6 font-black text-slate-700">অ্যাকশন</TableHead>
+                      <TableHead className="py-5 px-6 font-black text-slate-700 uppercase tracking-widest text-[10px]">পণ্য</TableHead>
+                      <TableHead className="font-black text-slate-700 uppercase tracking-widest text-[10px]">ক্যাটাগরি</TableHead>
+                      <TableHead className="font-black text-slate-700 uppercase tracking-widest text-[10px]">মূল্য</TableHead>
+                      <TableHead className="font-black text-slate-700 uppercase tracking-widest text-[10px]">স্টক</TableHead>
+                      <TableHead className="text-center font-black text-slate-700 uppercase tracking-widest text-[10px]">হাইলাইট</TableHead>
+                      <TableHead className="text-right px-6 font-black text-slate-700 uppercase tracking-widest text-[10px]">অ্যাকশন</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {products.map(p => (
                       <TableRow key={p.id} className="hover:bg-slate-50 transition-colors">
-                        <TableCell className="py-5 px-6">
-                          <div className="flex flex-col">
-                            <span className="font-bold text-slate-900">{p.name}</span>
-                            <span className={cn("text-[10px] font-black uppercase", p.stock > 0 ? "text-emerald-500" : "text-red-500")}>
-                              {p.stock > 0 ? 'In Stock' : 'Out of Stock'}
-                            </span>
+                        <TableCell className="py-4 px-6">
+                          <div className="flex items-center gap-4">
+                            <div className="w-12 h-12 rounded-lg overflow-hidden relative bg-slate-100 flex-shrink-0">
+                              <ImageWithFallback src={p.imageUrls[0]} alt={p.name} fill className="object-cover" />
+                            </div>
+                            <div className="flex flex-col">
+                              <span className="font-bold text-slate-900 line-clamp-1">{p.name}</span>
+                              <span className={cn("text-[9px] font-black uppercase tracking-tighter", p.stock > 0 ? "text-emerald-500" : "text-red-500")}>
+                                {p.stock > 0 ? 'Available' : 'Sold Out'}
+                              </span>
+                            </div>
                           </div>
                         </TableCell>
                         <TableCell><Badge variant="outline" className="rounded-full px-3 py-0 border-slate-200 text-slate-500 font-bold">{p.category}</Badge></TableCell>
-                        <TableCell className="font-black text-slate-900">৳{p.discountPrice || p.price}</TableCell>
+                        <TableCell className="font-black text-slate-900 whitespace-nowrap">৳{p.discountPrice || p.price}</TableCell>
                         <TableCell className="font-bold text-slate-600">{p.stock}</TableCell>
                         <TableCell className="text-center">
                           <Button 
                             variant="ghost" 
                             size="icon" 
                             className={cn("rounded-xl", p.isFeatured ? "text-amber-500 bg-amber-50" : "text-slate-300")}
-                            onClick={() => toggleFeatured(p)}
+                            onClick={async () => {
+                              await updateDoc(doc(db, 'products', p.id), { isFeatured: !p.isFeatured });
+                              fetchData();
+                            }}
                           >
                             <Star className={cn("w-5 h-5", p.isFeatured && "fill-current")} />
                           </Button>
                         </TableCell>
-                        <TableCell className="text-right px-6 space-x-1">
+                        <TableCell className="text-right px-6 space-x-1 whitespace-nowrap">
                           <Button variant="ghost" size="icon" className="rounded-xl hover:bg-emerald-50 hover:text-emerald-600" onClick={() => { setEditingProduct(p); setFormData(p as any); setProductDialogOpen(true); }}>
                             <Pencil className="w-4 h-4" />
                           </Button>
@@ -371,8 +408,8 @@ export default function AdminDashboard() {
                       <Textarea value={siteSettings.heroSubtitle} onChange={e => setSiteSettings({...siteSettings, heroSubtitle: e.target.value})} className="min-h-[100px] rounded-2xl bg-slate-50 border-slate-200 font-medium" />
                     </div>
                     <div className="space-y-2">
-                      <Label className="font-bold text-slate-700">অর্ডার নেওয়ার হোয়াটসঅ্যাপ নাম্বার</Label>
-                      <Input value={siteSettings.whatsappNumber} onChange={e => setSiteSettings({...siteSettings, whatsappNumber: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-slate-200 font-mono font-bold" />
+                      <Label className="font-bold text-slate-700">অর্ডার নেওয়ার হোয়াটসঅ্যাপ নাম্বার (Country code সহ)</Label>
+                      <Input placeholder="017xxxxxxxx" value={siteSettings.whatsappNumber} onChange={e => setSiteSettings({...siteSettings, whatsappNumber: e.target.value})} className="h-14 rounded-2xl bg-slate-50 border-slate-200 font-mono font-bold" />
                     </div>
                   </div>
                   
@@ -385,18 +422,18 @@ export default function AdminDashboard() {
               <Card className="rounded-[2.5rem] border-none shadow-xl bg-slate-900 p-8 text-white relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-32 h-32 bg-primary/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
                 <h3 className="text-xl font-black mb-6 flex items-center gap-2 text-primary relative z-10"><Sparkles className="w-5 h-5" /> কুইক টিপস</h3>
-                <div className="space-y-6 text-slate-300 text-sm leading-relaxed relative z-10">
+                <div className="space-y-6 text-slate-300 text-sm leading-relaxed relative z-10 font-medium">
                   <div className="flex gap-4">
                     <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-primary shrink-0">১</div>
                     <p>পণ্যের <b>ডিসকাউন্ট প্রাইস</b> যোগ করলে কার্ডে সুন্দর ডিসকাউন্ট ব্যাজ দেখাবে।</p>
                   </div>
                   <div className="flex gap-4">
                     <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-primary shrink-0">২</div>
-                    <p>যে পণ্যগুলো <b>Featured</b> করবেন সেগুলো হোম পেজে সবার আগে বড় করে দেখা যাবে।</p>
+                    <p>ইমেজ প্রিভিউ দেখে নিশ্চিত হয়ে <b>Save</b> বাটনে ক্লিক করুন।</p>
                   </div>
                   <div className="flex gap-4">
                     <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center font-bold text-primary shrink-0">৩</div>
-                    <p>কাস্টমারের ফোন নাম্বার ও পাসওয়ার্ড লিস্ট থেকে আপনি ম্যানুয়ালি লগইন করে তাদের সাহায্য করতে পারেন।</p>
+                    <p>সবসময় সরাসরি ইমেজের <b>Public URL</b> ব্যবহার করার চেষ্টা করুন।</p>
                   </div>
                 </div>
               </Card>
