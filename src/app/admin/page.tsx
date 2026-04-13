@@ -312,7 +312,6 @@ export default function AdminDashboard() {
             </Card>
           </TabsContent>
 
-          {/* User and Settings tabs follow same responsive patterns... */}
           <TabsContent value="customers">
             <Card className="rounded-[1.5rem] md:rounded-[3rem] border-none shadow-2xl overflow-hidden bg-white">
               <div className="overflow-x-auto scrollbar-hide">

@@ -59,7 +59,7 @@ export function ProductCard({ product }: { product: Product }) {
       product.isFeatured && "ring-2 ring-primary/20"
     )}>
       {/* Badges Overlay - Strictly in corners to avoid covering image */}
-      <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+      <div className="absolute top-4 left-4 z-20 flex flex-col gap-2 pointer-events-none">
         {hasDiscount && (
           <Badge className="bg-red-500 text-white border-none px-3 py-1 rounded-xl font-black text-[9px] shadow-xl uppercase tracking-widest">
             -{discountPercent}%
@@ -86,7 +86,7 @@ export function ProductCard({ product }: { product: Product }) {
         </Button>
       </div>
 
-      {/* HUGE Image Container - Edge to Edge with Safety Padding */}
+      {/* HUGE Image Container - Increased Padding to avoid badge overlap */}
       <div className="relative aspect-square overflow-hidden bg-slate-50/10 flex items-center justify-center">
         <Link href={`/product/${product.id}`} className="block w-full h-full relative z-10">
           <ImageWithFallback
@@ -94,7 +94,7 @@ export function ProductCard({ product }: { product: Product }) {
             alt={product.name}
             fill
             unoptimized={true}
-            className="group-hover:scale-110 transition-transform duration-700 object-contain drop-shadow-2xl p-6"
+            className="group-hover:scale-110 transition-transform duration-700 object-contain drop-shadow-2xl p-10"
           />
         </Link>
         
