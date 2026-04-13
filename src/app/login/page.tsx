@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState } from 'react';
@@ -13,6 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { Smartphone, ArrowRight, AlertCircle } from 'lucide-react';
 import { Navbar } from '@/components/layout/navbar';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function LoginPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -47,12 +48,23 @@ export default function LoginPage() {
       const role = isAdmin ? 'admin' : 'user';
 
       // Step 3: Save user profile in Firestore
-      await setDoc(doc(db, 'users', firebaseUser.uid), {
+      const userRef = doc(db, 'users', firebaseUser.uid);
+      const userData = {
         phoneNumber: cleanNumber,
         role: role,
         updatedAt: serverTimestamp(),
         createdAt: serverTimestamp(),
-      }, { merge: true });
+      };
+
+      setDoc(userRef, userData, { merge: true })
+        .catch(async (err) => {
+          const permissionError = new FirestorePermissionError({
+            path: userRef.path,
+            operation: 'write',
+            requestResourceData: userData,
+          });
+          errorEmitter.emit('permission-error', permissionError);
+        });
 
       toast({ 
         title: 'সফল লগইন', 
@@ -65,7 +77,7 @@ export default function LoginPage() {
       let errorMessage = 'লগইন করা সম্ভব হয়নি। আবার চেষ্টা করুন।';
       
       if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid') {
-        errorMessage = 'ফায়ারবেস কনফিগুরেশন ঠিক নেই। দয়া করে প্রজেক্ট সেটিংস থেকে সঠিক API Key চেক করুন।';
+        errorMessage = 'ফায়ারবেস কনফিগারেশন ত্রুটি। দয়া করে API Key চেক করুন।';
       }
       
       setError(errorMessage);
@@ -86,7 +98,7 @@ export default function LoginPage() {
         {error && (
           <Alert variant="destructive" className="max-w-md mb-6 rounded-2xl border-none shadow-lg">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>কনফিগুরেশন ত্রুটি</AlertTitle>
+            <AlertTitle>কনফিগারেশন ত্রুটি</AlertTitle>
             <AlertDescription>{error}</AlertDescription>
           </Alert>
         )}
