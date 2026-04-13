@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useMemo, useEffect, useState } from 'react';
@@ -51,7 +52,7 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-grow pb-20 pt-8">
-        {/* Minimal Headline */}
+        {/* Minimal Headline - Luxury Corner Badge */}
         <section className="container mx-auto px-4 mb-8">
           <div className="inline-flex items-center gap-2 bg-white/40 glass px-6 py-3 rounded-full border border-slate-200/50 shadow-sm">
             <Sparkles className="w-4 h-4 text-primary" />
@@ -61,7 +62,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SPECIAL COLLECTION - ABSOLUTE TOP */}
+        {/* SPECIAL COLLECTION - ABSOLUTE TOP (Moved Up) */}
         <section className="container mx-auto px-4 mb-16">
           <div className="flex items-center justify-between mb-8 border-b border-slate-200/50 pb-4">
             <h2 className="text-2xl md:text-4xl font-black tracking-tighter text-slate-900">

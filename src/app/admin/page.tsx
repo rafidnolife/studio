@@ -17,7 +17,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Plus, Pencil, Trash2, Settings, ShoppingBag, Users, Star, Save, Phone, Eye, EyeOff, Sparkles, TrendingUp, Package, Image as ImageIcon, CheckCircle2, ChevronRight, LayoutDashboard } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
@@ -149,7 +149,7 @@ export default function AdminDashboard() {
             <DialogContent className="w-[95vw] max-w-4xl max-h-[95vh] overflow-y-auto rounded-[2rem] md:rounded-[3rem] border-none shadow-2xl p-6 md:p-10">
               <DialogHeader>
                 <DialogTitle className="text-3xl font-black tracking-tight">পণ্যের তথ্য দিন</DialogTitle>
-                <DialogDescription className="font-bold">সঠিক তথ্য দিয়ে ইনভেন্টরি আপডেট রাখুন।</DialogDescription>
+                <DialogDescription className="font-bold text-slate-500">সঠিক তথ্য দিয়ে ইনভেন্টরি আপডেট রাখুন।</DialogDescription>
               </DialogHeader>
               <form onSubmit={handleProductSubmit} className="grid grid-cols-1 lg:grid-cols-2 gap-8 py-6">
                 <div className="space-y-6">
