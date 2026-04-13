@@ -15,7 +15,7 @@ import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Settings, ShoppingBag, Users, LayoutDashboard, Star, Save, Phone, Eye, EyeOff, CheckCircle2, Sparkles, TrendingUp, Package, Box, ShieldCheck, Zap, Image as ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, ShoppingBag, Users, Star, Save, Phone, Eye, EyeOff, Sparkles, TrendingUp, Package, Image as ImageIcon, CheckCircle2 } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -80,14 +80,6 @@ export default function AdminDashboard() {
   useEffect(() => {
     if (user?.role === 'admin') fetchData();
   }, [user, db]);
-
-  const formatWhatsAppNumber = (num: string) => {
-    let cleaned = num.replace(/\D/g, '');
-    if (cleaned.startsWith('01')) {
-      return '88' + cleaned;
-    }
-    return cleaned;
-  };
 
   const handleSaveSettings = () => {
     const data = {
@@ -203,7 +195,7 @@ export default function AdminDashboard() {
                 <div className="space-y-6">
                   <div className="space-y-2">
                     <Label className="font-bold text-slate-700">ইমেজ প্রিভিউ</Label>
-                    <div className="aspect-square rounded-3xl overflow-hidden bg-slate-100 border-2 border-dashed border-slate-200 flex items-center justify-center relative">
+                    <div className="aspect-square rounded-3xl overflow-hidden bg-white border-2 border-dashed border-slate-200 flex items-center justify-center relative">
                       {formData.imageUrls[0] ? (
                         <ImageWithFallback 
                           src={formData.imageUrls[0]} 
@@ -214,7 +206,7 @@ export default function AdminDashboard() {
                       ) : (
                         <div className="text-center text-slate-400">
                           <ImageIcon className="w-12 h-12 mx-auto mb-2 opacity-20" />
-                          <p className="text-xs font-bold uppercase tracking-widest">ইউআরএল দিলে এখানে প্রিভিউ দেখাবে</p>
+                          <p className="text-xs font-bold uppercase tracking-widest px-4">লিঙ্ক দিলে এখানে প্রিভিউ দেখাবে</p>
                         </div>
                       )}
                     </div>
