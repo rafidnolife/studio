@@ -10,12 +10,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Smartphone, ArrowRight } from 'lucide-react';
+import { Smartphone, ArrowRight, AlertCircle } from 'lucide-react';
 import { Navbar } from '@/components/layout/navbar';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
 export default function LoginPage() {
   const [phoneNumber, setPhoneNumber] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const auth = useFirebaseAuth();
   const db = useFirestore();
   const router = useRouter();
@@ -23,8 +25,8 @@ export default function LoginPage() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
     
-    // Basic validation
     if (!phoneNumber || phoneNumber.length < 11) {
       toast({ 
         variant: 'destructive', 
@@ -41,12 +43,10 @@ export default function LoginPage() {
       
       // Step 2: Determine role
       const cleanNumber = phoneNumber.replace(/\D/g, '');
-      // Admin numbers can be added here
       const isAdmin = cleanNumber === '01797958686' || cleanNumber === '8801797958686';
       const role = isAdmin ? 'admin' : 'user';
 
       // Step 3: Save user profile in Firestore
-      // We use the UID from anonymous auth to link the phone number
       await setDoc(doc(db, 'users', firebaseUser.uid), {
         phoneNumber: cleanNumber,
         role: role,
@@ -64,10 +64,11 @@ export default function LoginPage() {
       console.error("Login error:", err);
       let errorMessage = 'লগইন করা সম্ভব হয়নি। আবার চেষ্টা করুন।';
       
-      if (err.code === 'auth/api-key-not-valid') {
-        errorMessage = 'ফায়ারবেস কনফিগারেশনে ত্রুটি আছে। অ্যাডমিনকে জানান।';
+      if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid') {
+        errorMessage = 'ফায়ারবেস কনফিগুরেশন ঠিক নেই। দয়া করে প্রজেক্ট সেটিংস থেকে সঠিক API Key চেক করুন।';
       }
       
+      setError(errorMessage);
       toast({ 
         variant: 'destructive', 
         title: 'ত্রুটি', 
@@ -81,8 +82,16 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen bg-muted/20">
       <Navbar />
-      <div className="container mx-auto px-4 py-20 flex justify-center">
-        <Card className="w-full max-w-md border-none shadow-xl rounded-3xl overflow-hidden">
+      <div className="container mx-auto px-4 py-20 flex flex-col items-center">
+        {error && (
+          <Alert variant="destructive" className="max-w-md mb-6 rounded-2xl border-none shadow-lg">
+            <AlertCircle className="h-4 w-4" />
+            <AlertTitle>কনফিগুরেশন ত্রুটি</AlertTitle>
+            <AlertDescription>{error}</AlertDescription>
+          </Alert>
+        )}
+        
+        <Card className="w-full max-w-md border-none shadow-xl rounded-[2rem] overflow-hidden">
           <div className="h-2 bg-primary"></div>
           <CardHeader className="text-center pt-10 pb-6">
             <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mx-auto mb-4">
@@ -102,14 +111,14 @@ export default function LoginPage() {
                   type="tel" 
                   value={phoneNumber} 
                   onChange={(e) => setPhoneNumber(e.target.value)} 
-                  className="h-12 rounded-xl text-lg tracking-wider"
+                  className="h-12 rounded-xl text-lg tracking-wider bg-muted/30 border-none"
                   required
                 />
                 <p className="text-[10px] text-muted-foreground px-1">কোনো ওটিপি কোড লাগবে না। সরাসরি বাটনে ক্লিক করুন।</p>
               </div>
-              <Button disabled={loading} type="submit" className="w-full h-12 rounded-xl text-lg font-bold">
+              <Button disabled={loading} type="submit" className="w-full h-14 rounded-xl text-lg font-bold shadow-lg shadow-primary/20">
                 {loading ? 'লগইন হচ্ছে...' : 'লগইন করুন'}
-                <ArrowRight className="w-5 h-5 ml-2" />
+                {!loading && <ArrowRight className="w-5 h-5 ml-2" />}
               </Button>
             </form>
           </CardContent>
