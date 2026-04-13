@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from 'react';
@@ -76,14 +77,16 @@ export default function LoginPage() {
       console.error("Login error:", err);
       let errorMessage = 'লগইন করা সম্ভব হয়নি। আবার চেষ্টা করুন।';
       
-      if (err.code === 'auth/invalid-api-key' || err.code === 'auth/api-key-not-valid') {
-        errorMessage = 'ফায়ারবেস কনফিগারেশন ত্রুটি। দয়া করে API Key চেক করুন।';
+      if (err.code === 'auth/admin-restricted-operation') {
+        errorMessage = 'ফায়ারবেস কনসোলে Anonymous Authentication অপশনটি চালু করতে হবে।';
+      } else if (err.code === 'auth/invalid-api-key') {
+        errorMessage = 'ফায়ারবেস কনফিগারেশন ত্রুটি। API Key চেক করুন।';
       }
       
       setError(errorMessage);
       toast({ 
         variant: 'destructive', 
-        title: 'ত্রুটি', 
+        title: 'লগইন ত্রুটি', 
         description: errorMessage 
       });
     } finally {
@@ -98,8 +101,8 @@ export default function LoginPage() {
         {error && (
           <Alert variant="destructive" className="max-w-md mb-6 rounded-2xl border-none shadow-lg">
             <AlertCircle className="h-4 w-4" />
-            <AlertTitle>কনফিগারেশন ত্রুটি</AlertTitle>
-            <AlertDescription>{error}</AlertDescription>
+            <AlertTitle>সমস্যা পাওয়া গেছে</AlertTitle>
+            <AlertDescription className="text-xs">{error}</AlertDescription>
           </Alert>
         )}
         
@@ -126,7 +129,7 @@ export default function LoginPage() {
                   className="h-12 rounded-xl text-lg tracking-wider bg-muted/30 border-none"
                   required
                 />
-                <p className="text-[10px] text-muted-foreground px-1">কোনো ওটিপি কোড লাগবে না। সরাসরি বাটনে ক্লিক করুন।</p>
+                <p className="text-[10px] text-muted-foreground px-1">কোনো ওটিপি কোড লাগবে না। সরাসরি লগইন করুন।</p>
               </div>
               <Button disabled={loading} type="submit" className="w-full h-14 rounded-xl text-lg font-bold shadow-lg shadow-primary/20">
                 {loading ? 'লগইন হচ্ছে...' : 'লগইন করুন'}

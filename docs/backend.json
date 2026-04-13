@@ -32,7 +32,7 @@
     }
   },
   "auth": {
-    "providers": ["phone"]
+    "providers": ["phone", "anonymous"]
   },
   "firestore": {
     "/products/{productId}": {
