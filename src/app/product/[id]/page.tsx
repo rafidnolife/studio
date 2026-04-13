@@ -2,7 +2,7 @@
 "use client";
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
 import { useFirestore } from '@/firebase';
 import { doc, getDoc } from 'firebase/firestore';
@@ -11,12 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Skeleton } from '@/components/ui/skeleton';
-import { MessageCircle, Heart, ShieldCheck, Info, CheckCircle, Zap } from 'lucide-react';
+import { MessageCircle, Info, CheckCircle, Zap, ShieldCheck, ArrowLeft } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
 export default function ProductDetail() {
   const { id } = useParams();
+  const router = useRouter();
   const db = useFirestore();
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -85,7 +86,9 @@ export default function ProductDetail() {
       <Navbar />
       <div className="flex-grow flex flex-col items-center justify-center p-20 space-y-4">
         <h2 className="text-2xl font-black text-slate-800">পণ্যটি খুঁজে পাওয়া যায়নি!</h2>
-        <Button onClick={() => window.history.back()} className="rounded-full px-8">পিছনে যান</Button>
+        <Button onClick={() => router.back()} variant="outline" className="rounded-full px-8 gap-2">
+          <ArrowLeft className="w-4 h-4" /> পিছনে যান
+        </Button>
       </div>
     </div>
   );
@@ -102,11 +105,12 @@ export default function ProductDetail() {
       <main className="container mx-auto px-4 py-8 lg:py-16 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-20">
           <div className="space-y-6">
-            <div className="relative aspect-square rounded-[3rem] overflow-hidden bg-white border border-slate-100 shadow-2xl group min-h-[300px]">
+            <div className="relative aspect-square rounded-[3rem] overflow-hidden bg-white border border-slate-100 shadow-2xl group min-h-[350px]">
               <ImageWithFallback 
                 src={mainImage} 
                 alt={product.name} 
                 fill 
+                priority
                 className="object-contain p-4 sm:p-8 transition-transform duration-700 group-hover:scale-105"
               />
               {hasDiscount && (
@@ -115,18 +119,19 @@ export default function ProductDetail() {
                 </Badge>
               )}
             </div>
+            
             {product.imageUrls && product.imageUrls.length > 1 && (
-              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
+              <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide pt-2">
                 {product.imageUrls.map((url, i) => (
                   <button 
                     key={i} 
                     onClick={() => setActiveImage(i)} 
                     className={cn(
-                      "relative w-24 h-24 rounded-2xl overflow-hidden border-4 transition-all shrink-0 bg-white",
+                      "relative w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border-4 transition-all shrink-0 bg-white",
                       activeImage === i ? "border-primary shadow-lg scale-105" : "border-transparent opacity-60 hover:opacity-100"
                     )}
                   >
-                    <ImageWithFallback src={url} alt="thumbnail" fill className="object-cover" />
+                    <ImageWithFallback src={url} alt={`thumbnail-${i}`} fill />
                   </button>
                 ))}
               </div>
@@ -136,11 +141,11 @@ export default function ProductDetail() {
           <div className="flex flex-col justify-center space-y-8">
             <div className="space-y-3">
               <div className="flex items-center gap-3">
-                <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 border-none font-black text-xs px-4 py-1 rounded-full uppercase tracking-widest">{product.category}</Badge>
+                <Badge variant="secondary" className="bg-emerald-50 text-emerald-600 border-none font-black text-[10px] px-4 py-1 rounded-full uppercase tracking-widest">{product.category}</Badge>
                 {product.stock > 0 ? (
-                  <span className="flex items-center gap-1.5 text-emerald-500 font-bold text-xs"><CheckCircle className="w-3 h-3" /> ইন স্টক</span>
+                  <span className="flex items-center gap-1.5 text-emerald-500 font-bold text-xs"><CheckCircle className="w-3.5 h-3.5" /> ইন স্টক</span>
                 ) : (
-                  <span className="flex items-center gap-1.5 text-red-500 font-bold text-xs"><Info className="w-3 h-3" /> আউট অফ স্টক</span>
+                  <span className="flex items-center gap-1.5 text-red-500 font-bold text-xs"><Info className="w-3.5 h-3.5" /> আউট অফ স্টক</span>
                 )}
               </div>
               <h1 className="text-4xl md:text-5xl font-black text-slate-900 leading-[1.1] tracking-tighter">{product.name}</h1>
@@ -151,7 +156,7 @@ export default function ProductDetail() {
                 </div>
                 {hasDiscount && (
                   <div className="bg-amber-50 text-amber-600 px-4 py-2 rounded-2xl font-black text-sm border border-amber-100">
-                    আপনার সাশ্রয় ৳{savings}
+                    সাশ্রয় ৳{savings}
                   </div>
                 )}
               </div>
@@ -159,7 +164,7 @@ export default function ProductDetail() {
 
             <div className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-xl space-y-8">
               <div className="flex items-center justify-between">
-                <span className="font-black text-slate-700 text-lg">পরিমাণ নির্বাচন করুন:</span>
+                <span className="font-black text-slate-700 text-lg">পরিমাণ নির্বাচন:</span>
                 <div className="flex items-center gap-6 bg-slate-50 px-6 py-2 rounded-2xl border border-slate-100">
                   <button onClick={() => setQty(q => Math.max(1, q - 1))} className="text-2xl font-black text-slate-400 hover:text-primary transition-colors">-</button>
                   <span className="text-xl font-black w-10 text-center text-slate-900">{qty}</span>
@@ -171,32 +176,32 @@ export default function ProductDetail() {
                 <Button 
                   onClick={handleOrder} 
                   disabled={product.stock <= 0}
-                  className="w-full h-16 rounded-2xl text-xl font-black gap-3 shadow-xl shadow-primary/20 transition-all hover:scale-[1.02]"
+                  className="w-full h-16 rounded-2xl text-xl font-black gap-3 shadow-xl shadow-primary/20 transition-all hover:scale-[1.01] active:scale-95"
                 >
                   <MessageCircle className="w-7 h-7 fill-current" />
                   সরাসরি হোয়াটসঅ্যাপে অর্ডার
                 </Button>
-                <p className="text-[11px] text-center text-slate-400 font-bold uppercase tracking-widest">Safe & Secure Ordering via WhatsApp</p>
+                <p className="text-[10px] text-center text-slate-400 font-bold uppercase tracking-widest">Safe & Secure Ordering via WhatsApp</p>
               </div>
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-xl font-black text-slate-800 flex items-center gap-2">
+              <h3 className="text-xl font-black text-slate-800 flex items-center gap-2 px-2">
                 <Info className="w-5 h-5 text-primary" /> পণ্যের বিস্তারিত বিবরণ
               </h3>
-              <div className="p-6 bg-white rounded-[2rem] border border-slate-100">
+              <div className="p-8 bg-white rounded-[2.5rem] border border-slate-100 shadow-sm">
                 <p className="text-slate-600 leading-relaxed font-medium whitespace-pre-line">{product.description || 'এই পণ্যটির কোনো বিবরণ পাওয়া যায়নি।'}</p>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4 pt-4">
-              <div className="flex items-center gap-3 p-4 bg-emerald-50/50 rounded-2xl border border-emerald-100">
+              <div className="flex items-center gap-3 p-5 bg-emerald-50/50 rounded-2xl border border-emerald-100">
                 <ShieldCheck className="text-emerald-500 w-6 h-6" />
-                <span className="text-xs font-black text-emerald-700 uppercase">Original Product</span>
+                <span className="text-[10px] font-black text-emerald-700 uppercase leading-tight">Original<br/>Product</span>
               </div>
-              <div className="flex items-center gap-3 p-4 bg-amber-50/50 rounded-2xl border border-amber-100">
+              <div className="flex items-center gap-3 p-5 bg-amber-50/50 rounded-2xl border border-amber-100">
                 <Zap className="text-amber-500 w-6 h-6" />
-                <span className="text-xs font-black text-amber-700 uppercase">Express Delivery</span>
+                <span className="text-[10px] font-black text-amber-700 uppercase leading-tight">Express<br/>Delivery</span>
               </div>
             </div>
           </div>

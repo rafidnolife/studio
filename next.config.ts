@@ -31,6 +31,8 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.framer.com' },
       { protocol: 'https', hostname: '**.fb.com' },
       { protocol: 'https', hostname: '**.google.com' },
+      { protocol: 'https', hostname: '**.cloudinary.com' },
+      { protocol: 'https', hostname: '**.imgix.net' },
     ],
   },
 };
