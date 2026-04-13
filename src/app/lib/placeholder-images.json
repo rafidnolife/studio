@@ -1,3 +1,4 @@
+
 {
   "placeholderImages": [
     {
@@ -7,9 +8,21 @@
       "imageHint": "ecommerce banner"
     },
     {
+      "id": "electronics",
+      "description": "Electronics Category",
+      "imageUrl": "https://picsum.photos/seed/elec/400/400",
+      "imageHint": "smartphone gadgets"
+    },
+    {
+      "id": "lifestyle",
+      "description": "Lifestyle Category",
+      "imageUrl": "https://picsum.photos/seed/life/400/400",
+      "imageHint": "fashion clothing"
+    },
+    {
       "id": "broken-fallback",
       "description": "Broken image fallback",
-      "imageUrl": "https://placehold.co/600x400?text=Image+Not+Found",
+      "imageUrl": "https://placehold.co/600x400?text=ইমেজ+পাওয়া+যায়নি",
       "imageHint": "placeholder fallback"
     }
   ]
