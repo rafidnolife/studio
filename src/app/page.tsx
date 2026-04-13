@@ -79,7 +79,7 @@ export default function Home() {
             <div className="flex flex-col gap-1 min-w-0">
                <h2 className="text-xl md:text-6xl font-black tracking-tighter text-slate-900 flex items-center gap-2 md:gap-4 flex-wrap">
                 স্পেশাল <span className="text-primary">কালেকশন</span>
-                <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[7px] md:text-xs py-1 px-2 md:px-4 rounded-full flex items-center gap-1 shrink-0">
+                <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[8px] md:text-xs py-1 px-2 md:px-4 rounded-full flex items-center gap-1 shrink-0">
                   <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3" /> TRENDING
                 </Badge>
               </h2>

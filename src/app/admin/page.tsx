@@ -6,7 +6,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
 import { useFirestore } from '@/firebase';
-import { collection, updateDoc, deleteDoc, doc, getDocs, getDoc, query, orderBy, setDoc, serverTimestamp } from 'firebase/firestore';
+import { collection, updateDoc, deleteDoc, doc, getDocs, getDoc, query, orderBy, setDoc, serverTimestamp, addDoc } from 'firebase/firestore';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -24,7 +24,6 @@ import { cn } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError } from '@/firebase/errors';
-import { addDoc } from 'firebase/firestore';
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useAuth();
@@ -144,18 +143,25 @@ export default function AdminDashboard() {
 
   const deleteProduct = (id: string) => {
     if (!confirm('আপনি কি নিশ্চিতভাবে এই পণ্যটি মুছে ফেলতে চান?')) return;
+    
+    // Optimistic UI update
+    const previousProducts = [...products];
+    setProducts(products.filter(p => p.id !== id));
+
     const docRef = doc(db, 'products', id);
     deleteDoc(docRef)
       .then(() => {
         toast({ title: 'পণ্যটি মুছে ফেলা হয়েছে' });
-        fetchData();
       })
       .catch(async (error) => {
+        // Rollback on error
+        setProducts(previousProducts);
         const permissionError = new FirestorePermissionError({
           path: docRef.path,
           operation: 'delete',
         });
         errorEmitter.emit('permission-error', permissionError);
+        toast({ variant: 'destructive', title: 'ত্রুটি', description: 'পণ্যটি ডিলিট করা সম্ভব হয়নি।' });
       });
   };
 
