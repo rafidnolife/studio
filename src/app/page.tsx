@@ -21,12 +21,14 @@ export default function Home() {
   });
 
   useEffect(() => {
+    if (!db) return;
     getDoc(doc(db, 'settings', 'site')).then(s => {
       if (s.exists()) setSettings(s.data() as any);
     });
   }, [db]);
   
   const featuredQuery = useMemo(() => {
+    if (!db) return null;
     return query(
       collection(db, 'products'), 
       where('isFeatured', '==', true), 
@@ -35,12 +37,13 @@ export default function Home() {
   }, [db]);
 
   const recentProductsQuery = useMemo(() => {
+    if (!db) return null;
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(10));
   }, [db]);
 
   const { data: featuredProducts, loading: featLoading } = useCollection<Product>(featuredQuery);
   const { data: recentProducts, loading: recentLoading } = useCollection<Product>(recentProductsQuery);
-  const { data: allProducts } = useCollection<Product>(collection(db, 'products'));
+  const { data: allProducts } = useCollection<Product>(db ? collection(db, 'products') : null);
 
   const availableCategories = useMemo(() => {
     const hardcodedCats = [
@@ -77,7 +80,7 @@ export default function Home() {
         <section className="container mx-auto px-4 mb-20">
           <div className="flex items-center justify-between mb-8 md:mb-10 border-b border-primary/10 pb-6 gap-4">
             <div className="flex flex-col gap-1 min-w-0">
-               <h2 className="text-xl md:text-6xl font-black tracking-tighter text-slate-900 flex items-center gap-2 md:gap-4 flex-wrap">
+               <h2 className="text-xl md:text-5xl lg:text-6xl font-black tracking-tighter text-slate-900 flex items-center gap-2 md:gap-4 flex-wrap">
                 স্পেশাল <span className="text-primary">কালেকশন</span>
                 <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[8px] md:text-xs py-1 px-2 md:px-4 rounded-full flex items-center gap-1 shrink-0">
                   <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3" /> TRENDING
@@ -89,9 +92,9 @@ export default function Home() {
             </Link>
           </div>
           
-          <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 md:gap-12">
+          <div className="grid grid-cols-2 gap-4 md:gap-12">
             {featLoading ? (
-              Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2rem] md:rounded-[3rem]" />)
+              Array(2).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2rem] md:rounded-[3rem]" />)
             ) : featuredProducts.length > 0 ? (
               featuredProducts.map(p => <ProductCard key={p.id} product={p} />)
             ) : (
@@ -133,12 +136,12 @@ export default function Home() {
         {/* Recent Arrivals */}
         <section className="container mx-auto px-4 mb-16 md:mb-24">
           <div className="flex items-center justify-between mb-8 md:mb-10 border-b border-primary/10 pb-6">
-            <h2 className="text-2xl md:text-6xl font-black tracking-tighter text-slate-900">
+            <h2 className="text-2xl md:text-5xl lg:text-6xl font-black tracking-tighter text-slate-900">
               নতুন <span className="text-primary">পণ্যসমূহ</span>
             </h2>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 md:gap-12">
-            {recentLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2rem] md:rounded-[3rem]" />) : 
+          <div className="grid grid-cols-2 gap-4 md:gap-12">
+            {recentLoading ? Array(2).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2rem] md:rounded-[3rem]" />) : 
               recentProducts.map(p => <ProductCard key={p.id} product={p} />)
             }
           </div>

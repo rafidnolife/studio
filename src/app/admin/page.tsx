@@ -61,6 +61,7 @@ export default function AdminDashboard() {
   }, [user, authLoading, router]);
 
   const fetchData = async () => {
+    if (!db) return;
     setLoading(true);
     try {
       const pQuery = query(collection(db, 'products'), orderBy('createdAt', 'desc'));
@@ -73,7 +74,7 @@ export default function AdminDashboard() {
       const sSnap = await getDoc(doc(db, 'settings', 'site'));
       if (sSnap.exists()) setSiteSettings(sSnap.data() as any);
     } catch (err) {
-      console.error(err);
+      console.error("Fetch data error:", err);
     } finally {
       setLoading(false);
     }
@@ -142,16 +143,19 @@ export default function AdminDashboard() {
   };
 
   const deleteProduct = async (id: string) => {
-    if (!id) return;
+    if (!id || !db) return;
     
+    // Quick confirmation
+    if (!window.confirm('আপনি কি এই পণ্যটি মুছে ফেলতে চান?')) return;
+
     // Optimistic UI update
     const previousProducts = [...products];
     setProducts(products.filter(p => p.id !== id));
 
     try {
-      const docRef = doc(db, 'products', id);
-      await deleteDoc(docRef);
-      toast({ title: 'পণ্যটি মুছে ফেলা হয়েছে' });
+      const productRef = doc(db, 'products', id);
+      await deleteDoc(productRef);
+      toast({ title: 'পণ্যটি সফলভাবে মুছে ফেলা হয়েছে' });
     } catch (error) {
       // Rollback on error
       setProducts(previousProducts);
@@ -337,7 +341,7 @@ export default function AdminDashboard() {
                             <Button variant="ghost" size="icon" className="rounded-lg md:rounded-xl hover:bg-primary/10 hover:text-primary h-8 w-8 md:h-10 md:w-10" onClick={() => { setEditingProduct(p); setFormData(p as any); setProductDialogOpen(true); }}>
                               <Pencil className="w-4 h-4 md:w-5 md:h-5" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="rounded-lg md:rounded-xl hover:bg-red-50 hover:text-red-600 h-8 w-8 md:h-10 md:w-10" onClick={() => { if(confirm('আপনি কি নিশ্চিত?')) deleteProduct(p.id); }}>
+                            <Button variant="ghost" size="icon" className="rounded-lg md:rounded-xl hover:bg-red-50 hover:text-red-600 h-8 w-8 md:h-10 md:w-10" onClick={() => deleteProduct(p.id)}>
                               <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
                             </Button>
                           </div>
