@@ -180,7 +180,7 @@ export default function AdminDashboard() {
           </div>
           <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="rounded-2xl h-14 px-8 bg-primary shadow-2xl shadow-primary/20 hover:scale-105 transition-all font-black text-lg">
+              <Button className="rounded-2xl h-14 px-8 bg-primary shadow-2xl shadow-primary/20 hover:scale-105 transition-all font-black text-lg text-white">
                 <Plus className="mr-2 h-6 w-6" /> নতুন পণ্য যোগ
               </Button>
             </DialogTrigger>
@@ -254,7 +254,7 @@ export default function AdminDashboard() {
                     <Switch checked={formData.isFeatured} onCheckedChange={checked => setFormData({...formData, isFeatured: checked})} />
                     <Label className="font-black text-slate-700 text-sm md:text-base">হোম পেজে স্পেশাল রাখুন</Label>
                   </div>
-                  <Button type="submit" className="w-full h-14 md:h-16 rounded-xl md:rounded-[1.5rem] text-lg md:text-xl font-black shadow-2xl shadow-primary/20">সংরক্ষণ করুন</Button>
+                  <Button type="submit" className="w-full h-14 md:h-16 rounded-xl md:rounded-[1.5rem] text-lg md:text-xl font-black shadow-2xl shadow-primary/20 text-white">সংরক্ষণ করুন</Button>
                 </div>
               </form>
             </DialogContent>
@@ -378,7 +378,7 @@ export default function AdminDashboard() {
                           </div>
                         </TableCell>
                         <TableCell className="text-right px-6 md:px-8">
-                          <Badge className={c.role === 'admin' ? 'bg-primary border-none font-black px-4 md:px-6 py-0.5 md:py-1 text-[8px] md:text-[10px]' : 'bg-slate-100 text-slate-500 border-none px-4 md:px-6 py-0.5 md:py-1 font-black text-[8px] md:text-[10px]'}>
+                          <Badge className={c.role === 'admin' ? 'bg-primary border-none font-black px-4 md:px-6 py-0.5 md:py-1 text-[8px] md:text-[10px] text-white' : 'bg-slate-100 text-slate-500 border-none px-4 md:px-6 py-0.5 md:py-1 font-black text-[8px] md:text-[10px]'}>
                             {c.role === 'admin' ? 'অ্যাডমিন' : 'কাস্টমার'}
                           </Badge>
                         </TableCell>
@@ -415,7 +415,7 @@ export default function AdminDashboard() {
                     </div>
                   </div>
                   
-                  <Button onClick={handleSaveSettings} className="w-full h-16 md:h-20 rounded-xl md:rounded-[2rem] text-xl md:text-2xl font-black shadow-2xl shadow-primary/30 gap-3 md:gap-4">
+                  <Button onClick={handleSaveSettings} className="w-full h-16 md:h-20 rounded-xl md:rounded-[2rem] text-xl md:text-2xl font-black shadow-2xl shadow-primary/30 gap-3 md:gap-4 text-white">
                     <Save className="w-6 h-6 md:w-8 md:h-8" /> পরিবর্তন সেভ করুন
                   </Button>
                 </div>

@@ -65,7 +65,6 @@ export function ProductCard({ product }: { product: Product }) {
             -{discountPercent}% ছাড়
           </Badge>
         )}
-        {/* Special text removed from over the image as per user request */}
       </div>
       
       <div className="absolute top-3 right-3 md:top-5 md:right-5 z-20">
@@ -82,7 +81,7 @@ export function ProductCard({ product }: { product: Product }) {
         </Button>
       </div>
 
-      {/* Large Image Container for HD Quality */}
+      {/* Large Image Container for HD Quality - Fixed Padding */}
       <div className="relative aspect-square overflow-hidden bg-slate-50/10 flex items-center justify-center p-2 md:p-4">
         <Link href={`/product/${product.id}`} className="block w-full h-full relative z-10">
           <ImageWithFallback
