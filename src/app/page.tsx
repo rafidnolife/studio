@@ -69,7 +69,7 @@ export default function Home() {
             <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary shrink-0">
               <Sparkles className="w-5 h-5 md:w-6 md:h-6 animate-pulse" />
             </div>
-            <h1 className="text-sm md:text-3xl font-black text-slate-800 tracking-tighter uppercase flex flex-wrap items-center gap-2 md:gap-3 leading-tight break-words">
+            <h1 className="text-sm md:text-3xl font-black text-slate-800 tracking-tighter uppercase flex flex-wrap items-center gap-2 md:gap-3 leading-tight break-words max-w-[calc(100vw-100px)]">
               {settings.heroTitle}
               <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-primary rounded-full hidden sm:inline-block"></span>
             </h1>
@@ -111,7 +111,7 @@ export default function Home() {
             <div className="container mx-auto px-4">
               <div className="flex flex-col items-center mb-10 md:mb-12">
                 <span className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-2">Explore Your Style</span>
-                <h2 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tighter">ক্যাটাগরি <span className="text-primary">অনুসারে</span></h2>
+                <h2 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tighter text-center">ক্যাটাগরি <span className="text-primary">অনুসারে</span></h2>
               </div>
               <div className="overflow-x-auto scrollbar-hide">
                 <div className="flex items-center justify-start md:justify-center gap-4 md:gap-10 min-w-max pb-8 px-4">

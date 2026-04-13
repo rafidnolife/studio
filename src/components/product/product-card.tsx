@@ -82,7 +82,7 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
 
       {/* Large Image Container - HD and No Overlay Covering it */}
-      <div className="relative aspect-square overflow-hidden bg-slate-50/10 flex items-center justify-center p-2 md:p-3">
+      <div className="relative aspect-square overflow-hidden bg-slate-50/10 flex items-center justify-center p-3 md:p-6">
         <Link href={`/product/${product.id}`} className="block w-full h-full relative z-10">
           <ImageWithFallback
             src={product.imageUrls[0]}
@@ -104,7 +104,7 @@ export function ProductCard({ product }: { product: Product }) {
 
       <CardContent className="p-4 md:p-8 flex flex-col flex-grow space-y-3 md:space-y-6 bg-gradient-to-b from-transparent to-slate-50/30">
         <div className="space-y-1.5">
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <span className="text-[7px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] px-2 py-0.5 md:px-3 md:py-1 bg-primary/5 rounded-full inline-block">
               {product.category}
             </span>

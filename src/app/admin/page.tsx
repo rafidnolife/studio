@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
+import { Card, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
@@ -152,20 +152,21 @@ export default function AdminDashboard() {
     const previousProducts = [...products];
     setProducts(products.filter(p => p.id !== id));
 
-    try {
-      const productRef = doc(db, 'products', id);
-      await deleteDoc(productRef);
-      toast({ title: 'পণ্যটি সফলভাবে মুছে ফেলা হয়েছে' });
-    } catch (error) {
-      // Rollback on error
-      setProducts(previousProducts);
-      const permissionError = new FirestorePermissionError({
-        path: `products/${id}`,
-        operation: 'delete',
+    const productRef = doc(db, 'products', id);
+    deleteDoc(productRef)
+      .then(() => {
+        toast({ title: 'পণ্যটি সফলভাবে মুছে ফেলা হয়েছে' });
+      })
+      .catch(async (error) => {
+        // Rollback on error
+        setProducts(previousProducts);
+        const permissionError = new FirestorePermissionError({
+          path: `products/${id}`,
+          operation: 'delete',
+        });
+        errorEmitter.emit('permission-error', permissionError);
+        toast({ variant: 'destructive', title: 'ত্রুটি', description: 'পণ্যটি ডিলিট করা সম্ভব হয়নি।' });
       });
-      errorEmitter.emit('permission-error', permissionError);
-      toast({ variant: 'destructive', title: 'ত্রুটি', description: 'পণ্যটি ডিলিট করা সম্ভব হয়নি।' });
-    }
   };
 
   if (authLoading || !user || user.role !== 'admin') return null;
