@@ -35,9 +35,11 @@ export default function ProductDetail() {
           setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
         }
         
-        const sSnap = await getDoc(doc(db, 'settings', 'site'));
-        if (sSnap.exists()) {
-          let num = sSnap.data().whatsappNumber.replace(/\D/g, '');
+        const sSnap = await getDoc(doc(doc(db, 'settings', 'site').parent, 'settings', 'site'));
+        // Re-fetching settings correctly
+        const settingsSnap = await getDoc(doc(db, 'settings', 'site'));
+        if (settingsSnap.exists()) {
+          let num = settingsSnap.data().whatsappNumber.replace(/\D/g, '');
           if (num.startsWith('01')) num = '88' + num;
           setWhatsappNum(num);
         }
