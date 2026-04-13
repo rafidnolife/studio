@@ -65,11 +65,7 @@ export function ProductCard({ product }: { product: Product }) {
             -{discountPercent}% ছাড়
           </Badge>
         )}
-        {product.isFeatured && (
-          <Badge className="bg-amber-500 text-white border-none px-3 py-1 rounded-xl font-black text-[8px] md:text-[10px] shadow-2xl uppercase tracking-widest flex items-center gap-1">
-            <Sparkles className="w-3 h-3" /> স্পেশাল
-          </Badge>
-        )}
+        {/* Special text removed from over the image as per user request */}
       </div>
       
       <div className="absolute top-3 right-3 md:top-5 md:right-5 z-20">
@@ -86,8 +82,8 @@ export function ProductCard({ product }: { product: Product }) {
         </Button>
       </div>
 
-      {/* Image Container with high padding to prevent badge overlap */}
-      <div className="relative aspect-square overflow-hidden bg-slate-50/10 flex items-center justify-center p-8 md:p-12">
+      {/* Large Image Container for HD Quality */}
+      <div className="relative aspect-square overflow-hidden bg-slate-50/10 flex items-center justify-center p-2 md:p-4">
         <Link href={`/product/${product.id}`} className="block w-full h-full relative z-10">
           <ImageWithFallback
             src={product.imageUrls[0]}
@@ -109,7 +105,10 @@ export function ProductCard({ product }: { product: Product }) {
 
       <CardContent className="p-5 md:p-10 flex flex-col flex-grow space-y-4 md:space-y-8 bg-gradient-to-b from-transparent to-slate-50/30">
         <div className="space-y-2">
-          <span className="text-[8px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] px-3 py-1 bg-primary/5 rounded-full inline-block">{product.category}</span>
+          <div className="flex items-center gap-2">
+            <span className="text-[8px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] px-3 py-1 bg-primary/5 rounded-full inline-block">{product.category}</span>
+            {product.isFeatured && <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[7px] md:text-[8px] px-2 py-0.5 rounded-full flex items-center gap-1"><Sparkles className="w-2.5 h-2.5" /> SPECIAL</Badge>}
+          </div>
           <Link href={`/product/${product.id}`}>
             <h3 className="font-black text-sm md:text-2xl text-slate-900 line-clamp-1 leading-tight group-hover:text-primary transition-colors tracking-tighter">
               {product.name}

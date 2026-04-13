@@ -60,20 +60,20 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-grow pb-20 pt-8">
-        {/* Minimal Headline */}
+        {/* Minimal Headline - Fully Responsive */}
         <section className="container mx-auto px-4 mb-12">
           <div className="flex items-center gap-3 bg-white/60 glass w-fit max-w-full px-5 md:px-8 py-3 md:py-4 rounded-[1.5rem] md:rounded-[2rem] shadow-xl border-primary/10 overflow-hidden">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary shrink-0">
               <Sparkles className="w-5 h-5 md:w-6 md:h-6 animate-pulse" />
             </div>
-            <h1 className="text-sm md:text-3xl font-black text-slate-800 tracking-tighter uppercase flex flex-wrap items-center gap-2 md:gap-3 leading-tight">
+            <h1 className="text-sm md:text-3xl font-black text-slate-800 tracking-tighter uppercase flex flex-wrap items-center gap-2 md:gap-3 leading-tight break-words">
               {settings.heroTitle}
               <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-primary rounded-full hidden sm:inline-block"></span>
             </h1>
           </div>
         </section>
 
-        {/* SPECIAL COLLECTION */}
+        {/* SPECIAL COLLECTION - Responsive Grid */}
         <section className="container mx-auto px-4 mb-20">
           <div className="flex items-center justify-between mb-8 md:mb-10 border-b border-primary/10 pb-6 gap-4">
             <div className="flex flex-col gap-1 min-w-0">

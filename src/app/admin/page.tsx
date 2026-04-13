@@ -141,28 +141,27 @@ export default function AdminDashboard() {
       });
   };
 
-  const deleteProduct = (id: string) => {
-    if (!confirm('আপনি কি নিশ্চিতভাবে এই পণ্যটি মুছে ফেলতে চান?')) return;
+  const deleteProduct = async (id: string) => {
+    if (!id) return;
     
     // Optimistic UI update
     const previousProducts = [...products];
     setProducts(products.filter(p => p.id !== id));
 
-    const docRef = doc(db, 'products', id);
-    deleteDoc(docRef)
-      .then(() => {
-        toast({ title: 'পণ্যটি মুছে ফেলা হয়েছে' });
-      })
-      .catch(async (error) => {
-        // Rollback on error
-        setProducts(previousProducts);
-        const permissionError = new FirestorePermissionError({
-          path: docRef.path,
-          operation: 'delete',
-        });
-        errorEmitter.emit('permission-error', permissionError);
-        toast({ variant: 'destructive', title: 'ত্রুটি', description: 'পণ্যটি ডিলিট করা সম্ভব হয়নি।' });
+    try {
+      const docRef = doc(db, 'products', id);
+      await deleteDoc(docRef);
+      toast({ title: 'পণ্যটি মুছে ফেলা হয়েছে' });
+    } catch (error) {
+      // Rollback on error
+      setProducts(previousProducts);
+      const permissionError = new FirestorePermissionError({
+        path: `products/${id}`,
+        operation: 'delete',
       });
+      errorEmitter.emit('permission-error', permissionError);
+      toast({ variant: 'destructive', title: 'ত্রুটি', description: 'পণ্যটি ডিলিট করা সম্ভব হয়নি।' });
+    }
   };
 
   if (authLoading || !user || user.role !== 'admin') return null;
@@ -324,7 +323,7 @@ export default function AdminDashboard() {
                             <div className="flex flex-col gap-0.5 md:gap-1">
                               <span className="font-black text-slate-900 text-sm md:text-base line-clamp-1">{p.name}</span>
                               <div className="flex gap-1.5">
-                                {p.isFeatured && <Badge className="bg-amber-50 text-amber-500 border-none text-[7px] md:text-[8px] px-1.5 md:py-0 font-black">SPECIAL</Badge>}
+                                {p.isFeatured && <Badge className="bg-amber-50 text-amber-600 border-none text-[7px] md:text-[8px] px-1.5 md:py-0 font-black">SPECIAL</Badge>}
                                 {p.stock <= 0 && <Badge className="bg-red-50 text-red-500 border-none text-[7px] md:text-[8px] px-1.5 md:py-0 font-black">OUT</Badge>}
                               </div>
                             </div>
@@ -338,7 +337,7 @@ export default function AdminDashboard() {
                             <Button variant="ghost" size="icon" className="rounded-lg md:rounded-xl hover:bg-primary/10 hover:text-primary h-8 w-8 md:h-10 md:w-10" onClick={() => { setEditingProduct(p); setFormData(p as any); setProductDialogOpen(true); }}>
                               <Pencil className="w-4 h-4 md:w-5 md:h-5" />
                             </Button>
-                            <Button variant="ghost" size="icon" className="rounded-lg md:rounded-xl hover:bg-red-50 hover:text-red-600 h-8 w-8 md:h-10 md:w-10" onClick={() => deleteProduct(p.id)}>
+                            <Button variant="ghost" size="icon" className="rounded-lg md:rounded-xl hover:bg-red-50 hover:text-red-600 h-8 w-8 md:h-10 md:w-10" onClick={() => { if(confirm('আপনি কি নিশ্চিত?')) deleteProduct(p.id); }}>
                               <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
                             </Button>
                           </div>
