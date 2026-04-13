@@ -24,16 +24,18 @@ export default function ProductListing() {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
-  // Dynamic categories based on actual products in the database
+  // Dynamic categories: Filter unique and trimmed categories from actual products
   const categories = useMemo(() => {
-    const uniqueCategories = Array.from(new Set(products.map(p => p.category).filter(Boolean)));
+    const uniqueCategories = Array.from(
+      new Set(products.map(p => p.category?.trim()).filter(Boolean))
+    );
     return ['সব', ...uniqueCategories];
   }, [products]);
 
   const filteredProducts = useMemo(() => {
     return products.filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesCategory = selectedCategory === 'সব' || p.category === selectedCategory;
+      const matchesCategory = selectedCategory === 'সব' || p.category?.trim() === selectedCategory;
       return matchesSearch && matchesCategory;
     });
   }, [searchTerm, selectedCategory, products]);

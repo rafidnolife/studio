@@ -40,7 +40,7 @@ export default function Home() {
   const { data: recentProducts, loading: recentLoading } = useCollection<Product>(recentProductsQuery);
   const { data: allProducts } = useCollection<Product>(collection(db, 'products'));
 
-  // Filter category buttons to only show categories that actually have products
+  // Filter category buttons to only show unique categories that actually have products
   const availableCategories = useMemo(() => {
     const hardcodedCats = [
       { name: 'ইলেকট্রনিক্স', icon: '📱' },
@@ -50,7 +50,8 @@ export default function Home() {
       { name: 'অন্যান্য', icon: '📦' },
     ];
     
-    const existingCatNames = new Set(allProducts.map(p => p.category));
+    // Create a Set of unique, trimmed categories from existing products
+    const existingCatNames = new Set(allProducts.map(p => p.category?.trim()).filter(Boolean));
     return hardcodedCats.filter(cat => existingCatNames.has(cat.name));
   }, [allProducts]);
 
