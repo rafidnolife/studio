@@ -58,7 +58,6 @@ export function ProductCard({ product }: { product: Product }) {
       "group relative overflow-hidden border-none transition-all duration-700 bg-white rounded-[2.5rem] flex flex-col h-full",
       product.isFeatured ? "shadow-2xl ring-2 ring-primary/20 scale-[1.02] z-10" : "shadow-xl hover:shadow-2xl shadow-slate-200/50"
     )}>
-      {/* Badge container for clean overlay */}
       <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
         {hasDiscount && (
           <Badge className="bg-destructive text-white border-none px-4 py-1 rounded-xl font-black text-[10px] shadow-lg">
@@ -73,7 +72,7 @@ export function ProductCard({ product }: { product: Product }) {
       </div>
 
       <div className="relative aspect-[1/1.1] overflow-hidden bg-slate-50">
-        <Link href={`/product/${product.id}`} className="block h-full">
+        <Link href={`/product/${product.id}`} className="block w-full h-full relative">
           <ImageWithFallback
             src={product.imageUrls[0]}
             alt={product.name}
@@ -82,7 +81,6 @@ export function ProductCard({ product }: { product: Product }) {
           />
         </Link>
         
-        {/* Wishlist Button Overlay */}
         <div className="absolute top-4 right-4 z-20 opacity-0 group-hover:opacity-100 translate-x-4 group-hover:translate-x-0 transition-all duration-500">
           <Button 
             size="icon" 

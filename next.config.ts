@@ -26,6 +26,9 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.googleusercontent.com' },
       { protocol: 'https', hostname: '**.fbcdn.net' },
       { protocol: 'https', hostname: '**.akamaihd.net' },
+      { protocol: 'https', hostname: '**.static-amazon.com' },
+      { protocol: 'https', hostname: '**.media-amazon.com' },
+      { protocol: 'https', hostname: '**.framer.com' },
     ],
   },
 };
