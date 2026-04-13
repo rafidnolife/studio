@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -39,6 +40,7 @@
                 radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.02) 0, transparent 50%),
                 #F8FAFC;
     background-attachment: fixed;
+    overflow-x: hidden;
   }
 }
 
