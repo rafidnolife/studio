@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle, Info, Zap, ShieldCheck, ArrowLeft, ShoppingCart, MapPin } from 'lucide-react';
+import { CheckCircle, Info, Zap, ShieldCheck, ArrowLeft, ShoppingCart, MapPin, Truck } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -162,9 +162,9 @@ export default function ProductDetail() {
                   <ShoppingCart className="w-6 h-6 md:w-8 md:h-8" />
                   অর্ডার করুন
                 </Button>
-                <div className="flex items-center justify-center gap-2 text-[10px] text-slate-400 font-bold uppercase tracking-widest">
-                  <MapPin className="w-3.5 h-3.5" />
-                  শুধুমাত্র ঝিনাইদহের ভিতরে ডেলিভারি
+                <div className="flex items-center justify-center gap-2 text-[10px] text-primary font-black uppercase tracking-widest">
+                  <Truck className="w-3.5 h-3.5" />
+                  সারা বাংলাদেশে ক্যাশ অন ডেলিভারি
                 </div>
               </div>
             </div>
