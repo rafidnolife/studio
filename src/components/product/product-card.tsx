@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Button } from '@/components/ui/button';
 import { Heart, ArrowRight, Sparkles } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, memo } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -25,7 +25,7 @@ export interface Product {
   variants?: string[];
 }
 
-export function ProductCard({ product }: { product: Product }) {
+function ProductCardComponent({ product }: { product: Product }) {
   const [isWishlisted, setIsWishlisted] = useState(false);
   const { toast } = useToast();
   
@@ -86,7 +86,6 @@ export function ProductCard({ product }: { product: Product }) {
              <ImageWithFallback
                 src={product.imageUrls[0]}
                 alt={product.name}
-                fill
                 className="object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.1)] group-hover:drop-shadow-[0_30px_50px_rgba(0,0,0,0.2)]"
               />
           </div>
@@ -143,3 +142,5 @@ export function ProductCard({ product }: { product: Product }) {
     </Card>
   );
 }
+
+export const ProductCard = memo(ProductCardComponent);

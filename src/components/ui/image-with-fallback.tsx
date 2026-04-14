@@ -1,19 +1,24 @@
 
 "use client";
 
-import React, { useState, useEffect } from 'react';
-import Image, { ImageProps } from 'next/image';
+import React, { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
-interface ImageWithFallbackProps extends Omit<ImageProps, 'src'> {
+interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
+  fallbackSrc?: string;
 }
 
-export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFallbackProps) {
+export function ImageWithFallback({ 
+  src, 
+  alt, 
+  className, 
+  fallbackSrc = 'https://placehold.co/800x800?text=ইমেজ+পাওয়া+যায়নি',
+  ...props 
+}: ImageWithFallbackProps) {
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
-  
-  const fallbackSrc = 'https://placehold.co/800x800?text=ইমেজ+পাওয়া+যায়নি';
+  const imgRef = useRef<HTMLImageElement>(null);
 
   // Basic validation for URL
   const isValidUrl = (url: string) => {
@@ -23,15 +28,27 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
   const currentSrc = error || !isValidUrl(src) ? fallbackSrc : src;
 
   useEffect(() => {
+    // Reset state when src changes
     setError(false);
-    setLoading(true);
     
-    const timer = setTimeout(() => {
+    // Check if image is already cached in the browser
+    if (imgRef.current && imgRef.current.complete) {
       setLoading(false);
-    }, 10000);
-
-    return () => clearTimeout(timer);
+    } else {
+      setLoading(true);
+    }
   }, [src]);
+
+  const handleLoad = () => {
+    setLoading(false);
+  };
+
+  const handleError = () => {
+    if (!error) {
+      setError(true);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={cn("relative overflow-hidden flex items-center justify-center w-full h-full min-h-[inherit]", className)}>
@@ -41,22 +58,20 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
         </div>
       )}
       <img
+        ref={imgRef}
         src={currentSrc}
         alt={alt || "Product Image"}
+        onLoad={handleLoad}
+        onError={handleError}
+        decoding="async"
+        loading="lazy"
         className={cn(
-          "transition-all duration-700 w-full h-full object-contain",
+          "transition-all duration-500 w-full h-full object-contain",
           loading ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0',
           error ? 'opacity-40 grayscale' : 'opacity-100'
         )}
-        onError={() => {
-          if (!error) {
-            setError(true);
-            setLoading(false);
-          }
-        }}
-        onLoad={() => setLoading(false)}
-        loading="lazy"
         style={{ width: '100%', height: '100%' }}
+        {...props}
       />
     </div>
   );
