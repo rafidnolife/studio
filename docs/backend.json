@@ -15,7 +15,7 @@
         "imageUrls": { "type": "array", "items": { "type": "string" } },
         "isFeatured": { "type": "boolean" },
         "unit": { "type": "string", "description": "e.g., Size, Weight, Color" },
-        "variants": { "type": "array", "items": { "type": "string" }, "description": "e.g., ['M', 'L', 'XL'] or ['500g', '1kg']" },
+        "variants": { "type": "array", "items": { "type": "string" } },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },
@@ -28,9 +28,8 @@
       "properties": {
         "name": { "type": "string" },
         "phoneNumber": { "type": "string" },
-        "password": { "type": "string" },
         "role": { "type": "string", "enum": ["user", "admin"] },
-        "fcmToken": { "type": "string", "description": "Token for push notifications" },
+        "fcmToken": { "type": "string" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
@@ -40,15 +39,15 @@
       "type": "object",
       "properties": {
         "userId": { "type": "string" },
+        "customerName": { "type": "string" },
         "items": { "type": "array" },
         "subtotal": { "type": "number" },
         "deliveryCharge": { "type": "number" },
-        "appCharge": { "type": "number" },
         "totalAmount": { "type": "number" },
         "phoneNumber": { "type": "string" },
         "location": { "type": "object", "properties": {
-          "lat": { "type": "number" },
-          "lng": { "type": "number" },
+          "district": { "type": "string" },
+          "upazila": { "type": "string" },
           "address": { "type": "string" }
         }},
         "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled"] },
@@ -63,7 +62,7 @@
         "heroTitle": { "type": "string" },
         "heroSubtitle": { "type": "string" },
         "whatsappNumber": { "type": "string" },
-        "primaryColor": { "type": "string" }
+        "apkUrl": { "type": "string" }
       }
     }
   },
@@ -77,7 +76,7 @@
     },
     "/users/{userId}": {
       "schema": "UserProfile",
-      "description": "User profiles and customer details"
+      "description": "User profiles"
     },
     "/orders/{orderId}": {
       "schema": "Order",

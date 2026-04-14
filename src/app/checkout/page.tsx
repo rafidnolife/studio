@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState, Suspense } from 'react';
+import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
 import { useFirestore, useUser } from '@/firebase';
@@ -12,10 +12,79 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Phone, CreditCard, ShoppingBag, Truck, LocateFixed, CheckCircle, Navigation } from 'lucide-react';
+import { MapPin, Phone, CreditCard, Truck, User, Navigation, ChevronDown } from 'lucide-react';
 import { sendPushNotification } from '@/ai/flows/send-notification-flow';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+// Simplified Bangladesh Location Data (Districts and placeholder Upazilas)
+const bdData: Record<string, string[]> = {
+  "Dhaka": ["Dhaka North", "Dhaka South", "Savar", "Dhamrai", "Keraniganj", "Nawabganj", "Dohar"],
+  "Chittagong": ["Chittagong City", "Hathazari", "Patiya", "Raozan", "Rangunia", "Boalkhali", "Anwara", "Banshkhali", "Lohagara", "Satkania", "Sandwip", "Fatikchhari", "Mirsharai", "Sitakunda"],
+  "Gazipur": ["Gazipur Sadar", "Kaliakair", "Kaliganj", "Kapasia", "Sreepur"],
+  "Narayanganj": ["Narayanganj Sadar", "Bandar", "Araihazar", "Rupganj", "Sonargaon"],
+  "Jhenaidah": ["Jhenaidah Sadar", "Kaliganj", "Kotchandpur", "Maheshpur", "Shailkupa", "Harinakunda"],
+  "Sylhet": ["Sylhet Sadar", "Beanibazar", "Bishwanath", "Dakshin Surma", "Fenchuganj", "Golapganj", "Gowainghat", "Jaintiapur", "Kanaighat", "Zakiganj"],
+  "Rajshahi": ["Rajshahi City", "Paba", "Bagmara", "Godagari", "Charghat", "Durgapur", "Bagha", "Mohanpur", "Puthia", "Tanore"],
+  "Khulna": ["Khulna City", "Batiaghata", "Dacope", "Dumuria", "Dighalia", "Koyra", "Paikgachha", "Phultala", "Rupsha", "Terokhada"],
+  "Barisal": ["Barisal City", "Bakerganj", "Babuganj", "Banaripara", "Gournadi", "Hizla", "Mehendiganj", "Muladi", "Wazirpur"],
+  "Rangpur": ["Rangpur Sadar", "Badarganj", "Gangachara", "Kaunia", "Mithapukur", "Pirgachha", "Pirganj", "Taraganj"],
+  "Mymensingh": ["Mymensingh Sadar", "Bhaluka", "Gaffargaon", "Gauripur", "Haluaghat", "Ishwarganj", "Muktagachha", "Nandail", "Phulpur", "Trishal"],
+  "Comilla": ["Comilla City", "Barura", "Brahmanpara", "Burichang", "Chandina", "Chauddagram", "Daudkandi", "Debidwar", "Homna", "Laksam", "Muradnagar", "Nangalkot", "Titas"],
+  "Brahmanbaria": ["Brahmanbaria Sadar", "Ashuganj", "Bancharampur", "Kasba", "Nabinagar", "Nasirnagar", "Sarail", "Akhaura"],
+  "Noakhali": ["Noakhali Sadar", "Begumganj", "Chatkhil", "Companiganj", "Hatiya", "Senbagh", "Sonaimuri", "Subarnachar"],
+  "Feni": ["Feni Sadar", "Chhagalnaiya", "Daganbhuiyan", "Parshuram", "Sonagazi", "Fulgazi"],
+  "Chandpur": ["Chandpur Sadar", "Faridganj", "Hajiganj", "Hayderganj", "Kachua", "Matlab North", "Matlab South", "Shahrasti"],
+  "Lakshmipur": ["Lakshmipur Sadar", "Raipur", "Ramganj", "Ramgati", "Kamalnagar"],
+  "Cox's Bazar": ["Cox's Bazar Sadar", "Chakaria", "Kutubdia", "Maheshkhali", "Ramu", "Teknaf", "Ukhia", "Pekua"],
+  "Habiganj": ["Habiganj Sadar", "Ajmiriganj", "Bahubal", "Baniyachong", "Chunarughat", "Lakhai", "Madhabpur", "Nabiganj"],
+  "Moulvibazar": ["Moulvibazar Sadar", "Barlekha", "Kamalganj", "Kulaura", "Rajnagar", "Sreemangal", "Juri"],
+  "Sunamganj": ["Sunamganj Sadar", "Bishwambharpur", "Chhatak", "Derai", "Dharamapasha", "Dowarabazar", "Jagannathpur", "Jamalganj", "Sullah", "Tahirpur"],
+  "Bagerhat": ["Bagerhat Sadar", "Chitalmari", "Fakirhat", "Kachua", "Mollahat", "Mongla", "Morrelganj", "Rampal", "Sarankhola"],
+  "Jessore": ["Jessore Sadar", "Abhaynagar", "Bagherpara", "Chaugachha", "Jhikargachha", "Keshabpur", "Manirampur", "Sharsha"],
+  "Kushtia": ["Kushtia Sadar", "Bheramara", "Daulatpur", "Khoksa", "Kumarkhali", "Mirpur"],
+  "Magura": ["Magura Sadar", "Mohammadpur", "Shalikha", "Sreepur"],
+  "Meherpur": ["Meherpur Sadar", "Gangni", "Mujibnagar"],
+  "Narail": ["Narail Sadar", "Kalia", "Lohagara"],
+  "Satkhira": ["Satkhira Sadar", "Assasuni", "Debhata", "Kalaroa", "Kaliganj", "Shyamnagar", "Tala"],
+  "Chuadanga": ["Chuadanga Sadar", "Alamdanga", "Damurhuda", "Jibannagar"],
+  "Bogura": ["Bogura Sadar", "Adamdighi", "Dhunat", "Dhupchanchia", "Gabtali", "Kahaloo", "Nandigram", "Sariakandi", "Sherpur", "Shibganj", "Sonatola"],
+  "Joypurhat": ["Joypurhat Sadar", "Akkelpur", "Kalai", "Khetlal", "Panchbibi"],
+  "Naogaon": ["Naogaon Sadar", "Atrai", "Badalgachhi", "Dhamoirhat", "Manda", "Mahadevpur", "Niamatpur", "Patnitala", "Porsha", "Raninagar", "Sapahar"],
+  "Natore": ["Natore Sadar", "Bagatipara", "Baraigram", "Gurudaspur", "Lalpur", "Singra"],
+  "Pabna": ["Pabna Sadar", "Atgharia", "Bera", "Bhangura", "Chatmohar", "Faridpur", "Ishwardi", "Santhia", "Sujanagar"],
+  "Sirajganj": ["Sirajganj Sadar", "Belkuchi", "Chauhali", "Kamarkhanda", "Kazipur", "Raiganj", "Shahjadpur", "Tarash", "Ullapara"],
+  "Dinajpur": ["Dinajpur Sadar", "Birampur", "Birganj", "Birol", "Bochaganj", "Chirirbandar", "Phulbari", "Ghoraghat", "Hakimpur", "Kaharole", "Khansama", "Nawabganj", "Parbatipur"],
+  "Gaibandha": ["Gaibandha Sadar", "Phulchhari", "Gobindaganj", "Palashbari", "Sadullapur", "Saghata", "Sundarganj"],
+  "Kurigram": ["Kurigram Sadar", "Bhurungamari", "Chilmari", "Phulbari", "Nageshwari", "Rajarhat", "Rajibpur", "Roumari", "Ulipur"],
+  "Lalmonirhat": ["Lalmonirhat Sadar", "Aditmari", "Hatibandha", "Kaliganj", "Patgram"],
+  "Nilphamari": ["Nilphamari Sadar", "Dimla", "Domar", "Jaldhaka", "Kishoreganj", "Saidpur"],
+  "Panchagarh": ["Panchagarh Sadar", "Atwari", "Boda", "Debiganj", "Tetulia"],
+  "Thakurgaon": ["Thakurgaon Sadar", "Baliadangi", "Haripur", "Pirganj", "Ranisankail"],
+  "Barguna": ["Barguna Sadar", "Amtali", "Bamna", "Betagi", "Patharghata", "Taltali"],
+  "Bhola": ["Bhola Sadar", "Burhanuddin", "Char Fasson", "Daulatkhan", "Lalmohan", "Manpura", "Tazumuddin"],
+  "Jhalokati": ["Jhalokati Sadar", "Kathalia", "Nalchity", "Rajapur"],
+  "Patuakhali": ["Patuakhali Sadar", "Bauphal", "Dashmina", "Galachipa", "Kalapara", "Mirzaganj", "Rangabali"],
+  "Pirojpur": ["Pirojpur Sadar", "Bhandaria", "Kawkhali", "Mathbaria", "Nazirpur", "Nesarabad", "Zianagar"],
+  "Faridpur": ["Faridpur Sadar", "Alfadanga", "Bhanga", "Boalmari", "Charbhadrasan", "Madhukhali", "Nagarkanda", "Sadarpur", "Saltha"],
+  "Gopalganj": ["Gopalganj Sadar", "Kashiani", "Kotalipara", "Muksudpur", "Tungipara"],
+  "Kishoreganj": ["Kishoreganj Sadar", "Austagram", "Bajitpur", "Bhairab", "Hossainpur", "Itna", "Karimganj", "Katiadi", "Kuliarchar", "Mithamain", "Nikli", "Pakundia", "Tarail"],
+  "Madaripur": ["Madaripur Sadar", "Kalkini", "Rajoir", "Shibchar"],
+  "Manikganj": ["Manikganj Sadar", "Daulatpur", "Ghiror", "Harirampur", "Saturia", "Shivalaya", "Singair"],
+  "Munshiganj": ["Munshiganj Sadar", "Gazaria", "Lohajang", "Sirajdikhan", "Sreenagar", "Tongibari"],
+  "Rajbari": ["Rajbari Sadar", "Baliakandi", "Goalandaghat", "Pangsha", "Kalukhali"],
+  "Shariatpur": ["Shariatpur Sadar", "Bhedarganj", "Damudya", "Gosairhat", "Naria", "Zajira"],
+  "Tangail": ["Tangail Sadar", "Basail", "Bhuapur", "Delduar", "Ghatail", "Gopalpur", "Kalihati", "Madhupur", "Mirzapur", "Nagarpur", "Sakhipur", "Dhanbari"],
+  "Netrokona": ["Netrokona Sadar", "Atpara", "Barhatta", "Durgapur", "Khaliajuri", "Kalmakanda", "Kendua", "Madan", "Mohanganj", "Purbadhala"],
+  "Sherpur": ["Sherpur Sadar", "Jhenaigati", "Nakla", "Nalitabari", "Sreebardi"],
+  "Jamalpur": ["Jamalpur Sadar", "Bakshiganj", "Dewanganj", "Islampur", "Madarganj", "Melandaha", "Sarishabari"],
+  "Bandarban": ["Bandarban Sadar", "Ali Kadam", "Lama", "Naikhongchhari", "Rowangchhari", "Ruma", "Thanchi"],
+  "Khagrachhari": ["Khagrachhari Sadar", "Dighinala", "Lakshmichhari", "Mahalchhari", "Manikchhari", "Matiranga", "Panchhari", "Ramgarh"],
+  "Rangamati": ["Rangamati Sadar", "Baghaichhari", "Barkal", "Kawkhali", "Belaichhari", "Kaptai", "Jurachhari", "Langadu", "Naniarchar", "Rajasthali"]
+};
+
+const districts = Object.keys(bdData).sort();
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -31,12 +100,21 @@ function CheckoutContent() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [orderLoading, setOrderLoading] = useState(false);
+  
+  const [customerName, setCustomerName] = useState('');
   const [phoneNumber, setPhoneNumber] = useState('');
+  const [selectedDistrict, setSelectedDistrict] = useState<string>('');
+  const [selectedUpazila, setSelectedUpazila] = useState<string>('');
   const [address, setAddress] = useState('');
-  const [location, setLocation] = useState<{lat: number, lng: number} | null>(null);
 
-  const deliveryCharge = 17;
-  const appCharge = 3;
+  const upazilas = useMemo(() => {
+    return selectedDistrict ? bdData[selectedDistrict] || [] : [];
+  }, [selectedDistrict]);
+
+  const deliveryCharge = useMemo(() => {
+    if (!selectedDistrict) return 0;
+    return selectedDistrict === 'Dhaka' ? 70 : 120;
+  }, [selectedDistrict]);
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -44,6 +122,7 @@ function CheckoutContent() {
       return;
     }
     if (user) {
+      setCustomerName(user.displayName || '');
       setPhoneNumber(user.phoneNumber || '');
     }
   }, [user, authLoading, router]);
@@ -65,63 +144,19 @@ function CheckoutContent() {
     fetchProduct();
   }, [productId, db]);
 
-  const getCurrentLocation = () => {
-    if ("geolocation" in navigator) {
-      toast({ title: "অপেক্ষা করুন", description: "আপনার জিপিএস লোকেশন খোঁজা হচ্ছে..." });
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-          toast({ title: "সফল", description: "আপনার সঠিক জিপিএস লোকেশন পাওয়া গেছে।" });
-        },
-        (error) => {
-          console.error(error);
-          toast({ variant: "destructive", title: "ব্যর্থ", description: "জিপিএস লোকেশন পাওয়া যায়নি। অনুগ্রহ করে পারমিশন চেক করুন।" });
-        },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
-    } else {
-      toast({ variant: "destructive", title: "ব্যর্থ", description: "আপনার ব্রাউজারে জিপিএস সাপোর্ট করে না।" });
-    }
-  };
-
-  const sendAdminNotifications = async (db: Firestore, userName: string, total: number) => {
-    try {
-      const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
-      const adminSnapshot = await getDocs(adminQuery);
-      adminSnapshot.forEach((adminDoc) => {
-        const adminData = adminDoc.data();
-        if (adminData.fcmToken) {
-          sendPushNotification({
-            recipientToken: adminData.fcmToken,
-            title: 'নতুন অর্ডার এসেছে! 🔔',
-            body: `${userName} একটি নতুন অর্ডার করেছেন (৳${total})। এখনই চেক করুন!`
-          }).catch(e => console.error("Notification failed", e));
-        }
-      });
-    } catch (e) {
-      console.error("Admin query failed", e);
-    }
-  };
-
   const handlePlaceOrder = () => {
-    if (!phoneNumber || !address) {
-      toast({ variant: "destructive", title: "তথ্য অসম্পূর্ণ", description: "ফোন নম্বর এবং সঠিক ঠিকানা দিন।" });
-      return;
-    }
-    if (!location) {
-      toast({ variant: "destructive", title: "লোকেশন প্রয়োজন", description: "অনুগ্রহ করে জিপিএস বাটন চেপে আপনার সঠিক লোকেশন অ্যাড করুন।" });
+    if (!customerName || !phoneNumber || !selectedDistrict || !selectedUpazila || !address) {
+      toast({ variant: "destructive", title: "তথ্য অসম্পূর্ণ", description: "অনুগ্রহ করে সব তথ্য সঠিক ভাবে পূরণ করুন।" });
       return;
     }
 
     setOrderLoading(true);
     const subtotal = (product?.discountPrice || product?.price || 0) * initialQty;
-    const total = subtotal + deliveryCharge + appCharge;
+    const total = subtotal + deliveryCharge;
 
     const orderData = {
       userId: user?.uid,
+      customerName,
       items: [{
         id: product?.id,
         name: product?.name,
@@ -131,12 +166,11 @@ function CheckoutContent() {
       }],
       subtotal,
       deliveryCharge,
-      appCharge,
       totalAmount: total,
       phoneNumber,
       location: {
-        lat: location.lat,
-        lng: location.lng,
+        district: selectedDistrict,
+        upazila: selectedUpazila,
         address: address
       },
       status: 'pending',
@@ -145,11 +179,23 @@ function CheckoutContent() {
 
     addDoc(collection(db, 'orders'), orderData)
       .then(() => {
-        toast({ title: "অডার সফল", description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই কল দেওয়া হবে।" });
+        toast({ title: "অর্ডার সফল", description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই কল দেওয়া হবে।" });
         router.push('/orders');
         
-        // Notify Admin directly on their phone
-        sendAdminNotifications(db, user?.displayName || 'একজন ক্রেতা', total);
+        // Notify Admins
+        const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
+        getDocs(adminQuery).then(snap => {
+          snap.forEach(adminDoc => {
+            const adminData = adminDoc.data();
+            if (adminData.fcmToken) {
+              sendPushNotification({
+                recipientToken: adminData.fcmToken,
+                title: 'নতুন অর্ডার এসেছে! 🔔',
+                body: `${customerName} (৳${total}) একটি নতুন অর্ডার করেছেন।`
+              });
+            }
+          });
+        });
       })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
@@ -177,62 +223,79 @@ function CheckoutContent() {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2 space-y-6">
-          <Card className="rounded-[2rem] border-none shadow-xl bg-white p-6 md:p-10 transition-all hover:shadow-2xl">
+          <Card className="rounded-[2rem] border-none shadow-xl bg-white p-6 md:p-10">
             <CardHeader className="px-0 pt-0">
               <CardTitle className="flex items-center gap-2 text-xl md:text-2xl font-black">
-                <MapPin className="text-primary" /> ডেলিভারি তথ্য
+                <Truck className="text-primary" /> ডেলিভারি তথ্য
               </CardTitle>
-              <div className="flex items-center gap-2 mt-2">
-                <span className="animate-ping w-2 h-2 bg-red-500 rounded-full"></span>
-                <p className="text-xs font-black text-red-500 uppercase tracking-widest">শুধুমাত্র ঝিনাইদহের ভিতরে ডেলিভারি সম্ভব</p>
-              </div>
+              <p className="text-xs font-black text-primary uppercase tracking-widest mt-1">সারা বাংলাদেশে ক্যাশ অন ডেলিভারি</p>
             </CardHeader>
-            <CardContent className="px-0 space-y-8 mt-6">
-              <div className="space-y-3">
-                <Label className="font-black text-slate-700 ml-1 text-base">ফোন নম্বর</Label>
-                <div className="relative group">
-                  <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
-                  <Input 
-                    value={phoneNumber} 
-                    onChange={e => setPhoneNumber(e.target.value)} 
-                    placeholder="আপনার সচল ফোন নম্বর লিখুন" 
-                    className="h-16 pl-12 rounded-2xl bg-slate-50 border-none shadow-inner font-bold text-lg" 
-                  />
-                </div>
-              </div>
-              
+            <CardContent className="px-0 space-y-6 mt-6">
               <div className="space-y-4">
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <Label className="font-black text-slate-700 ml-1 text-base">বিস্তারিত ঠিকানা</Label>
-                  <Button 
-                    onClick={getCurrentLocation} 
-                    type="button"
-                    variant="outline" 
-                    className="h-12 rounded-2xl gap-2 font-black text-sm text-primary border-primary/20 hover:bg-primary hover:text-white transition-all shadow-lg active:scale-95"
-                  >
-                    <LocateFixed className="w-5 h-5" /> জিপিএস লোকেশন দিন
-                  </Button>
-                </div>
-                
-                <div className="relative group">
-                  <Navigation className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-                  <Input 
-                    value={address} 
-                    onChange={e => setAddress(e.target.value)} 
-                    placeholder="গ্রাম, রাস্তা বা বাসার বিস্তারিত নম্বর..." 
-                    className="h-16 pl-12 rounded-2xl bg-slate-50 border-none shadow-inner font-bold text-lg" 
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="font-black text-slate-700 ml-1">কাস্টমারের নাম</Label>
+                    <div className="relative group">
+                      <User className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+                      <Input 
+                        value={customerName} 
+                        onChange={e => setCustomerName(e.target.value)} 
+                        placeholder="আপনার নাম লিখুন" 
+                        className="h-14 pl-12 rounded-2xl bg-slate-50 border-none shadow-inner font-bold" 
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-black text-slate-700 ml-1">ফোন নম্বর</Label>
+                    <div className="relative group">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 group-focus-within:text-primary transition-colors" />
+                      <Input 
+                        value={phoneNumber} 
+                        onChange={e => setPhoneNumber(e.target.value)} 
+                        placeholder="আপনার ফোন নম্বর লিখুন" 
+                        className="h-14 pl-12 rounded-2xl bg-slate-50 border-none shadow-inner font-bold" 
+                      />
+                    </div>
+                  </div>
                 </div>
 
-                {location && (
-                  <div className="p-4 bg-emerald-50 border border-emerald-100 text-emerald-600 rounded-2xl text-sm font-black flex items-center justify-between animate-in fade-in slide-in-from-top-2">
-                    <div className="flex items-center gap-2">
-                      <CheckCircle className="w-5 h-5" /> 
-                      লোকেশন পাওয়া গেছে!
-                    </div>
-                    <span className="text-[10px] bg-emerald-500 text-white px-2 py-0.5 rounded-full">LIVE GPS</span>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label className="font-black text-slate-700 ml-1">জেলা সিলেক্ট করুন</Label>
+                    <Select onValueChange={(val) => { setSelectedDistrict(val); setSelectedUpazila(''); }}>
+                      <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none shadow-inner font-bold">
+                        <SelectValue placeholder="জেলা বেছে নিন" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 rounded-2xl">
+                        {districts.map(d => <SelectItem key={d} value={d} className="font-bold">{d}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
                   </div>
-                )}
+                  <div className="space-y-2">
+                    <Label className="font-black text-slate-700 ml-1">থানা/উপজেলা সিলেক্ট করুন</Label>
+                    <Select disabled={!selectedDistrict} onValueChange={setSelectedUpazila} value={selectedUpazila}>
+                      <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none shadow-inner font-bold">
+                        <SelectValue placeholder="থানা বেছে নিন" />
+                      </SelectTrigger>
+                      <SelectContent className="max-h-60 rounded-2xl">
+                        {upazilas.map(u => <SelectItem key={u} value={u} className="font-bold">{u}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="font-black text-slate-700 ml-1">বিস্তারিত ডেলিভারি ঠিকানা</Label>
+                  <div className="relative group">
+                    <Navigation className="absolute left-4 top-4 w-5 h-5 text-slate-400" />
+                    <textarea 
+                      value={address} 
+                      onChange={e => setAddress(e.target.value)} 
+                      placeholder="গ্রাম, রাস্তা বা বাসার বিস্তারিত নম্বর..." 
+                      className="w-full min-h-[100px] pl-12 pt-4 rounded-2xl bg-slate-50 border-none shadow-inner font-bold resize-none focus:ring-2 ring-primary/20 outline-none" 
+                    />
+                  </div>
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -240,17 +303,17 @@ function CheckoutContent() {
           <Card className="rounded-[2rem] border-none shadow-xl bg-slate-900 p-8 text-white">
             <CardHeader className="px-0 pt-0">
               <CardTitle className="flex items-center gap-2 text-xl font-black text-primary">
-                <Truck className="w-7 h-7" /> পেমেন্ট পদ্ধতি
+                <CreditCard className="w-7 h-7" /> পেমেন্ট পদ্ধতি
               </CardTitle>
             </CardHeader>
             <CardContent className="px-0 mt-4">
               <div className="p-6 border-2 border-primary/30 rounded-2xl bg-primary/5 flex items-center justify-between">
                 <div>
-                  <h4 className="font-black text-lg md:text-xl">ক্যাশ অন ডেলিভারি (COD)</h4>
-                  <p className="text-slate-400 text-sm font-medium">পণ্য হাতে পেয়ে টাকা পরিশোধ করুন।</p>
+                  <h4 className="font-black text-lg">ক্যাশ অন ডেলিভারি (COD)</h4>
+                  <p className="text-slate-400 text-sm">পণ্য হাতে পেয়ে টাকা পরিশোধ করুন।</p>
                 </div>
-                <div className="w-8 h-8 rounded-full border-4 border-primary bg-primary flex items-center justify-center">
-                  <CheckCircle className="w-5 h-5 text-white" />
+                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
+                  <Truck className="w-5 h-5 text-white" />
                 </div>
               </div>
             </CardContent>
@@ -281,25 +344,22 @@ function CheckoutContent() {
                 </div>
                 <div className="flex justify-between text-slate-500 font-bold">
                   <span>ডেলিভারি চার্জ</span>
-                  <span>৳{deliveryCharge}</span>
-                </div>
-                <div className="flex justify-between text-slate-500 font-bold">
-                  <span>অ্যাপ চার্জ</span>
-                  <span>৳{appCharge}</span>
+                  <span>৳{deliveryCharge || '0'}</span>
                 </div>
                 <div className="flex justify-between text-3xl font-black text-primary pt-6 border-t">
                   <span>সর্বমোট</span>
-                  <span>৳{subtotal + deliveryCharge + appCharge}</span>
+                  <span>৳{subtotal + deliveryCharge}</span>
                 </div>
               </div>
 
               <Button 
-                disabled={orderLoading} 
+                disabled={orderLoading || !selectedDistrict} 
                 onClick={handlePlaceOrder}
                 className="w-full h-16 rounded-2xl text-xl font-black shadow-xl shadow-primary/30 bg-primary mt-6 transition-all active:scale-95"
               >
                 {orderLoading ? "অর্ডার হচ্ছে..." : "অর্ডার কনফার্ম করুন"}
               </Button>
+              <p className="text-[10px] text-center font-black text-slate-400 uppercase tracking-widest">নিরাপদ ও বিশ্বস্ত শপিং</p>
             </CardContent>
           </Card>
         </div>
