@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Phone, CreditCard, ShoppingBag, Truck, Info, GpsFixed } from 'lucide-react';
+import { MapPin, Phone, CreditCard, ShoppingBag, Truck, Info, LocateFixed, CheckCircle } from 'lucide-react';
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -166,7 +166,7 @@ function CheckoutContent() {
                 <div className="flex items-center justify-between">
                   <Label className="font-black text-slate-700 ml-1">ঠিকানা (বিস্তারিত)</Label>
                   <Button onClick={getCurrentLocation} variant="outline" className="h-10 rounded-xl gap-2 font-black text-xs text-primary border-primary/20 hover:bg-primary/5">
-                    <GpsFixed className="w-4 h-4" /> জিপিএস লোকেশন দিন
+                    <LocateFixed className="w-4 h-4" /> জিপিএস লোকেশন দিন
                   </Button>
                 </div>
                 <Input 
