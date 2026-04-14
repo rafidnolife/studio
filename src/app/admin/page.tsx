@@ -14,7 +14,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Settings, Users, Save, Package, ShoppingCart, CheckCircle, XCircle, MapPin, LocateFixed, Activity, ExternalLink, ZoomIn, DollarSign } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, Users, Save, Package, ShoppingCart, CheckCircle, XCircle, MapPin, LocateFixed, Activity, ExternalLink, ZoomIn, DollarSign, Download } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -36,7 +36,8 @@ export default function AdminDashboard() {
   const [siteSettings, setSiteSettings] = useState({
     heroTitle: 'সেরা পণ্যের সেরা বাজার',
     heroSubtitle: 'সরাসরি হোয়াটসঅ্যাপে অর্ডার করুন ঝামেলাহীন কেনাকাটায়।',
-    whatsappNumber: '01797958686'
+    whatsappNumber: '01797958686',
+    apkUrl: ''
   });
   const [loading, setLoading] = useState(true);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
@@ -82,7 +83,8 @@ export default function AdminDashboard() {
         setSiteSettings({
           heroTitle: data.heroTitle || '',
           heroSubtitle: data.heroSubtitle || '',
-          whatsappNumber: data.whatsappNumber || ''
+          whatsappNumber: data.whatsappNumber || '',
+          apkUrl: data.apkUrl || ''
         });
       }
     } catch (err) {
@@ -103,7 +105,6 @@ export default function AdminDashboard() {
         toast({ title: `অর্ডার ${status === 'confirmed' ? 'কনফার্ম' : 'ক্যানসেল'} হয়েছে` });
         fetchData();
         
-        // Notify Customer directly on their phone
         const customerSnap = await getDoc(doc(db, 'users', customerId));
         if (customerSnap.exists()) {
           const customerData = customerSnap.data();
@@ -531,6 +532,16 @@ export default function AdminDashboard() {
                 <div className="space-y-2">
                   <Label className="font-black text-sm md:text-base">হোয়াটসঅ্যাপ নম্বর (Contact)</Label>
                   <Input value={siteSettings.whatsappNumber || ''} onChange={e => setSiteSettings({...siteSettings, whatsappNumber: e.target.value})} className="rounded-xl h-12 md:h-14 font-bold" />
+                </div>
+                <div className="space-y-2">
+                  <Label className="font-black text-sm md:text-base">অ্যাপ ডাউনলোড ইউআরএল (APK Link)</Label>
+                  <Input 
+                    placeholder="আপনার অ্যাপের ড্রাইভ বা স্টোরেজ লিঙ্ক দিন" 
+                    value={siteSettings.apkUrl || ''} 
+                    onChange={e => setSiteSettings({...siteSettings, apkUrl: e.target.value})} 
+                    className="rounded-xl h-12 md:h-14 font-mono text-xs" 
+                  />
+                  <p className="text-[10px] text-slate-400 font-bold px-1">গুগল ড্রাইভ বা ফায়ারবেস স্টোরেজ লিঙ্ক ব্যবহার করুন।</p>
                 </div>
                 <Button onClick={saveSettings} className="h-14 md:h-16 rounded-2xl font-black text-base md:text-lg gap-2 shadow-xl shadow-primary/20 bg-primary">
                   <Save className="w-5 h-5" /> পরিবর্তন সেভ করুন

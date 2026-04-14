@@ -8,7 +8,7 @@ import { collection, query, limit, where, getDoc, doc, orderBy } from 'firebase/
 import { Product, ProductCard } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
-import { ChevronRight, Star, ShieldCheck, Zap, Award, Sparkles, TrendingUp } from 'lucide-react';
+import { ChevronRight, Star, ShieldCheck, Zap, Award, Sparkles, TrendingUp, Download, Smartphone } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -17,7 +17,8 @@ export default function Home() {
   const db = useFirestore();
   const [settings, setSettings] = useState({
     heroTitle: 'সেরা পণ্যের সেরা বাজার',
-    heroSubtitle: 'সরাসরি হোয়াটসঅ্যাপে অর্ডার করুন ঝামেলাহীন কেনাকাটায়।'
+    heroSubtitle: 'সরাসরি হোয়াটসঅ্যাপে অর্ডার করুন ঝামেলাহীন কেনাকাটায়।',
+    apkUrl: ''
   });
 
   useEffect(() => {
@@ -108,6 +109,41 @@ export default function Home() {
             )}
           </div>
         </section>
+
+        {settings.apkUrl && (
+          <section className="container mx-auto px-4 mb-12 md:mb-20">
+            <div className="relative overflow-hidden bg-slate-900 rounded-[2rem] md:rounded-[3rem] p-8 md:p-16 text-white shadow-2xl flex flex-col md:flex-row items-center gap-10">
+              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] rounded-full -mr-20 -mt-20"></div>
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/10 blur-[80px] rounded-full -ml-20 -mb-20"></div>
+              
+              <div className="relative z-10 w-24 h-24 md:w-40 md:h-40 bg-white/10 backdrop-blur-xl rounded-[2rem] flex items-center justify-center border border-white/20 shadow-2xl shrink-0 animate-bounce-slow">
+                <Smartphone className="w-12 h-12 md:w-20 md:h-20 text-primary" />
+              </div>
+              
+              <div className="relative z-10 flex-grow text-center md:text-left space-y-4 md:space-y-6">
+                <div className="space-y-2">
+                  <Badge className="bg-primary text-white border-none font-black text-[10px] md:text-xs tracking-widest px-4 py-1.5 rounded-full">OFFICIAL APP</Badge>
+                  <h2 className="text-3xl md:text-6xl font-black tracking-tighter leading-none">এখনই <span className="text-primary">অ্যাপটি</span> ডাউনলোড করুন!</h2>
+                  <p className="text-slate-400 font-bold text-sm md:text-lg max-w-xl">সবচেয়ে দ্রুত কেনাকাটার অভিজ্ঞতা এবং স্পেশাল অফার পেতে আমাদের অফিসিয়াল অ্যান্ড্রয়েড অ্যাপটি ব্যবহার করুন।</p>
+                </div>
+                
+                <div className="flex flex-col sm:flex-row items-center gap-4">
+                  <Button 
+                    asChild 
+                    className="h-16 md:h-20 px-10 md:px-14 rounded-2xl md:rounded-[1.5rem] bg-primary text-white font-black text-xl md:text-2xl gap-3 shadow-2xl shadow-primary/40 hover:scale-105 transition-all w-full sm:w-auto"
+                  >
+                    <a href={settings.apkUrl} target="_blank" rel="noopener noreferrer">
+                      <Download className="w-6 h-6 md:w-8 md:h-8" /> ডাউনলোড অ্যাপ
+                    </a>
+                  </Button>
+                  <div className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-widest text-center sm:text-left">
+                    * ডাউনলোড করার পর ইনস্টল করুন <br className="hidden sm:block" /> (Enable "Install from Unknown Sources")
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+        )}
 
         {availableCategories.length > 0 && (
           <section className="py-8 md:py-16 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 mb-8 md:mb-12">
