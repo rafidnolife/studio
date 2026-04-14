@@ -60,46 +60,46 @@ export default function Home() {
   }, [allProducts]);
 
   return (
-    <div className="flex flex-col min-h-screen selection:bg-primary/20 overflow-x-hidden w-full">
+    <div className="flex flex-col min-h-screen selection:bg-primary/20 overflow-x-hidden w-full max-w-full">
       <Navbar />
       
-      <main className="flex-grow pb-16 pt-2">
-        {/* Compact Responsive Headline */}
-        <section className="container mx-auto px-4 mb-6">
+      <main className="flex-grow pb-16 pt-0">
+        {/* Optimized Hero Section with Zero Excess Gaps */}
+        <section className="container mx-auto px-4 mt-2 md:mt-4 mb-4 md:mb-6">
           <div className="flex items-center gap-3 bg-white/70 glass w-fit max-w-full px-5 md:px-10 py-3 md:py-6 rounded-[1.5rem] md:rounded-[3rem] shadow-xl border-primary/10 overflow-hidden">
-            <div className="w-8 h-8 md:w-12 md:h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary shrink-0">
+            <div className="w-8 h-8 md:w-12 md:h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary shrink-0 shadow-inner">
               <Sparkles className="w-4 h-4 md:w-7 md:h-7 animate-pulse" />
             </div>
-            <h1 className="text-sm sm:text-xl md:text-4xl font-black text-slate-800 tracking-tighter uppercase flex flex-wrap items-center gap-2 md:gap-4 leading-tight break-words max-w-[calc(100vw-100px)]">
+            <h1 className="text-sm sm:text-lg md:text-3xl lg:text-4xl font-black text-slate-800 tracking-tighter uppercase flex flex-wrap items-center gap-2 md:gap-4 leading-tight break-words max-w-[calc(100vw-80px)] text-wrap-fix">
               {settings.heroTitle}
               <span className="w-1.5 md:w-2.5 h-1.5 md:h-2.5 bg-primary rounded-full hidden sm:inline-block"></span>
             </h1>
           </div>
         </section>
 
-        {/* SPECIAL COLLECTION - High Visibility */}
-        <section className="container mx-auto px-4 mb-16">
-          <div className="flex items-center justify-between mb-8 border-b border-primary/10 pb-4 gap-4">
+        {/* SPECIAL COLLECTION - Moved higher for maximum visibility */}
+        <section className="container mx-auto px-4 mb-12 md:mb-16">
+          <div className="flex items-center justify-between mb-6 md:mb-10 border-b border-primary/10 pb-4 gap-4">
             <div className="flex flex-col gap-1 min-w-0">
-               <h2 className="text-xl md:text-5xl font-black tracking-tighter text-slate-900 flex items-center gap-2 md:gap-4">
+               <h2 className="text-lg md:text-4xl lg:text-5xl font-black tracking-tighter text-slate-900 flex items-center gap-2 md:gap-4">
                 স্পেশাল <span className="text-primary">কালেকশন</span>
-                <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[8px] md:text-xs py-1 px-3 rounded-full flex items-center gap-1 shrink-0">
+                <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[7px] md:text-xs py-1 px-3 rounded-full flex items-center gap-1 shrink-0">
                   <TrendingUp className="w-3 h-3" /> TRENDING
                 </Badge>
               </h2>
             </div>
-            <Link href="/products" className="group bg-primary text-white font-black text-[9px] md:text-sm flex items-center gap-1 md:gap-2 px-4 md:px-8 py-2 md:py-4 rounded-full shadow-xl shadow-primary/20 hover:scale-105 transition-all uppercase tracking-widest shrink-0">
+            <Link href="/products" className="group bg-primary text-white font-black text-[8px] md:text-sm flex items-center gap-1 md:gap-2 px-4 md:px-8 py-2 md:py-4 rounded-full shadow-xl shadow-primary/20 hover:scale-105 transition-all uppercase tracking-widest shrink-0">
               সব দেখুন <ChevronRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10">
             {featLoading ? (
-              Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-square rounded-[2rem]" />)
+              Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-square rounded-[2.5rem]" />)
             ) : featuredProducts.length > 0 ? (
               featuredProducts.map(p => <ProductCard key={p.id} product={p} />)
             ) : (
-              <div className="col-span-full py-16 text-center text-slate-400 font-bold bg-white/40 glass rounded-[2rem] border-2 border-dashed border-slate-200">
+              <div className="col-span-full py-16 text-center text-slate-400 font-bold bg-white/40 glass rounded-[2.5rem] border-2 border-dashed border-slate-200">
                 কোনো হাইলাইটেড পণ্য নেই।
               </div>
             )}
@@ -108,7 +108,7 @@ export default function Home() {
 
         {/* Categories Section */}
         {availableCategories.length > 0 && (
-          <section className="py-12 md:py-24 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 mb-16">
+          <section className="py-12 md:py-24 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 mb-12 md:mb-16">
             <div className="container mx-auto px-4">
               <div className="flex flex-col items-center mb-10">
                 <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-2">Explore Your Style</span>
@@ -135,14 +135,14 @@ export default function Home() {
         )}
 
         {/* Recent Arrivals */}
-        <section className="container mx-auto px-4 mb-16 md:mb-32">
+        <section className="container mx-auto px-4 mb-16 md:mb-24">
           <div className="flex items-center justify-between mb-10 border-b border-primary/10 pb-6">
-            <h2 className="text-2xl md:text-5xl font-black tracking-tighter text-slate-900">
+            <h2 className="text-xl md:text-4xl lg:text-5xl font-black tracking-tighter text-slate-900">
               নতুন <span className="text-primary">পণ্যসমূহ</span>
             </h2>
           </div>
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
-            {recentLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-square rounded-[2rem]" />) : 
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-10">
+            {recentLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-square rounded-[2.5rem]" />) : 
               recentProducts.map(p => <ProductCard key={p.id} product={p} />)
             }
           </div>

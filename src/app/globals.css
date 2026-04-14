@@ -24,7 +24,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 161 94% 30%;
-    --radius: 2rem;
+    --radius: 2.5rem;
   }
 }
 
@@ -33,29 +33,28 @@
     @apply border-border;
   }
   html, body {
-    @apply overflow-x-hidden w-full;
+    @apply overflow-x-hidden w-full max-w-full;
+    touch-action: manipulation;
   }
   body {
     @apply text-foreground font-body antialiased;
-    background: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.3) 0px, transparent 50%),
-                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.3) 0px, transparent 50%),
-                radial-gradient(at 50% 50%, rgba(236, 72, 153, 0.2) 0px, transparent 50%),
-                radial-gradient(at 0% 100%, rgba(139, 92, 246, 0.25) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(245, 158, 11, 0.2) 0px, transparent 50%),
+    background: radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.2) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, rgba(59, 130, 246, 0.2) 0px, transparent 50%),
+                radial-gradient(at 50% 50%, rgba(236, 72, 153, 0.1) 0px, transparent 50%),
                 #f8fafc;
     background-attachment: fixed;
   }
 }
 
 .glass {
-  background: rgba(255, 255, 255, 0.7);
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .premium-card {
-  @apply rounded-[2.5rem] bg-white border border-slate-100 shadow-xl transition-all duration-500 hover:shadow-2xl;
+  @apply rounded-[3rem] bg-white border border-slate-100 shadow-xl transition-all duration-700 hover:shadow-2xl;
 }
 
 .scrollbar-hide::-webkit-scrollbar {
@@ -64,4 +63,10 @@
 .scrollbar-hide {
   -ms-overflow-style: none;
   scrollbar-width: none;
+}
+
+.text-wrap-fix {
+  overflow-wrap: break-word;
+  word-wrap: break-word;
+  word-break: break-word;
 }
