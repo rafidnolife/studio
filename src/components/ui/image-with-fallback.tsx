@@ -7,6 +7,7 @@ import { cn } from '@/lib/utils';
 interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   fallbackSrc?: string;
+  fill?: boolean;
 }
 
 export function ImageWithFallback({ 
@@ -14,6 +15,7 @@ export function ImageWithFallback({
   alt, 
   className, 
   fallbackSrc = 'https://placehold.co/800x800?text=ইমেজ+পাওয়া+যায়নি',
+  fill,
   ...props 
 }: ImageWithFallbackProps) {
   const [error, setError] = useState(false);
@@ -31,7 +33,7 @@ export function ImageWithFallback({
     // Reset state when src changes
     setError(false);
     
-    // Check if image is already cached in the browser
+    // Check if image is already cached in the browser for instant loading
     if (imgRef.current && imgRef.current.complete) {
       setLoading(false);
     } else {
@@ -51,7 +53,11 @@ export function ImageWithFallback({
   };
 
   return (
-    <div className={cn("relative overflow-hidden flex items-center justify-center w-full h-full min-h-[inherit]", className)}>
+    <div className={cn(
+      "relative overflow-hidden flex items-center justify-center w-full h-full min-h-[inherit]", 
+      fill && "absolute inset-0",
+      className
+    )}>
       {loading && (
         <div className="absolute inset-0 bg-slate-100/50 animate-pulse z-10 flex items-center justify-center">
           <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
@@ -64,9 +70,9 @@ export function ImageWithFallback({
         onLoad={handleLoad}
         onError={handleError}
         decoding="async"
-        loading="lazy"
+        loading="eager"
         className={cn(
-          "transition-all duration-500 w-full h-full object-contain",
+          "transition-all duration-300 w-full h-full object-contain",
           loading ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0',
           error ? 'opacity-40 grayscale' : 'opacity-100'
         )}
