@@ -28,6 +28,7 @@
         "phoneNumber": { "type": "string" },
         "password": { "type": "string" },
         "role": { "type": "string", "enum": ["user", "admin"] },
+        "fcmToken": { "type": "string", "description": "Token for push notifications" },
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },

@@ -20,6 +20,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, Dialog
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
+import { sendPushNotification } from '@/ai/flows/send-notification-flow';
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useUser();
@@ -84,10 +85,24 @@ export default function AdminDashboard() {
     if (user?.role === 'admin') fetchData();
   }, [user, db]);
 
-  const updateOrderStatus = async (orderId: string, status: 'confirmed' | 'cancelled') => {
+  const updateOrderStatus = async (orderId: string, customerId: string, status: 'confirmed' | 'cancelled') => {
     const orderRef = doc(db, 'orders', orderId);
     try {
       await updateDoc(orderRef, { status });
+      
+      // Send notification to customer
+      const customerSnap = await getDoc(doc(db, 'users', customerId));
+      if (customerSnap.exists()) {
+        const customerData = customerSnap.data();
+        if (customerData.fcmToken) {
+          sendPushNotification({
+            recipientToken: customerData.fcmToken,
+            title: `অর্ডার ${status === 'confirmed' ? 'নিশ্চিত' : 'বাতিল'} হয়েছে`,
+            body: `আপনার অর্ডার #${orderId.slice(0, 8)} এখন ${status === 'confirmed' ? 'কনফার্মড' : 'ক্যানসেলড'}।`
+          });
+        }
+      }
+
       toast({ title: `অর্ডার ${status === 'confirmed' ? 'কনফার্ম' : 'ক্যানসেল'} হয়েছে` });
       fetchData();
     } catch (err) {
@@ -218,7 +233,7 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* Stats Section - Fully Responsive Grid */}
+        {/* Stats Section */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
             { label: 'মোট বিক্রি', value: `৳${stats.totalSales}`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
@@ -316,8 +331,8 @@ export default function AdminDashboard() {
                           <div className="flex justify-end gap-1">
                             {o.status === 'pending' ? (
                               <>
-                                <Button size="icon" variant="ghost" className="h-8 w-8 md:h-10 md:w-10 rounded-full text-emerald-500 hover:bg-emerald-50" onClick={() => updateOrderStatus(o.id, 'confirmed')}><CheckCircle className="w-5 h-5" /></Button>
-                                <Button size="icon" variant="ghost" className="h-8 w-8 md:h-10 md:w-10 rounded-full text-red-500 hover:bg-red-50" onClick={() => updateOrderStatus(o.id, 'cancelled')}><XCircle className="w-5 h-5" /></Button>
+                                <Button size="icon" variant="ghost" className="h-8 w-8 md:h-10 md:w-10 rounded-full text-emerald-500 hover:bg-emerald-50" onClick={() => updateOrderStatus(o.id, o.userId, 'confirmed')}><CheckCircle className="w-5 h-5" /></Button>
+                                <Button size="icon" variant="ghost" className="h-8 w-8 md:h-10 md:w-10 rounded-full text-red-500 hover:bg-red-50" onClick={() => updateOrderStatus(o.id, o.userId, 'cancelled')}><XCircle className="w-5 h-5" /></Button>
                               </>
                             ) : (
                               <Badge variant="outline" className="rounded-full text-[8px] md:text-[9px] uppercase font-black opacity-50 whitespace-nowrap">COMPLETED</Badge>

@@ -5,7 +5,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
 import { useFirestore, useUser } from '@/firebase';
-import { doc, getDoc, addDoc, collection, serverTimestamp } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
 import { Product } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { MapPin, Phone, CreditCard, ShoppingBag, Truck, Info, LocateFixed, CheckCircle, Navigation } from 'lucide-react';
+import { sendPushNotification } from '@/ai/flows/send-notification-flow';
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -98,7 +99,7 @@ function CheckoutContent() {
     const total = subtotal + deliveryCharge + appCharge;
 
     try {
-      await addDoc(collection(db, 'orders'), {
+      const orderRef = await addDoc(collection(db, 'orders'), {
         userId: user?.uid,
         items: [{
           id: product?.id,
@@ -118,6 +119,20 @@ function CheckoutContent() {
         },
         status: 'pending',
         createdAt: serverTimestamp()
+      });
+
+      // Send notification to admin
+      const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
+      const adminSnapshot = await getDocs(adminQuery);
+      adminSnapshot.forEach(async (adminDoc) => {
+        const adminData = adminDoc.data();
+        if (adminData.fcmToken) {
+          sendPushNotification({
+            recipientToken: adminData.fcmToken,
+            title: 'নতুন অর্ডার এসেছে!',
+            body: `${user?.displayName || 'একজন ক্রেতা'} একটি নতুন অর্ডার করেছেন (৳${total})।`
+          });
+        }
       });
 
       toast({ title: "অর্ডার সফল", description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই কল দেওয়া হবে।" });

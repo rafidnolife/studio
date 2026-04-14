@@ -4,6 +4,7 @@ import { Noto_Sans_Bengali } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+import { NotificationHandler } from '@/components/notifications/notification-handler';
 
 const bengali = Noto_Sans_Bengali({
   subsets: ['bengali'],
@@ -26,6 +27,7 @@ export default function RootLayout({
     <html lang="bn" className={bengali.variable}>
       <body className="font-body antialiased min-h-screen bg-background text-foreground">
         <FirebaseClientProvider>
+          <NotificationHandler />
           {children}
           <Toaster />
         </FirebaseClientProvider>
