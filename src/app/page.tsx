@@ -41,9 +41,14 @@ export default function Home() {
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'), limit(10));
   }, [db]);
 
+  const allProductsQuery = useMemo(() => {
+    if (!db) return null;
+    return collection(db, 'products');
+  }, [db]);
+
   const { data: featuredProducts, loading: featLoading } = useCollection<Product>(featuredQuery);
   const { data: recentProducts, loading: recentLoading } = useCollection<Product>(recentProductsQuery);
-  const { data: allProducts } = useCollection<Product>(db ? collection(db, 'products') : null);
+  const { data: allProducts } = useCollection<Product>(allProductsQuery);
 
   const availableCategories = useMemo(() => {
     const hardcodedCats = [
@@ -64,7 +69,6 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-grow pb-16 pt-0">
-        {/* Optimized Hero Section with Minimal Gaps */}
         <section className="container mx-auto px-4 mt-2 md:mt-4 mb-2 md:mb-4">
           <div className="flex items-center gap-3 bg-white/70 glass w-fit max-w-full px-4 md:px-8 py-2 md:py-4 rounded-2xl md:rounded-[2.5rem] shadow-xl border-primary/10 overflow-hidden">
             <div className="w-6 h-6 md:w-10 md:h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary shrink-0 shadow-inner">
@@ -77,7 +81,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* SPECIAL COLLECTION - Placed higher with tighter margins */}
         <section className="container mx-auto px-4 mb-8 md:mb-12">
           <div className="flex items-center justify-between mb-4 md:mb-8 border-b border-primary/10 pb-3 gap-4">
             <div className="flex flex-col gap-1 min-w-0">
@@ -106,7 +109,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Categories Section */}
         {availableCategories.length > 0 && (
           <section className="py-8 md:py-16 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 mb-8 md:mb-12">
             <div className="container mx-auto px-4">
@@ -134,7 +136,6 @@ export default function Home() {
           </section>
         )}
 
-        {/* Recent Arrivals */}
         <section className="container mx-auto px-4 mb-10 md:mb-16">
           <div className="flex items-center justify-between mb-6 md:mb-10 border-b border-primary/10 pb-4">
             <h2 className="text-lg md:text-3xl lg:text-4xl font-black tracking-tighter text-slate-900">
@@ -148,7 +149,6 @@ export default function Home() {
           </div>
         </section>
 
-        {/* Value Props */}
         <section className="container mx-auto px-4">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-8">
             {[

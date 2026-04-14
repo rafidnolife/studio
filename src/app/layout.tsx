@@ -1,8 +1,16 @@
 
 import type { Metadata } from 'next';
+import { Noto_Sans_Bengali } from 'next/font/google';
 import './globals.css';
 import { Toaster } from '@/components/ui/toaster';
 import { FirebaseClientProvider } from '@/firebase/client-provider';
+
+const bengali = Noto_Sans_Bengali({
+  subsets: ['bengali'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-bengali',
+  display: 'swap',
+});
 
 export const metadata: Metadata = {
   title: 'দোকান এক্সপ্রেস (Dokaan Express)',
@@ -15,12 +23,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="bn">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
-        <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      </head>
+    <html lang="bn" className={bengali.variable}>
       <body className="font-body antialiased min-h-screen bg-background text-foreground">
         <FirebaseClientProvider>
           {children}

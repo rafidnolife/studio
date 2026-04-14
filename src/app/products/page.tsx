@@ -9,7 +9,7 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { Product, ProductCard } from '@/components/product/product-card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, SlidersHorizontal, ShoppingBag, Sparkles } from 'lucide-react';
+import { Search, SlidersHorizontal, ShoppingBag } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 
@@ -18,13 +18,17 @@ function ProductListingContent() {
   const initialCategory = searchParams.get('category') || 'সব';
   
   const db = useFirestore();
-  const productsQuery = useMemo(() => query(collection(db, 'products'), orderBy('createdAt', 'desc')), [db]);
+  const productsQuery = useMemo(() => {
+    if (!db) return null;
+    return query(collection(db, 'products'), orderBy('createdAt', 'desc'));
+  }, [db]);
   const { data: products, loading } = useCollection<Product>(productsQuery);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState(initialCategory);
 
   const categories = useMemo(() => {
+    if (!products) return ['সব'];
     const uniqueCategories = Array.from(
       new Set(products.map(p => p.category?.trim()).filter(Boolean))
     );
@@ -32,6 +36,7 @@ function ProductListingContent() {
   }, [products]);
 
   const filteredProducts = useMemo(() => {
+    if (!products) return [];
     return products.filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'সব' || p.category?.trim() === selectedCategory;

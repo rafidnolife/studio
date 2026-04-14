@@ -56,7 +56,7 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
         }}
         onLoad={() => setLoading(false)}
         loading="lazy"
-        unoptimized={true} // IMPORTANT: Ensures HD quality by bypassing Next.js resizing
+        // unoptimized={false} is the default, allowing Next.js to resize/optimize images
         {...props}
       />
     </div>
