@@ -77,7 +77,14 @@ export default function AdminDashboard() {
       setOrders(oSnapshot.docs.map(d => ({ id: d.id, ...d.data() })));
 
       const sSnap = await getDoc(doc(db, 'settings', 'site'));
-      if (sSnap.exists()) setSiteSettings(sSnap.data() as any);
+      if (sSnap.exists()) {
+        const data = sSnap.data();
+        setSiteSettings({
+          heroTitle: data.heroTitle || '',
+          heroSubtitle: data.heroSubtitle || '',
+          whatsappNumber: data.whatsappNumber || ''
+        });
+      }
     } catch (err) {
       console.error(err);
     } finally {
@@ -138,11 +145,15 @@ export default function AdminDashboard() {
   const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const data: any = {
-      ...formData,
+      name: formData.name,
       price: Number(formData.price),
       discountPrice: formData.discountPrice ? Number(formData.discountPrice) : null,
+      description: formData.description,
+      category: formData.category,
       stock: Number(formData.stock),
+      isFeatured: formData.isFeatured,
       imageUrls: formData.imageUrls.filter(u => u.trim() !== ''),
+      unit: formData.unit,
       variants: formData.variants.split(',').map(v => v.trim()).filter(v => v !== ''),
       updatedAt: serverTimestamp(),
     };
@@ -253,44 +264,44 @@ export default function AdminDashboard() {
                   <div className="space-y-4 md:space-y-6">
                     <div className="space-y-2">
                       <Label className="font-bold text-sm md:text-base">পণ্যের নাম</Label>
-                      <Input placeholder="নাম" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required className="rounded-xl h-12" />
+                      <Input placeholder="নাম" value={formData.name || ''} onChange={e => setFormData({...formData, name: e.target.value})} required className="rounded-xl h-12" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label className="font-bold text-sm md:text-base">মূল্য (৳)</Label>
-                        <Input type="number" placeholder="৳" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required className="rounded-xl h-12" />
+                        <Input type="number" placeholder="৳" value={formData.price || ''} onChange={e => setFormData({...formData, price: e.target.value})} required className="rounded-xl h-12" />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-bold text-sm md:text-base">ক্যাটাগরি</Label>
-                        <Input placeholder="ক্যাটাগরি" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required className="rounded-xl h-12" />
+                        <Input placeholder="ক্যাটাগরি" value={formData.category || ''} onChange={e => setFormData({...formData, category: e.target.value})} required className="rounded-xl h-12" />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <Label className="font-bold text-sm md:text-base">ছবি ইউআরএল</Label>
-                      <Input placeholder="https://..." value={formData.imageUrls[0]} onChange={e => setFormData({...formData, imageUrls: [e.target.value]})} required className="rounded-xl h-12" />
+                      <Input placeholder="https://..." value={formData.imageUrls[0] || ''} onChange={e => setFormData({...formData, imageUrls: [e.target.value]})} required className="rounded-xl h-12" />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label className="font-bold text-sm md:text-base">ইউনিট টাইপ (যেমন: সাইজ, ওজন)</Label>
-                        <Input placeholder="Size" value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} className="rounded-xl h-12" />
+                        <Input placeholder="Size" value={formData.unit || ''} onChange={e => setFormData({...formData, unit: e.target.value})} className="rounded-xl h-12" />
                       </div>
                       <div className="space-y-2">
                         <Label className="font-bold text-sm md:text-base">ভেরিয়েন্ট (কমা দিয়ে লিখুন)</Label>
-                        <Input placeholder="M, L, XL" value={formData.variants} onChange={e => setFormData({...formData, variants: e.target.value})} className="rounded-xl h-12" />
+                        <Input placeholder="M, L, XL" value={formData.variants || ''} onChange={e => setFormData({...formData, variants: e.target.value})} className="rounded-xl h-12" />
                       </div>
                     </div>
                   </div>
                   <div className="space-y-4 md:space-y-6">
                     <div className="space-y-2">
                       <Label className="font-bold text-sm md:text-base">বিবরণ</Label>
-                      <Textarea placeholder="পণ্যের বিস্তারিত বিবরণ..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="rounded-xl min-h-[100px] md:min-h-[120px]" />
+                      <Textarea placeholder="পণ্যের বিস্তারিত বিবরণ..." value={formData.description || ''} onChange={e => setFormData({...formData, description: e.target.value})} className="rounded-xl min-h-[100px] md:min-h-[120px]" />
                     </div>
                     <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
                       <div className="space-y-0.5">
                         <Label className="font-black text-sm">স্পেশাল কালেকশন</Label>
                         <p className="text-[9px] text-slate-400 font-bold uppercase">হোম পেজে হাইলাইট হবে</p>
                       </div>
-                      <Switch checked={formData.isFeatured} onCheckedChange={c => setFormData({...formData, isFeatured: c})} />
+                      <Switch checked={formData.isFeatured || false} onCheckedChange={c => setFormData({...formData, isFeatured: c})} />
                     </div>
                     <Button type="submit" className="w-full h-14 md:h-16 rounded-2xl font-black text-lg md:text-xl shadow-lg">পণ্য সেভ করুন</Button>
                   </div>
@@ -439,7 +450,22 @@ export default function AdminDashboard() {
                         <TableCell className="font-black text-sm md:text-lg text-primary">৳{p.discountPrice || p.price}</TableCell>
                         <TableCell className="text-right space-x-1">
                           <div className="flex justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10 rounded-full hover:bg-primary/10 hover:text-primary" onClick={() => { setEditingProduct(p); setFormData({ ...p, variants: p.variants?.join(', ') || '' } as any); setProductDialogOpen(true); }}><Pencil className="w-4 h-4 md:w-5 md:h-5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10 rounded-full hover:bg-primary/10 hover:text-primary" onClick={() => { 
+                              setEditingProduct(p); 
+                              setFormData({ 
+                                name: p.name || '',
+                                price: p.price?.toString() || '',
+                                discountPrice: p.discountPrice?.toString() || '',
+                                description: p.description || '',
+                                category: p.category || '',
+                                stock: p.stock?.toString() || '',
+                                isFeatured: p.isFeatured || false,
+                                imageUrls: p.imageUrls || [''],
+                                unit: p.unit || '',
+                                variants: p.variants?.join(', ') || ''
+                              }); 
+                              setProductDialogOpen(true); 
+                            }}><Pencil className="w-4 h-4 md:w-5 md:h-5" /></Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10 rounded-full text-red-500 hover:bg-red-50" onClick={() => deleteProduct(p.id)}><Trash2 className="w-4 h-4 md:w-5 md:h-5" /></Button>
                           </div>
                         </TableCell>
@@ -495,15 +521,15 @@ export default function AdminDashboard() {
               <div className="grid gap-4 md:gap-6">
                 <div className="space-y-2">
                   <Label className="font-black text-sm md:text-base">হিরো টাইটেল (Home Headline)</Label>
-                  <Input value={siteSettings.heroTitle} onChange={e => setSiteSettings({...siteSettings, heroTitle: e.target.value})} className="rounded-xl h-12 md:h-14 font-bold" />
+                  <Input value={siteSettings.heroTitle || ''} onChange={e => setSiteSettings({...siteSettings, heroTitle: e.target.value})} className="rounded-xl h-12 md:h-14 font-bold" />
                 </div>
                 <div className="space-y-2">
                   <Label className="font-black text-sm md:text-base">হিরো সাব-টাইটেল (Description)</Label>
-                  <Textarea value={siteSettings.heroSubtitle} onChange={e => setSiteSettings({...siteSettings, heroSubtitle: e.target.value})} className="rounded-xl min-h-[80px] md:min-h-[100px] font-medium" />
+                  <Textarea value={siteSettings.heroSubtitle || ''} onChange={e => setSiteSettings({...siteSettings, heroSubtitle: e.target.value})} className="rounded-xl min-h-[80px] md:min-h-[100px] font-medium" />
                 </div>
                 <div className="space-y-2">
                   <Label className="font-black text-sm md:text-base">হোয়াটসঅ্যাপ নম্বর (Contact)</Label>
-                  <Input value={siteSettings.whatsappNumber} onChange={e => setSiteSettings({...siteSettings, whatsappNumber: e.target.value})} className="rounded-xl h-12 md:h-14 font-bold" />
+                  <Input value={siteSettings.whatsappNumber || ''} onChange={e => setSiteSettings({...siteSettings, whatsappNumber: e.target.value})} className="rounded-xl h-12 md:h-14 font-bold" />
                 </div>
                 <Button onClick={saveSettings} className="h-14 md:h-16 rounded-2xl font-black text-base md:text-lg gap-2 shadow-xl shadow-primary/20 bg-primary">
                   <Save className="w-5 h-5" /> পরিবর্তন সেভ করুন
