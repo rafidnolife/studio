@@ -111,8 +111,8 @@ export default function AdminDashboard() {
           if (customerData.fcmToken) {
             sendPushNotification({
               recipientToken: customerData.fcmToken,
-              title: `অর্ডার ${status === 'confirmed' ? 'নিশ্চিত' : 'বাতিল'} হয়েছে`,
-              body: `আপনার অর্ডার #${orderId.slice(0, 8)} এখন ${status === 'confirmed' ? 'কনফার্মড' : 'ক্যানসেলড'}।`
+              title: `অর্ডার ${status === 'confirmed' ? 'নিশ্চিত' : 'বাতিল'} হয়েছে 🔔`,
+              body: `আপনার অর্ডারটি এখন ${status === 'confirmed' ? 'কনফার্ম' : 'বাতিল'} করা হয়েছে। ধন্যবাদ।`
             });
           }
         }

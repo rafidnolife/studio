@@ -31,9 +31,16 @@ export function useNotifications() {
         const permission = await Notification.requestPermission();
         if (permission === 'granted') {
           const messaging = getMessaging();
-          // Note: In a real app, use your project's VAPID key from Firebase Console -> Project Settings -> Cloud Messaging
+          
+          // Using a placeholder that follows base64url format to avoid "Invalid Server Key" error
+          // Note: User must replace this with their actual VAPID key from Firebase Console
+          const VAPID_KEY = 'BF3W9Q_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_I';
+          
           const token = await getToken(messaging, { 
-            vapidKey: 'BPI06-6pW-K0X1F5t_QZ5H-D1W9X0vQYy5H-D1W9X0vQYy5H-D1W9X0vQYy' 
+            vapidKey: VAPID_KEY 
+          }).catch(err => {
+            console.warn('Could not get FCM token. Make sure VAPID key is correct in Firebase Console.', err);
+            return null;
           });
 
           if (token) {
@@ -42,7 +49,7 @@ export function useNotifications() {
           }
         }
       } catch (error) {
-        console.error('Failed to get FCM token:', error);
+        console.error('Failed to handle notification permission:', error);
       }
     };
 
@@ -58,7 +65,7 @@ export function useNotifications() {
           body: payload.notification?.body,
           icon: 'https://picsum.photos/seed/dokaan/100/100',
           badge: 'https://picsum.photos/seed/dokaan/100/100',
-          vibrate: [200, 100, 200], // Vibration pattern
+          vibrate: [200, 100, 200], // Vibration pattern for phones
           tag: 'order-update',
           renotify: true
         };
@@ -66,7 +73,7 @@ export function useNotifications() {
         // Trigger system notification
         new Notification(notificationTitle, notificationOptions);
 
-        // Also show a toast in-app for visual feedback
+        // Also show a toast in-app
         toast({
           title: notificationTitle,
           description: payload.notification?.body,
