@@ -63,23 +63,23 @@ export default function Home() {
     <div className="flex flex-col min-h-screen selection:bg-primary/20 overflow-x-hidden">
       <Navbar />
       
-      <main className="flex-grow pb-20 pt-8">
-        {/* Responsive Headline */}
-        <section className="container mx-auto px-4 mb-12">
-          <div className="flex items-center gap-3 bg-white/60 glass w-fit max-w-full px-5 md:px-8 py-3 md:py-4 rounded-[1.5rem] md:rounded-[2rem] shadow-xl border-primary/10 overflow-hidden">
-            <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary shrink-0">
-              <Sparkles className="w-5 h-5 md:w-6 md:h-6 animate-pulse" />
+      <main className="flex-grow pb-16 pt-4">
+        {/* Compact Responsive Headline */}
+        <section className="container mx-auto px-4 mb-6">
+          <div className="flex items-center gap-3 bg-white/60 glass w-fit max-w-full px-4 md:px-8 py-2 md:py-3 rounded-[1.25rem] md:rounded-[2rem] shadow-xl border-primary/10 overflow-hidden">
+            <div className="w-7 h-7 md:w-10 md:h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary shrink-0">
+              <Sparkles className="w-4 h-4 md:w-6 md:h-6 animate-pulse" />
             </div>
-            <h1 className="text-sm md:text-3xl font-black text-slate-800 tracking-tighter uppercase flex flex-wrap items-center gap-2 md:gap-3 leading-tight break-words max-w-[calc(100vw-100px)]">
+            <h1 className="text-sm md:text-2xl lg:text-3xl font-black text-slate-800 tracking-tighter uppercase flex flex-wrap items-center gap-2 md:gap-3 leading-tight break-words max-w-[calc(100vw-100px)]">
               {settings.heroTitle}
               <span className="w-1.5 h-1.5 md:w-2 md:h-2 bg-primary rounded-full hidden sm:inline-block"></span>
             </h1>
           </div>
         </section>
 
-        {/* SPECIAL COLLECTION - Responsive Grid */}
-        <section className="container mx-auto px-4 mb-20">
-          <div className="flex items-center justify-between mb-8 md:mb-10 border-b border-primary/10 pb-6 gap-4">
+        {/* SPECIAL COLLECTION - Moved Up */}
+        <section className="container mx-auto px-4 mb-16">
+          <div className="flex items-center justify-between mb-6 md:mb-10 border-b border-primary/10 pb-4 gap-4">
             <div className="flex flex-col gap-1 min-w-0">
                <h2 className="text-xl md:text-5xl lg:text-6xl font-black tracking-tighter text-slate-900 flex items-center gap-2 md:gap-4 flex-wrap">
                 স্পেশাল <span className="text-primary">কালেকশন</span>
@@ -99,7 +99,7 @@ export default function Home() {
             ) : featuredProducts.length > 0 ? (
               featuredProducts.map(p => <ProductCard key={p.id} product={p} />)
             ) : (
-              <div className="col-span-full py-16 md:py-24 text-center text-slate-400 font-bold bg-white/40 glass rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-slate-200">
+              <div className="col-span-full py-12 md:py-24 text-center text-slate-400 font-bold bg-white/40 glass rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-slate-200">
                 কোনো হাইলাইটেড পণ্য নেই।
               </div>
             )}
