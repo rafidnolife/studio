@@ -50,7 +50,7 @@
           "upazila": { "type": "string" },
           "address": { "type": "string" }
         }},
-        "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled"] },
+        "status": { "type": "string", "enum": ["pending", "confirmed", "completed", "cancelled"] },
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },

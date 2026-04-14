@@ -18,8 +18,6 @@ export default function OrdersPage() {
 
   const ordersQuery = useMemo(() => {
     if (!user || !db) return null;
-    // Removed orderBy('createdAt', 'desc') to avoid composite index requirement
-    // This allows the query to run without needing to create an index in Firebase Console
     return query(
       collection(db, 'orders'),
       where('userId', '==', user.uid)
@@ -28,7 +26,6 @@ export default function OrdersPage() {
 
   const { data: rawOrders, loading: ordersLoading } = useCollection<any>(ordersQuery);
 
-  // Client-side sorting: Sort by createdAt descending (newest first)
   const orders = useMemo(() => {
     if (!rawOrders) return [];
     return [...rawOrders].sort((a, b) => {
@@ -67,7 +64,8 @@ export default function OrdersPage() {
                 <div className={cn(
                   "h-2 w-full",
                   order.status === 'pending' ? "bg-amber-400" :
-                  order.status === 'confirmed' ? "bg-emerald-500" : "bg-red-500"
+                  order.status === 'confirmed' ? "bg-blue-400" :
+                  order.status === 'completed' ? "bg-emerald-500" : "bg-red-500"
                 )} />
                 <CardContent className="p-6 md:p-8 flex flex-col md:flex-row justify-between gap-6">
                   <div className="space-y-4">
@@ -76,20 +74,25 @@ export default function OrdersPage() {
                       <Badge className={cn(
                         "rounded-full font-black text-[10px] px-4 py-1 border-none",
                         order.status === 'pending' ? "bg-amber-50 text-amber-600" :
-                        order.status === 'confirmed' ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
+                        order.status === 'confirmed' ? "bg-blue-50 text-blue-600" :
+                        order.status === 'completed' ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
                       )}>
                         {order.status === 'pending' ? 'পেন্ডিং' : 
-                         order.status === 'confirmed' ? 'কনফার্মড' : 'ক্যানসেল'}
+                         order.status === 'confirmed' ? 'নিশ্চিত' : 
+                         order.status === 'completed' ? 'সফল' : 'বাতিল'}
                       </Badge>
                     </div>
                     <div className="space-y-1">
                       {order.items.map((item: any, i: number) => (
-                        <h3 key={i} className="text-lg font-black text-slate-900 leading-tight">
-                          {item.name} <span className="text-primary">x {item.qty}</span>
-                        </h3>
+                        <div key={i}>
+                          <h3 className="text-lg font-black text-slate-900 leading-tight">
+                            {item.name} <span className="text-primary">x {item.qty}</span>
+                          </h3>
+                          {item.variant && <p className="text-xs font-bold text-primary">বিকল্প: {item.variant}</p>}
+                        </div>
                       ))}
                       <p className="text-slate-500 font-bold text-sm flex items-center gap-1">
-                        <Package className="w-3.5 h-3.5 text-primary" /> {order.location?.address}
+                        <Package className="w-3.5 h-3.5 text-primary" /> {order.location?.address}, {order.location?.upazila}, {order.location?.district}
                       </p>
                     </div>
                   </div>

@@ -5,20 +5,19 @@ import { useEffect, useState, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
 import { useFirestore, useUser } from '@/firebase';
-import { doc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, where, Firestore } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
 import { Product } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Phone, CreditCard, Truck, User, Navigation, ChevronDown } from 'lucide-react';
+import { MapPin, Phone, CreditCard, Truck, User, Navigation } from 'lucide-react';
 import { sendPushNotification } from '@/ai/flows/send-notification-flow';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
-// Translated Bangladesh Location Data to Bengali
 const bdData: Record<string, string[]> = {
   "ঢাকা": ["ঢাকা উত্তর", "ঢাকা দক্ষিণ", "সাভার", "ধামরাই", "কেরানীগঞ্জ", "নবাবগঞ্জ", "দোহার"],
   "চট্টগ্রাম": ["চট্টগ্রাম সিটি", "হাটহাজারী", "পটিয়া", "রাউজান", "রাঙ্গুনিয়া", "বোয়ালখালী", "আনোয়ারা", "বাঁশখালী", "লোহাগাড়া", "সাতকানিয়া", "সন্দ্বীপ", "ফটিকছড়ি", "মিরসরাই", "সীতাকুণ্ড"],
@@ -54,7 +53,7 @@ const bdData: Record<string, string[]> = {
   "নওগাঁ": ["নওগাঁ সদর", "আত্রাই", "বদলগাছী", "ধামইরহাট", "মান্দা", "মহাদেবপুর", "নিয়ামতপুর", "পত্নীতলা", "পোরশা", "রানীনগর", "সাপাহার"],
   "নাটোর": ["নাটোর সদর", "বাগাতিপাড়া", "বড়াইগ্রাম", "গুরুদাসপুর", "লালপুর", "সিংড়া"],
   "পাবনা": ["পাবনা সদর", "আটঘরিয়া", "বেড়া", "ভাঙ্গুড়া", "চাটমোহর", "ফরিদপুর", "ঈশ্বরদী", "সাথিয়া", "সুজানগর"],
-  "সিরাজগঞ্জ": ["সিরাজগঞ্জ সদর", "বেলকুচি", "চৌহালী", "কামারখন্দ", "কাজীপুর", "রায়গঞ্জ", "শাহজাদপুর", "তাড়াশ", "উল্লাপাড়া"],
+  "সিরাজগঞ্জ": ["সিরাজগঞ্জ সদর", "বেলকুچی", "চৌহালী", "কামারখন্দ", "কাজীপুর", "রায়গঞ্জ", "শাহজাদপুর", "তাড়াশ", "উল্লাপাড়া"],
   "দিনাজপুর": ["দিনাজপুর সদর", "বিরামপুর", "বীরগঞ্জ", "বিরল", "বোচাগঞ্জ", "চিরিরবন্দর", "ফুলবাড়ী", "ঘোড়াঘাট", "হাকিমপুর", "কাহারোল", "খানসামা", "নবাবগঞ্জ", "পার্বতীপুর"],
   "গাইবান্ধা": ["গাইবান্ধা সদর", "ফুলছড়ি", "গোবিন্দগঞ্জ", "পলাশবাড়ী", "সাদুল্লাপুর", "সাঘাটা", "সুন্দরগঞ্জ"],
   "কুড়িগ্রাম": ["কুড়িগ্রাম সদর", "ভুরুঙ্গামারী", "চিলমারী", "ফুলবাড়ী", "নাগেশ্বরী", "রাজারহাট", "রাজিবপুর", "রৌমারী", "উলিপুর"],
@@ -113,7 +112,6 @@ function CheckoutContent() {
 
   const deliveryCharge = useMemo(() => {
     if (!selectedDistrict) return 0;
-    // Check for Bengali district name
     return selectedDistrict === 'ঢাকা' ? 70 : 120;
   }, [selectedDistrict]);
 
@@ -263,7 +261,7 @@ function CheckoutContent() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label className="font-black text-slate-700 ml-1">জেলা সিলেক্ট করুন</Label>
-                    <Select onValueChange={(val) => { setSelectedDistrict(val); setSelectedUpazila(''); }}>
+                    <Select onValueChange={(val) => { setSelectedDistrict(val); setSelectedUpazila(''); }} value={selectedDistrict}>
                       <SelectTrigger className="h-14 rounded-2xl bg-slate-50 border-none shadow-inner font-bold">
                         <SelectValue placeholder="জেলা বেছে নিন" />
                       </SelectTrigger>

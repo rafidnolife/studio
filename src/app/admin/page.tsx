@@ -14,7 +14,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Settings, Users, Save, Package, ShoppingCart, CheckCircle, XCircle, MapPin, Activity, DollarSign } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, Package, ShoppingCart, CheckCircle, XCircle, Activity, DollarSign, Users, PackageCheck } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -96,11 +96,16 @@ export default function AdminDashboard() {
     if (user?.role === 'admin') fetchData();
   }, [user, db]);
 
-  const updateOrderStatus = (orderId: string, customerId: string, status: 'confirmed' | 'cancelled') => {
+  const updateOrderStatus = (orderId: string, customerId: string, status: 'confirmed' | 'completed' | 'cancelled') => {
     const orderRef = doc(db, 'orders', orderId);
     updateDoc(orderRef, { status })
       .then(async () => {
-        toast({ title: `অর্ডার ${status === 'confirmed' ? 'কনফার্ম' : 'ক্যানসেল'} হয়েছে` });
+        let statusText = '';
+        if (status === 'confirmed') statusText = 'নিশ্চিত (Confirmed)';
+        if (status === 'completed') statusText = 'সফল (Completed)';
+        if (status === 'cancelled') statusText = 'বাতিল (Cancelled)';
+
+        toast({ title: `অর্ডার ${statusText} হয়েছে` });
         fetchData();
         
         const customerSnap = await getDoc(doc(db, 'users', customerId));
@@ -109,8 +114,8 @@ export default function AdminDashboard() {
           if (customerData.fcmToken) {
             sendPushNotification({
               recipientToken: customerData.fcmToken,
-              title: `অর্ডার ${status === 'confirmed' ? 'নিশ্চিত' : 'বাতিল'} হয়েছে 🔔`,
-              body: `আপনার অর্ডারটি এখন ${status === 'confirmed' ? 'কনফার্ম' : 'বাতিল'} করা হয়েছে। ধন্যবাদ।`
+              title: `অর্ডার ${statusText} হয়েছে 🔔`,
+              body: `আপনার অর্ডারটি এখন ${statusText} করা হয়েছে। ধন্যবাদ।`
             });
           }
         }
@@ -231,7 +236,7 @@ export default function AdminDashboard() {
   };
 
   const stats = {
-    totalSales: orders.filter(o => o.status === 'confirmed').reduce((acc, o) => acc + (o.totalAmount || 0), 0),
+    totalSales: orders.filter(o => o.status === 'completed').reduce((acc, o) => acc + (o.totalAmount || 0), 0),
     totalOrders: orders.length,
     totalCustomers: customers.length,
     totalProducts: products.length
@@ -308,7 +313,7 @@ export default function AdminDashboard() {
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'মোট বিক্রি', value: `৳${stats.totalSales}`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
+            { label: 'সফল বিক্রি', value: `৳${stats.totalSales}`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
             { label: 'মোট অর্ডার', value: stats.totalOrders, icon: ShoppingCart, color: 'text-blue-500', bg: 'bg-blue-50' },
             { label: 'ক্রেতা', value: stats.totalCustomers, icon: Users, color: 'text-purple-500', bg: 'bg-purple-50' },
             { label: 'পণ্য', value: stats.totalProducts, icon: Package, color: 'text-amber-500', bg: 'bg-amber-50' },
@@ -353,7 +358,7 @@ export default function AdminDashboard() {
                           <span className="font-black text-slate-900 block">{o.customerName || 'ক্রেতা'}</span>
                           <span className="text-[10px] text-slate-500 font-bold uppercase">{o.phoneNumber}</span>
                           <p className="text-xs font-bold text-primary mt-1">
-                            {o.items?.map((i: any) => `${i.name} (${i.qty})`).join(', ')}
+                            {o.items?.map((i: any) => `${i.name} (${i.qty}) ${i.variant ? `[${i.variant}]` : ''}`).join(', ')}
                           </p>
                         </div>
                       </TableCell>
@@ -368,18 +373,24 @@ export default function AdminDashboard() {
                         <Badge className={cn(
                           "font-black text-[10px] px-3 py-1 rounded-full border-none", 
                           o.status === 'pending' ? 'bg-amber-100 text-amber-600' : 
-                          o.status === 'confirmed' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
-                        )}>{o.status}</Badge>
+                          o.status === 'confirmed' ? 'bg-blue-100 text-blue-600' : 
+                          o.status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
+                        )}>
+                          {o.status === 'pending' ? 'পেন্ডিং' : o.status === 'confirmed' ? 'কনফার্মড' : o.status === 'completed' ? 'সফল' : 'বাতিল'}
+                        </Badge>
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           {o.status === 'pending' && (
                             <>
-                              <Button size="icon" variant="ghost" className="h-10 w-10 text-emerald-500" onClick={() => updateOrderStatus(o.id, o.userId, 'confirmed')}><CheckCircle className="w-5 h-5" /></Button>
-                              <Button size="icon" variant="ghost" className="h-10 w-10 text-red-500" onClick={() => updateOrderStatus(o.id, o.userId, 'cancelled')}><XCircle className="w-5 h-5" /></Button>
+                              <Button size="icon" variant="ghost" className="h-10 w-10 text-blue-500" onClick={() => updateOrderStatus(o.id, o.userId, 'confirmed')} title="কনফার্ম করুন"><CheckCircle className="w-5 h-5" /></Button>
+                              <Button size="icon" variant="ghost" className="h-10 w-10 text-red-500" onClick={() => updateOrderStatus(o.id, o.userId, 'cancelled')} title="বাতিল করুন"><XCircle className="w-5 h-5" /></Button>
                             </>
                           )}
-                          <Button size="icon" variant="ghost" className="h-10 w-10 text-slate-400 hover:text-red-500" onClick={() => deleteOrder(o.id)}><Trash2 className="w-4 h-4" /></Button>
+                          {o.status === 'confirmed' && (
+                            <Button size="icon" variant="ghost" className="h-10 w-10 text-emerald-500" onClick={() => updateOrderStatus(o.id, o.userId, 'completed')} title="কম্প্লিট করুন"><PackageCheck className="w-5 h-5" /></Button>
+                          )}
+                          <Button size="icon" variant="ghost" className="h-10 w-10 text-slate-400 hover:text-red-500" onClick={() => deleteOrder(o.id)} title="ডিলিট"><Trash2 className="w-4 h-4" /></Button>
                         </div>
                       </TableCell>
                     </TableRow>
