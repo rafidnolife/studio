@@ -22,7 +22,6 @@ export function ImageWithFallback({
   const [loading, setLoading] = useState(true);
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // Basic validation for URL
   const isValidUrl = (url: string) => {
     return url && typeof url === 'string' && url.trim() !== '' && url.startsWith('http');
   };
@@ -30,10 +29,7 @@ export function ImageWithFallback({
   const currentSrc = error || !isValidUrl(src) ? fallbackSrc : src;
 
   useEffect(() => {
-    // Reset state when src changes
     setError(false);
-    
-    // Check if image is already cached in the browser for instant loading
     if (imgRef.current && imgRef.current.complete) {
       setLoading(false);
     } else {
@@ -76,7 +72,7 @@ export function ImageWithFallback({
           loading ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0',
           error ? 'opacity-40 grayscale' : 'opacity-100'
         )}
-        style={{ width: '100%', height: '100%' }}
+        style={fill ? { width: '100%', height: '100%' } : props.style}
         {...props}
       />
     </div>

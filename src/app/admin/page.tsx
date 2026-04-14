@@ -117,7 +117,6 @@ export default function AdminDashboard() {
         toast({ title: title });
         fetchData();
         
-        // Send Real-time Notification to Customer
         sendPushNotification({
           recipientId: customerId,
           title: title,
