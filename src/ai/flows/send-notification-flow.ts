@@ -1,15 +1,17 @@
 
 'use server';
 /**
- * @fileOverview A Genkit flow that simulates sending a push notification.
- * In a production environment, this would call the FCM REST API.
+ * @fileOverview A Genkit flow that sends a notification by writing to Firestore.
+ * This enables real-time notifications for both admins and customers.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { initializeFirebase } from '@/firebase';
+import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const SendNotificationInputSchema = z.object({
-  recipientToken: z.string().describe('The FCM token of the recipient device.'),
+  recipientId: z.string().describe('The UID of the user to receive the notification.'),
   title: z.string().describe('The notification title.'),
   body: z.string().describe('The notification message body.'),
 });
@@ -26,10 +28,18 @@ const sendNotificationFlow = ai.defineFlow(
     outputSchema: z.void(),
   },
   async (input) => {
-    console.log(`[Push Notification] To: ${input.recipientToken} | Title: ${input.title} | Body: ${input.body}`);
+    const { db } = initializeFirebase();
     
-    // In a real scenario, you'd use fetch() to call FCM v1 API here.
-    // This requires an OAuth2 access token which is usually handled by Firebase Admin SDK.
-    // For this prototype, we log the action. 
+    // We write to a Firestore collection called 'notifications'
+    // The client hook (useNotifications) listens to this collection in real-time.
+    await addDoc(collection(db, 'notifications'), {
+      recipientId: input.recipientId,
+      title: input.title,
+      body: input.body,
+      read: false,
+      createdAt: serverTimestamp(),
+    });
+
+    console.log(`[Notification Queued] To UID: ${input.recipientId} | Title: ${input.title}`);
   }
 );

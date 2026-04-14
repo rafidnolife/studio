@@ -181,18 +181,15 @@ function CheckoutContent() {
         toast({ title: "অর্ডার সফল", description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই কল দেওয়া হবে।" });
         router.push('/orders');
         
-        // Notify Admins
+        // Notify Admins in Real-time
         const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
         getDocs(adminQuery).then(snap => {
           snap.forEach(adminDoc => {
-            const adminData = adminDoc.data();
-            if (adminData.fcmToken) {
-              sendPushNotification({
-                recipientToken: adminData.fcmToken,
-                title: 'নতুন অর্ডার এসেছে! 🔔',
-                body: `${customerName} (৳${total}) একটি নতুন অর্ডার করেছেন।`
-              });
-            }
+            sendPushNotification({
+              recipientId: adminDoc.id,
+              title: 'নতুন অর্ডার এসেছে! 🔔',
+              body: `${customerName} (৳${total}) একটি নতুন অর্ডার করেছেন।`
+            });
           });
         });
       })

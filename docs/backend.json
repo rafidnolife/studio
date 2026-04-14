@@ -54,6 +54,18 @@
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
+    "Notification": {
+      "title": "Notification",
+      "description": "A notification for a user",
+      "type": "object",
+      "properties": {
+        "recipientId": { "type": "string" },
+        "title": { "type": "string" },
+        "body": { "type": "string" },
+        "read": { "type": "boolean" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
     "SiteSettings": {
       "title": "Site Settings",
       "description": "Customizable content for the website",
@@ -81,6 +93,10 @@
     "/orders/{orderId}": {
       "schema": "Order",
       "description": "Customer orders"
+    },
+    "/notifications/{notificationId}": {
+      "schema": "Notification",
+      "description": "User notifications"
     },
     "/settings/site": {
       "schema": "SiteSettings",

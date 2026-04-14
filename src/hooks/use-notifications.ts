@@ -3,8 +3,7 @@
 
 import { useEffect } from 'react';
 import { useFirestore, useUser } from '@/firebase';
-import { doc, updateDoc } from 'firebase/firestore';
-import { getMessaging, getToken, onMessage } from 'firebase/messaging';
+import { collection, query, where, onSnapshot, orderBy, limit, doc, updateDoc } from 'firebase/firestore';
 import { useToast } from '@/hooks/use-toast';
 
 export function useNotifications() {
@@ -13,73 +12,57 @@ export function useNotifications() {
   const { toast } = useToast();
 
   useEffect(() => {
-    if (!user || typeof window === 'undefined') return;
+    if (!user || !db) return;
 
-    // Register Service Worker for background notifications
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('/firebase-messaging-sw.js')
-        .then((registration) => {
-          console.log('Service Worker registered with scope:', registration.scope);
-        })
-        .catch((err) => {
-          console.error('Service Worker registration failed:', err);
-        });
-    }
+    // Listen for new notifications for the current user
+    const q = query(
+      collection(db, 'notifications'),
+      where('recipientId', '==', user.uid),
+      where('read', '==', false),
+      orderBy('createdAt', 'desc'),
+      limit(5)
+    );
 
-    const requestPermission = async () => {
-      try {
-        const permission = await Notification.requestPermission();
-        if (permission === 'granted') {
-          const messaging = getMessaging();
+    const unsubscribe = onSnapshot(q, (snapshot) => {
+      snapshot.docChanges().forEach((change) => {
+        if (change.type === 'added') {
+          const data = change.doc.data();
           
-          // Using a placeholder that follows base64url format to avoid "Invalid Server Key" error
-          // Note: User must replace this with their actual VAPID key from Firebase Console
-          const VAPID_KEY = 'BF3W9Q_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_G9Z_R9Z_I';
-          
-          const token = await getToken(messaging, { 
-            vapidKey: VAPID_KEY 
-          }).catch(err => {
-            console.warn('Could not get FCM token. Make sure VAPID key is correct in Firebase Console.', err);
-            return null;
+          // Trigger browser notification if permission is granted
+          if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+            const notification = new Notification(data.title, {
+              body: data.body,
+              icon: 'https://picsum.photos/seed/dokaan/100/100',
+              badge: 'https://picsum.photos/seed/dokaan/100/100',
+              vibrate: [200, 100, 200],
+            });
+
+            // Play a notification sound
+            const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+            audio.play().catch(e => console.log('Audio play failed', e));
+          }
+
+          // Show in-app toast
+          toast({
+            title: data.title,
+            description: data.body,
           });
 
-          if (token) {
-            const userRef = doc(db, 'users', user.uid);
-            updateDoc(userRef, { fcmToken: token });
-          }
+          // Mark as read after showing (optional, or wait for user click)
+          const notificationRef = doc(db, 'notifications', change.doc.id);
+          updateDoc(notificationRef, { read: true });
         }
-      } catch (error) {
-        console.error('Failed to handle notification permission:', error);
-      }
-    };
-
-    requestPermission();
-
-    const messaging = getMessaging();
-    const unsubscribe = onMessage(messaging, (payload) => {
-      console.log('Foreground Message received: ', payload);
-      
-      if (typeof window !== 'undefined' && 'Notification' in window) {
-        const notificationTitle = payload.notification?.title || 'দোকান এক্সপ্রেস';
-        const notificationOptions = {
-          body: payload.notification?.body,
-          icon: 'https://picsum.photos/seed/dokaan/100/100',
-          badge: 'https://picsum.photos/seed/dokaan/100/100',
-          vibrate: [200, 100, 200], // Vibration pattern for phones
-          tag: 'order-update',
-          renotify: true
-        };
-
-        // Trigger system notification
-        new Notification(notificationTitle, notificationOptions);
-
-        // Also show a toast in-app
-        toast({
-          title: notificationTitle,
-          description: payload.notification?.body,
-        });
-      }
+      });
+    }, (error) => {
+      console.error('Notification listener error:', error);
     });
+
+    // Request browser notification permission on mount
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
 
     return () => unsubscribe();
   }, [user, db, toast]);

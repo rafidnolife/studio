@@ -100,25 +100,29 @@ export default function AdminDashboard() {
     const orderRef = doc(db, 'orders', orderId);
     updateDoc(orderRef, { status })
       .then(async () => {
-        let statusText = '';
-        if (status === 'confirmed') statusText = 'নিশ্চিত (Confirmed)';
-        if (status === 'completed') statusText = 'সফল (Completed)';
-        if (status === 'cancelled') statusText = 'বাতিল (Cancelled)';
+        let title = '';
+        let body = '';
+        
+        if (status === 'confirmed') {
+          title = 'অর্ডার কনফার্ম হয়েছে! ✅';
+          body = 'আপনার অর্ডারটি কনফার্ম করা হয়েছে। খুব দ্রুতই আপনার পণ্যটি হাতে পেয়ে যাবেন।';
+        } else if (status === 'completed') {
+          title = 'অর্ডার সফল হয়েছে! 📦';
+          body = 'আপনার অর্ডারটি সফলভাবে পৌঁছে দেওয়া হয়েছে। আমাদের সাথে থাকার জন্য ধন্যবাদ।';
+        } else if (status === 'cancelled') {
+          title = 'অর্ডার বাতিল হয়েছে ❌';
+          body = 'দুঃখিত, আপনার অর্ডারটি কোনো কারণে বাতিল করা হয়েছে। বিস্তারিত জানতে যোগাযোগ করুন।';
+        }
 
-        toast({ title: `অর্ডার ${statusText} হয়েছে` });
+        toast({ title: title });
         fetchData();
         
-        const customerSnap = await getDoc(doc(db, 'users', customerId));
-        if (customerSnap.exists()) {
-          const customerData = customerSnap.data();
-          if (customerData.fcmToken) {
-            sendPushNotification({
-              recipientToken: customerData.fcmToken,
-              title: `অর্ডার ${statusText} হয়েছে 🔔`,
-              body: `আপনার অর্ডারটি এখন ${statusText} করা হয়েছে। ধন্যবাদ।`
-            });
-          }
-        }
+        // Send Real-time Notification to Customer
+        sendPushNotification({
+          recipientId: customerId,
+          title: title,
+          body: body
+        });
       })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
