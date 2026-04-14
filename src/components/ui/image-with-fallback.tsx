@@ -13,7 +13,7 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   
-  const fallbackSrc = 'https://placehold.co/800x600?text=Image+Not+Found';
+  const fallbackSrc = 'https://placehold.co/800x800?text=Image+Not+Found';
 
   // Basic validation for URL
   const isValidUrl = (url: string) => {
@@ -38,16 +38,16 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
   return (
     <div className={cn("relative overflow-hidden flex items-center justify-center w-full h-full min-h-[inherit]", className)}>
       {loading && (
-        <div className="absolute inset-0 bg-slate-100 animate-pulse z-10 flex items-center justify-center">
-          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+        <div className="absolute inset-0 bg-slate-100/50 animate-pulse z-10 flex items-center justify-center">
+          <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
         </div>
       )}
       <Image
         src={currentSrc}
         alt={alt || "Product Image"}
         className={cn(
-          "transition-all duration-1000 w-full h-full",
-          loading ? 'opacity-0 scale-90' : 'opacity-100 scale-100',
+          "transition-all duration-700 w-full h-full",
+          loading ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0',
           error ? 'object-contain p-8 opacity-40' : 'object-contain'
         )}
         onError={() => {
@@ -55,7 +55,7 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
           setLoading(false);
         }}
         onLoad={() => setLoading(false)}
-        loading="eager"
+        loading="lazy"
         unoptimized={true} // IMPORTANT: Ensures HD quality by bypassing Next.js resizing
         {...props}
       />

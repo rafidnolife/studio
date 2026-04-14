@@ -64,42 +64,42 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-grow pb-16 pt-2">
-        {/* Compact Responsive Headline with reduced vertical spacing */}
-        <section className="container mx-auto px-4 mb-4 md:mb-6">
-          <div className="flex items-center gap-2 md:gap-3 bg-white/60 glass w-fit max-w-full px-4 md:px-8 py-2 md:py-4 rounded-[1.25rem] md:rounded-[3rem] shadow-xl border-primary/10 overflow-hidden">
-            <div className="w-6 h-6 md:w-10 md:h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary shrink-0">
-              <Sparkles className="w-3.5 h-3.5 md:w-6 md:h-6 animate-pulse" />
+        {/* Compact Responsive Headline */}
+        <section className="container mx-auto px-4 mb-6">
+          <div className="flex items-center gap-3 bg-white/70 glass w-fit max-w-full px-5 md:px-10 py-3 md:py-6 rounded-[1.5rem] md:rounded-[3rem] shadow-xl border-primary/10 overflow-hidden">
+            <div className="w-8 h-8 md:w-12 md:h-12 bg-primary/20 rounded-full flex items-center justify-center text-primary shrink-0">
+              <Sparkles className="w-4 h-4 md:w-7 md:h-7 animate-pulse" />
             </div>
-            <h1 className="text-xs sm:text-lg md:text-3xl font-black text-slate-800 tracking-tighter uppercase flex flex-wrap items-center gap-1.5 md:gap-3 leading-tight break-words max-w-[calc(100vw-80px)]">
+            <h1 className="text-sm sm:text-xl md:text-4xl font-black text-slate-800 tracking-tighter uppercase flex flex-wrap items-center gap-2 md:gap-4 leading-tight break-words max-w-[calc(100vw-100px)]">
               {settings.heroTitle}
-              <span className="w-1 md:w-2 h-1 md:h-2 bg-primary rounded-full hidden sm:inline-block"></span>
+              <span className="w-1.5 md:w-2.5 h-1.5 md:h-2.5 bg-primary rounded-full hidden sm:inline-block"></span>
             </h1>
           </div>
         </section>
 
-        {/* SPECIAL COLLECTION - Higher priority and responsive grid */}
-        <section className="container mx-auto px-4 mb-12">
-          <div className="flex items-center justify-between mb-6 border-b border-primary/10 pb-4 gap-4">
+        {/* SPECIAL COLLECTION - High Visibility */}
+        <section className="container mx-auto px-4 mb-16">
+          <div className="flex items-center justify-between mb-8 border-b border-primary/10 pb-4 gap-4">
             <div className="flex flex-col gap-1 min-w-0">
-               <h2 className="text-xl md:text-4xl lg:text-6xl font-black tracking-tighter text-slate-900 flex items-center gap-2 md:gap-4 flex-wrap">
+               <h2 className="text-xl md:text-5xl font-black tracking-tighter text-slate-900 flex items-center gap-2 md:gap-4">
                 স্পেশাল <span className="text-primary">কালেকশন</span>
-                <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[8px] md:text-xs py-1 px-2 md:px-4 rounded-full flex items-center gap-1 shrink-0">
-                  <TrendingUp className="w-2.5 h-2.5 md:w-3 md:h-3" /> TRENDING
+                <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[8px] md:text-xs py-1 px-3 rounded-full flex items-center gap-1 shrink-0">
+                  <TrendingUp className="w-3 h-3" /> TRENDING
                 </Badge>
               </h2>
             </div>
-            <Link href="/products" className="group bg-primary text-white font-black text-[9px] md:text-sm flex items-center gap-1 md:gap-2 px-3 md:px-6 py-2 md:py-3 rounded-full shadow-xl shadow-primary/20 hover:scale-105 transition-all uppercase tracking-widest shrink-0">
-              সব <ChevronRight className="w-3.5 h-3.5 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
+            <Link href="/products" className="group bg-primary text-white font-black text-[9px] md:text-sm flex items-center gap-1 md:gap-2 px-4 md:px-8 py-2 md:py-4 rounded-full shadow-xl shadow-primary/20 hover:scale-105 transition-all uppercase tracking-widest shrink-0">
+              সব দেখুন <ChevronRight className="w-4 h-4 md:w-5 md:h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
           </div>
           
-          <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 md:gap-10">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
             {featLoading ? (
-              Array(2).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2rem] md:rounded-[3rem]" />)
+              Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-square rounded-[2rem]" />)
             ) : featuredProducts.length > 0 ? (
               featuredProducts.map(p => <ProductCard key={p.id} product={p} />)
             ) : (
-              <div className="col-span-full py-12 md:py-24 text-center text-slate-400 font-bold bg-white/40 glass rounded-[2rem] md:rounded-[3rem] border-2 border-dashed border-slate-200">
+              <div className="col-span-full py-16 text-center text-slate-400 font-bold bg-white/40 glass rounded-[2rem] border-2 border-dashed border-slate-200">
                 কোনো হাইলাইটেড পণ্য নেই।
               </div>
             )}
@@ -108,18 +108,18 @@ export default function Home() {
 
         {/* Categories Section */}
         {availableCategories.length > 0 && (
-          <section className="py-10 md:py-20 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 mb-12">
+          <section className="py-12 md:py-24 bg-gradient-to-r from-primary/5 via-primary/10 to-primary/5 mb-16">
             <div className="container mx-auto px-4">
-              <div className="flex flex-col items-center mb-8">
-                <span className="text-[9px] md:text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-2">Explore Your Style</span>
+              <div className="flex flex-col items-center mb-10">
+                <span className="text-[10px] font-black text-primary uppercase tracking-[0.3em] mb-2">Explore Your Style</span>
                 <h2 className="text-2xl md:text-5xl font-black text-slate-900 tracking-tighter text-center">ক্যাটাগরি <span className="text-primary">অনুসারে</span></h2>
               </div>
               <div className="overflow-x-auto scrollbar-hide">
-                <div className="flex items-center justify-start md:justify-center gap-4 md:gap-10 min-w-max pb-4 px-4">
+                <div className="flex items-center justify-start md:justify-center gap-4 md:gap-12 min-w-max pb-6 px-4">
                   {availableCategories.map((cat, i) => (
-                    <Link key={i} href={`/products?category=${cat.name}`} className="group flex flex-col items-center gap-3 md:gap-5">
+                    <Link key={i} href={`/products?category=${cat.name}`} className="group flex flex-col items-center gap-3 md:gap-6">
                       <div className={cn(
-                        "w-16 h-16 md:w-32 md:h-32 bg-white rounded-[1.25rem] md:rounded-[2.5rem] flex items-center justify-center text-3xl md:text-5xl shadow-xl border border-slate-100 transition-all group-hover:-translate-y-2 group-hover:shadow-2xl",
+                        "w-16 h-16 md:w-36 md:h-36 bg-white rounded-[1.5rem] md:rounded-[3rem] flex items-center justify-center text-3xl md:text-6xl shadow-xl border border-slate-100 transition-all group-hover:-translate-y-2 group-hover:shadow-2xl",
                         "relative overflow-hidden"
                       )}>
                         <div className={cn("absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity", cat.color)}></div>
@@ -135,14 +135,14 @@ export default function Home() {
         )}
 
         {/* Recent Arrivals */}
-        <section className="container mx-auto px-4 mb-12 md:mb-24">
-          <div className="flex items-center justify-between mb-8 border-b border-primary/10 pb-6">
+        <section className="container mx-auto px-4 mb-16 md:mb-32">
+          <div className="flex items-center justify-between mb-10 border-b border-primary/10 pb-6">
             <h2 className="text-2xl md:text-5xl font-black tracking-tighter text-slate-900">
               নতুন <span className="text-primary">পণ্যসমূহ</span>
             </h2>
           </div>
-          <div className="grid grid-cols-2 lg:grid-cols-2 gap-4 md:gap-10">
-            {recentLoading ? Array(2).fill(0).map((_, i) => <Skeleton key={i} className="aspect-[3/4] rounded-[2rem] md:rounded-[3rem]" />) : 
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-8">
+            {recentLoading ? Array(4).fill(0).map((_, i) => <Skeleton key={i} className="aspect-square rounded-[2rem]" />) : 
               recentProducts.map(p => <ProductCard key={p.id} product={p} />)
             }
           </div>
@@ -150,20 +150,20 @@ export default function Home() {
 
         {/* Value Props */}
         <section className="container mx-auto px-4">
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-10">
             {[
               { icon: Zap, title: 'দ্রুত ডেলিভারি', color: 'bg-emerald-500', text: 'Fast Delivery' },
               { icon: ShieldCheck, title: 'নিরাপদ পেমেন্ট', color: 'bg-primary', text: 'Secure' },
               { icon: Star, title: 'সেরা কোয়ালিটি', color: 'bg-amber-500', text: 'Premium' },
               { icon: Award, title: 'বিশ্বস্ত বাজার', color: 'bg-indigo-600', text: 'Trusted' }
             ].map((v, i) => (
-              <div key={i} className="bg-white/70 glass p-5 md:p-8 rounded-[1.5rem] md:rounded-[3rem] flex flex-col items-center text-center space-y-3 shadow-xl hover:scale-105 transition-all border-none">
-                <div className={`w-12 h-12 md:w-20 md:h-20 ${v.color} rounded-[1rem] md:rounded-[2rem] flex items-center justify-center shadow-xl text-white`}>
-                  <v.icon className="w-6 h-6 md:w-10 md:h-10" />
+              <div key={i} className="bg-white/70 glass p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] flex flex-col items-center text-center space-y-4 shadow-xl hover:scale-105 transition-all border-none">
+                <div className={`w-14 h-14 md:w-24 md:h-24 ${v.color} rounded-[1.25rem] md:rounded-[2.5rem] flex items-center justify-center shadow-xl text-white`}>
+                  <v.icon className="w-7 h-7 md:w-12 md:h-12" />
                 </div>
                 <div className="space-y-1">
-                  <h3 className="font-black text-[9px] md:text-base text-slate-900 uppercase tracking-widest">{v.title}</h3>
-                  <p className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-[0.2em]">{v.text}</p>
+                  <h3 className="font-black text-[10px] md:text-lg text-slate-900 uppercase tracking-widest">{v.title}</h3>
+                  <p className="text-[8px] md:text-xs font-black text-slate-400 uppercase tracking-[0.2em]">{v.text}</p>
                 </div>
               </div>
             ))}
