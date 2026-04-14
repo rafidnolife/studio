@@ -114,6 +114,7 @@ export function Navbar() {
         </div>
       </div>
 
+      {/* Mobile Navigation Bar */}
       <div className="md:hidden fixed bottom-4 left-4 right-4 h-16 glass border shadow-2xl rounded-[2rem] px-6 flex justify-between items-center z-50">
         {navItems.map((item) => (
           <Link
@@ -132,4 +133,3 @@ export function Navbar() {
     </nav>
   );
 }
-    

@@ -14,7 +14,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Settings, Users, Save, Package, ShoppingCart, CheckCircle, XCircle, MapPin, LocateFixed, Activity, LayoutDashboard, ExternalLink, ZoomIn } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, Users, Save, Package, ShoppingCart, CheckCircle, XCircle, MapPin, LocateFixed, Activity, ExternalLink, ZoomIn, Info } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -150,7 +150,7 @@ export default function AdminDashboard() {
   if (authLoading || !user || user.role !== 'admin') return null;
 
   return (
-    <div className="min-h-screen pb-24 md:pb-12 overflow-x-hidden bg-[#F8FAFC]">
+    <div className="min-h-screen pb-24 md:pb-12 overflow-x-hidden">
       <Navbar />
       <main className="container mx-auto px-4 py-6 md:py-10 max-w-7xl">
         <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
@@ -398,7 +398,7 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* Improved Interactive Map Dialog */}
+        {/* Enhanced Interactive In-App Map Dialog */}
         <Dialog open={mapDialogOpen} onOpenChange={setMapDialogOpen}>
           <DialogContent className="max-w-5xl h-[85vh] flex flex-col p-0 overflow-hidden rounded-[2rem] border-none shadow-2xl bg-white">
             <DialogHeader className="p-6 pb-4 border-b">
@@ -453,4 +453,3 @@ export default function AdminDashboard() {
     </div>
   );
 }
-    

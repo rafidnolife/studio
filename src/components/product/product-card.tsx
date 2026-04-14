@@ -145,4 +145,3 @@ export function ProductCard({ product }: { product: Product }) {
     </Card>
   );
 }
-    
