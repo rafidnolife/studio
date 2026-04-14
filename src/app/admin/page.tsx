@@ -14,9 +14,9 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Settings, Users, Save, Package, ShoppingCart, CheckCircle, XCircle, MapPin, LocateFixed, ExternalLink, Activity } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, Users, Save, Package, ShoppingCart, CheckCircle, XCircle, MapPin, LocateFixed, Activity, LayoutDashboard, ExternalLink } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
@@ -38,6 +38,8 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [mapDialogOpen, setMapDialogOpen] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<{lat: number, lng: number, address: string} | null>(null);
 
   const [formData, setFormData] = useState({
     name: '',
@@ -116,19 +118,22 @@ export default function AdminDashboard() {
       setEditingProduct(null);
       setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''] });
       fetchData();
+    }).catch(err => {
+      console.error(err);
+      toast({ variant: 'destructive', title: 'ব্যর্থ' });
     });
   };
 
   const deleteProduct = async (id: string) => {
-    if (confirm('আপনি কি নিশ্চিত যে পণ্যটি মুছে ফেলতে চান?')) {
-      try {
-        await deleteDoc(doc(db, 'products', id));
-        toast({ title: 'পণ্য মুছে ফেলা হয়েছে' });
-        setProducts(products.filter(p => p.id !== id));
-      } catch (err) {
-        console.error(err);
-        toast({ variant: 'destructive', title: 'ব্যর্থ' });
-      }
+    if (!confirm('আপনি কি নিশ্চিত যে পণ্যটি মুছে ফেলতে চান?')) return;
+    
+    try {
+      await deleteDoc(doc(db, 'products', id));
+      toast({ title: 'পণ্য মুছে ফেলা হয়েছে' });
+      setProducts(prev => prev.filter(p => p.id !== id));
+    } catch (err) {
+      console.error(err);
+      toast({ variant: 'destructive', title: 'ব্যর্থ' });
     }
   };
 
@@ -138,6 +143,7 @@ export default function AdminDashboard() {
       toast({ title: 'সাইট সেটিংস আপডেট করা হয়েছে' });
     } catch (err) {
       console.error(err);
+      toast({ variant: 'destructive', title: 'ব্যর্থ' });
     }
   };
 
@@ -162,7 +168,7 @@ export default function AdminDashboard() {
               <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2rem] border-none shadow-2xl">
                 <DialogHeader>
                   <DialogTitle className="text-2xl font-black">পণ্যের তথ্য</DialogTitle>
-                  <DialogDescription className="font-bold">সঠিক তথ্য দিয়ে পণ্যটি আপডেট করুন।</DialogDescription>
+                  <DialogDescription className="font-bold text-slate-400">সঠিক তথ্য দিয়ে পণ্যটি আপডেট করুন।</DialogDescription>
                 </DialogHeader>
                 <form onSubmit={handleProductSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8 py-6">
                   <div className="space-y-6">
@@ -239,7 +245,7 @@ export default function AdminDashboard() {
                       <TableRow key={o.id} className="hover:bg-primary/5 transition-colors">
                         <TableCell className="py-6">
                           <div className="space-y-2">
-                            <span className="font-black text-slate-900 block">
+                            <span className="font-black text-slate-900 block text-sm md:text-base">
                               {o.items.map((i: any) => `${i.name} (${i.qty})`).join(', ')}
                             </span>
                             <div className="space-y-1.5">
@@ -248,20 +254,23 @@ export default function AdminDashboard() {
                                 {o.location?.address}
                               </p>
                               {o.location?.lat && (
-                                <a 
-                                  href={`https://www.google.com/maps/search/?api=1&query=${o.location.lat},${o.location.lng}`} 
-                                  target="_blank" 
-                                  rel="noopener noreferrer"
-                                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary text-white text-[10px] font-black rounded-full hover:bg-slate-900 transition-all shadow-md"
+                                <Button 
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    setSelectedLocation(o.location);
+                                    setMapDialogOpen(true);
+                                  }}
+                                  className="h-8 rounded-full gap-2 font-black text-[10px] text-primary border-primary/20 hover:bg-primary hover:text-white transition-all"
                                 >
-                                  <LocateFixed className="w-3 h-3" /> ম্যাপে দেখুন
-                                </a>
+                                  <LocateFixed className="w-3.5 h-3.5" /> অ্যাপে ম্যাপ দেখুন
+                                </Button>
                               )}
                             </div>
                           </div>
                         </TableCell>
-                        <TableCell className="font-mono font-bold text-slate-600">{o.phoneNumber}</TableCell>
-                        <TableCell className="font-black text-lg text-primary">৳{o.totalAmount}</TableCell>
+                        <TableCell className="font-mono font-bold text-slate-600 text-sm">{o.phoneNumber}</TableCell>
+                        <TableCell className="font-black text-base md:text-lg text-primary">৳{o.totalAmount}</TableCell>
                         <TableCell>
                           <Badge className={cn(
                             "font-black text-[10px] px-3 py-1 rounded-full border-none shadow-sm", 
@@ -272,13 +281,17 @@ export default function AdminDashboard() {
                             {o.status.toUpperCase()}
                           </Badge>
                         </TableCell>
-                        <TableCell className="text-right space-x-2">
-                          {o.status === 'pending' && (
-                            <div className="flex justify-end gap-2">
-                              <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full text-emerald-500 hover:bg-emerald-50" onClick={() => updateOrderStatus(o.id, 'confirmed')}><CheckCircle className="w-6 h-6" /></Button>
-                              <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full text-red-500 hover:bg-red-50" onClick={() => updateOrderStatus(o.id, 'cancelled')}><XCircle className="w-6 h-6" /></Button>
-                            </div>
-                          )}
+                        <TableCell className="text-right">
+                          <div className="flex justify-end gap-1">
+                            {o.status === 'pending' ? (
+                              <>
+                                <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full text-emerald-500 hover:bg-emerald-50" onClick={() => updateOrderStatus(o.id, 'confirmed')}><CheckCircle className="w-6 h-6" /></Button>
+                                <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full text-red-500 hover:bg-red-50" onClick={() => updateOrderStatus(o.id, 'cancelled')}><XCircle className="w-6 h-6" /></Button>
+                              </>
+                            ) : (
+                              <Badge variant="outline" className="rounded-full text-[9px] uppercase font-black opacity-50">DONE</Badge>
+                            )}
+                          </div>
                         </TableCell>
                       </TableRow>
                     ))}
@@ -306,13 +319,13 @@ export default function AdminDashboard() {
                         <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
                           <img src={p.imageUrls[0]} alt="" className="object-cover w-full h-full" />
                         </div>
-                        <span className="font-black text-slate-900">{p.name}</span>
+                        <span className="font-black text-slate-900 text-sm md:text-base">{p.name}</span>
                       </TableCell>
-                      <TableCell><Badge variant="outline" className="rounded-full font-bold">{p.category}</Badge></TableCell>
-                      <TableCell className="font-black text-lg text-primary">৳{p.discountPrice || p.price}</TableCell>
-                      <TableCell className="text-right space-x-2">
-                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary" onClick={() => { setEditingProduct(p); setFormData(p as any); setProductDialogOpen(true); }}><Pencil className="w-5 h-5" /></Button>
-                        <Button variant="ghost" size="icon" className="rounded-full text-red-500 hover:bg-red-50" onClick={() => deleteProduct(p.id)}><Trash2 className="w-5 h-5" /></Button>
+                      <TableCell><Badge variant="outline" className="rounded-full font-bold text-[10px]">{p.category}</Badge></TableCell>
+                      <TableCell className="font-black text-base md:text-lg text-primary">৳{p.discountPrice || p.price}</TableCell>
+                      <TableCell className="text-right space-x-1">
+                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full hover:bg-primary/10 hover:text-primary" onClick={() => { setEditingProduct(p); setFormData(p as any); setProductDialogOpen(true); }}><Pencil className="w-5 h-5" /></Button>
+                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full text-red-500 hover:bg-red-50" onClick={() => deleteProduct(p.id)}><Trash2 className="w-5 h-5" /></Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -322,7 +335,7 @@ export default function AdminDashboard() {
           </TabsContent>
 
           <TabsContent value="settings">
-            <Card className="rounded-[2.5rem] border-none shadow-2xl p-8 bg-white/80 glass space-y-8 max-w-3xl mx-auto">
+            <Card className="rounded-[2.5rem] border-none shadow-2xl p-6 md:p-10 bg-white/80 glass space-y-8 max-w-3xl mx-auto">
               <div className="flex items-center gap-4 border-b pb-6">
                 <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-lg">
                   <Activity className="w-6 h-6" />
@@ -346,14 +359,53 @@ export default function AdminDashboard() {
                   <Label className="font-black">হোয়াটসঅ্যাপ নম্বর</Label>
                   <Input value={siteSettings.whatsappNumber} onChange={e => setSiteSettings({...siteSettings, whatsappNumber: e.target.value})} className="rounded-xl h-14 font-bold" />
                 </div>
-                <Button onClick={saveSettings} className="h-16 rounded-2xl font-black text-lg gap-2 shadow-xl shadow-primary/20">
+                <Button onClick={saveSettings} className="h-16 rounded-2xl font-black text-lg gap-2 shadow-xl shadow-primary/20 bg-primary">
                   <Save className="w-5 h-5" /> পরিবর্তন সেভ করুন
                 </Button>
               </div>
             </Card>
           </TabsContent>
         </Tabs>
+
+        {/* Integrated Map Dialog */}
+        <Dialog open={mapDialogOpen} onOpenChange={setMapDialogOpen}>
+          <DialogContent className="max-w-4xl h-[80vh] flex flex-col p-0 overflow-hidden rounded-[2rem] border-none shadow-2xl bg-white">
+            <DialogHeader className="p-6 pb-0">
+              <DialogTitle className="text-2xl font-black flex items-center gap-2">
+                <LocateFixed className="text-primary" /> লোকেশন ম্যাপ
+              </DialogTitle>
+              <DialogDescription className="font-bold text-slate-500">
+                {selectedLocation?.address}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex-grow p-4">
+              {selectedLocation && (
+                <iframe
+                  title="Customer Location"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, borderRadius: '1.5rem' }}
+                  src={`https://www.google.com/maps?q=${selectedLocation.lat},${selectedLocation.lng}&z=15&output=embed`}
+                  allowFullScreen
+                />
+              )}
+            </div>
+            <DialogFooter className="p-6 pt-0 flex justify-between items-center bg-slate-50/50">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">
+                GPS: {selectedLocation?.lat.toFixed(6)}, {selectedLocation?.lng.toFixed(6)}
+              </p>
+              <Button 
+                variant="outline" 
+                className="rounded-full font-black text-xs gap-2"
+                onClick={() => window.open(`https://www.google.com/maps/search/?api=1&query=${selectedLocation?.lat},${selectedLocation?.lng}`, '_blank')}
+              >
+                <ExternalLink className="w-4 h-4" /> ফুল ম্যাপে দেখুন
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   );
 }
+    
