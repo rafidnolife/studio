@@ -13,7 +13,7 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
   
-  const fallbackSrc = 'https://placehold.co/800x800?text=Image+Not+Found';
+  const fallbackSrc = 'https://placehold.co/800x800?text=ইমেজ+পাওয়া+যায়নি';
 
   // Basic validation for URL
   const isValidUrl = (url: string) => {
@@ -22,15 +22,13 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
 
   const currentSrc = error || !isValidUrl(src) ? fallbackSrc : src;
 
-  // Reset states when src changes
   useEffect(() => {
     setError(false);
     setLoading(true);
     
-    // Safety timeout to prevent infinite loading spinners
     const timer = setTimeout(() => {
       setLoading(false);
-    }, 8000);
+    }, 10000);
 
     return () => clearTimeout(timer);
   }, [src]);
@@ -42,22 +40,23 @@ export function ImageWithFallback({ src, alt, className, ...props }: ImageWithFa
           <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
         </div>
       )}
-      <Image
+      <img
         src={currentSrc}
         alt={alt || "Product Image"}
         className={cn(
-          "transition-all duration-700 w-full h-full",
+          "transition-all duration-700 w-full h-full object-contain",
           loading ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0',
-          error ? 'object-contain p-8 opacity-40' : 'object-contain'
+          error ? 'opacity-40 grayscale' : 'opacity-100'
         )}
         onError={() => {
-          setError(true);
-          setLoading(false);
+          if (!error) {
+            setError(true);
+            setLoading(false);
+          }
         }}
         onLoad={() => setLoading(false)}
         loading="lazy"
-        // unoptimized={false} is the default, allowing Next.js to resize/optimize images
-        {...props}
+        style={{ width: '100%', height: '100%' }}
       />
     </div>
   );

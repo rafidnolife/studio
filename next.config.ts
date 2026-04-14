@@ -23,6 +23,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: 'images.pexels.com' },
       { protocol: 'https', hostname: 'assets.fbstatic.com' },
       { protocol: 'https', hostname: 'www.siwaklifestyle.com' },
+      { protocol: 'https', hostname: 'siwaklifestyle.com' },
       { protocol: 'https', hostname: 'allmarket.com.bd' },
       { protocol: 'https', hostname: 'www.allmarket.com.bd' },
       { protocol: 'https', hostname: 'gadgetandgear.com' },
@@ -39,6 +40,7 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '**.google.com' },
       { protocol: 'https', hostname: '**.cloudinary.com' },
       { protocol: 'https', hostname: '**.imgix.net' },
+      { protocol: 'https', hostname: '**.wp.com' },
     ],
   },
 };
