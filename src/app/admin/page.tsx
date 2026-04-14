@@ -52,7 +52,9 @@ export default function AdminDashboard() {
     category: '',
     stock: '',
     isFeatured: false,
-    imageUrls: ['']
+    imageUrls: [''],
+    unit: '',
+    variants: ''
   });
 
   useEffect(() => {
@@ -94,7 +96,6 @@ export default function AdminDashboard() {
         toast({ title: `অর্ডার ${status === 'confirmed' ? 'কনফার্ম' : 'ক্যানসেল'} হয়েছে` });
         fetchData();
         
-        // Send notification to customer
         const customerSnap = await getDoc(doc(db, 'users', customerId));
         if (customerSnap.exists()) {
           const customerData = customerSnap.data();
@@ -142,6 +143,7 @@ export default function AdminDashboard() {
       discountPrice: formData.discountPrice ? Number(formData.discountPrice) : null,
       stock: Number(formData.stock),
       imageUrls: formData.imageUrls.filter(u => u.trim() !== ''),
+      variants: formData.variants.split(',').map(v => v.trim()).filter(v => v !== ''),
       updatedAt: serverTimestamp(),
     };
 
@@ -154,7 +156,7 @@ export default function AdminDashboard() {
           toast({ title: 'সফলভাবে সেভ হয়েছে' });
           setProductDialogOpen(false);
           setEditingProduct(null);
-          setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''] });
+          setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''], unit: '', variants: '' });
           fetchData();
         })
         .catch(async (err) => {
@@ -170,7 +172,7 @@ export default function AdminDashboard() {
         .then(() => {
           toast({ title: 'সফলভাবে সেভ হয়েছে' });
           setProductDialogOpen(false);
-          setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''] });
+          setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''], unit: '', variants: '' });
           fetchData();
         })
         .catch(async (err) => {
@@ -267,6 +269,16 @@ export default function AdminDashboard() {
                       <Label className="font-bold text-sm md:text-base">ছবি ইউআরএল</Label>
                       <Input placeholder="https://..." value={formData.imageUrls[0]} onChange={e => setFormData({...formData, imageUrls: [e.target.value]})} required className="rounded-xl h-12" />
                     </div>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label className="font-bold text-sm md:text-base">ইউনিট টাইপ (যেমন: সাইজ, ওজন)</Label>
+                        <Input placeholder="Size" value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} className="rounded-xl h-12" />
+                      </div>
+                      <div className="space-y-2">
+                        <Label className="font-bold text-sm md:text-base">ভেরিয়েন্ট (কমা দিয়ে লিখুন)</Label>
+                        <Input placeholder="M, L, XL" value={formData.variants} onChange={e => setFormData({...formData, variants: e.target.value})} className="rounded-xl h-12" />
+                      </div>
+                    </div>
                   </div>
                   <div className="space-y-4 md:space-y-6">
                     <div className="space-y-2">
@@ -288,7 +300,6 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* Stats Section */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
             { label: 'মোট বিক্রি', value: `৳${stats.totalSales}`, icon: DollarSign, color: 'text-emerald-500', bg: 'bg-emerald-50' },
@@ -347,7 +358,7 @@ export default function AdminDashboard() {
                         <TableCell className="py-4 md:py-6">
                           <div className="space-y-1 md:space-y-2">
                             <span className="font-black text-slate-900 block text-xs md:text-base leading-tight">
-                              {o.items?.map((i: any) => `${i.name} (${i.qty})`).join(', ') || 'পণ্য নেই'}
+                              {o.items?.map((i: any) => `${i.name}${i.variant ? ` (${i.variant})` : ''} (${i.qty})`).join(', ') || 'পণ্য নেই'}
                             </span>
                             <div className="space-y-1">
                               <p className="text-[10px] md:text-xs text-slate-500 font-bold flex items-start gap-1 max-w-[150px] md:max-w-xs truncate">
@@ -428,7 +439,7 @@ export default function AdminDashboard() {
                         <TableCell className="font-black text-sm md:text-lg text-primary">৳{p.discountPrice || p.price}</TableCell>
                         <TableCell className="text-right space-x-1">
                           <div className="flex justify-end gap-1">
-                            <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10 rounded-full hover:bg-primary/10 hover:text-primary" onClick={() => { setEditingProduct(p); setFormData(p as any); setProductDialogOpen(true); }}><Pencil className="w-4 h-4 md:w-5 md:h-5" /></Button>
+                            <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10 rounded-full hover:bg-primary/10 hover:text-primary" onClick={() => { setEditingProduct(p); setFormData({ ...p, variants: p.variants?.join(', ') || '' } as any); setProductDialogOpen(true); }}><Pencil className="w-4 h-4 md:w-5 md:h-5" /></Button>
                             <Button variant="ghost" size="icon" className="h-8 w-8 md:h-10 md:w-10 rounded-full text-red-500 hover:bg-red-50" onClick={() => deleteProduct(p.id)}><Trash2 className="w-4 h-4 md:w-5 md:h-5" /></Button>
                           </div>
                         </TableCell>
@@ -502,7 +513,6 @@ export default function AdminDashboard() {
           </TabsContent>
         </Tabs>
 
-        {/* Enhanced Interactive In-App Map Dialog */}
         <Dialog open={mapDialogOpen} onOpenChange={setMapDialogOpen}>
           <DialogContent className="max-w-5xl w-[95vw] md:w-full h-[80vh] md:h-[85vh] flex flex-col p-0 overflow-hidden rounded-[1.5rem] md:rounded-[2rem] border-none shadow-2xl bg-white">
             <DialogHeader className="p-4 md:p-6 pb-2 md:pb-4 border-b">

@@ -26,6 +26,7 @@ function CheckoutContent() {
 
   const productId = searchParams.get('productId');
   const initialQty = Number(searchParams.get('qty')) || 1;
+  const variant = searchParams.get('variant');
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -125,7 +126,8 @@ function CheckoutContent() {
         id: product?.id,
         name: product?.name,
         price: product?.discountPrice || product?.price,
-        qty: initialQty
+        qty: initialQty,
+        variant: variant || null
       }],
       subtotal,
       deliveryCharge,
@@ -146,7 +148,6 @@ function CheckoutContent() {
         toast({ title: "অডার সফল", description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই কল দেওয়া হবে।" });
         router.push('/orders');
         
-        // Non-blocking notification
         sendAdminNotifications(db, user?.displayName || 'একজন ক্রেতা', total);
       })
       .catch(async (serverError) => {
@@ -268,6 +269,7 @@ function CheckoutContent() {
                 <div className="min-w-0">
                   <h4 className="font-black text-base truncate leading-tight">{product?.name}</h4>
                   <p className="text-sm font-bold text-slate-400 mt-1">পরিমাণ: {initialQty}</p>
+                  {variant && <p className="text-xs font-black text-primary uppercase mt-1">বিকল্প: {variant}</p>}
                 </div>
               </div>
 

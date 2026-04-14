@@ -14,6 +14,8 @@
         "stock": { "type": "number" },
         "imageUrls": { "type": "array", "items": { "type": "string" } },
         "isFeatured": { "type": "boolean" },
+        "unit": { "type": "string", "description": "e.g., Size, Weight, Color" },
+        "variants": { "type": "array", "items": { "type": "string" }, "description": "e.g., ['M', 'L', 'XL'] or ['500g', '1kg']" },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },

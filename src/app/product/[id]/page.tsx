@@ -23,6 +23,7 @@ export default function ProductDetail() {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
+  const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -53,7 +54,16 @@ export default function ProductDetail() {
       router.push('/login');
       return;
     }
-    router.push(`/checkout?productId=${product?.id}&qty=${qty}`);
+    if (product?.variants && product.variants.length > 0 && !selectedVariant) {
+      toast({
+        variant: "destructive",
+        title: "ভেরিয়েন্ট সিলেক্ট করুন",
+        description: `অনুগ্রহ করে একটি ${product.unit || 'বিকল্প'} বেছে নিন।`
+      });
+      return;
+    }
+    const variantParam = selectedVariant ? `&variant=${encodeURIComponent(selectedVariant)}` : '';
+    router.push(`/checkout?productId=${product?.id}&qty=${qty}${variantParam}`);
   };
 
   if (loading) return (
@@ -112,6 +122,28 @@ export default function ProductDetail() {
             </div>
 
             <div className="p-6 md:p-10 bg-white rounded-[2rem] border border-slate-100 shadow-2xl space-y-6">
+              {product.variants && product.variants.length > 0 && (
+                <div className="space-y-3">
+                  <span className="font-black text-slate-800 text-lg">{product.unit || 'বিকল্প'} বেছে নিন:</span>
+                  <div className="flex flex-wrap gap-2">
+                    {product.variants.map((v) => (
+                      <button
+                        key={v}
+                        onClick={() => setSelectedVariant(v)}
+                        className={cn(
+                          "px-4 py-2 rounded-xl font-bold border-2 transition-all",
+                          selectedVariant === v 
+                            ? "bg-primary text-white border-primary shadow-lg scale-105" 
+                            : "bg-slate-50 border-slate-100 text-slate-600 hover:border-primary/30"
+                        )}
+                      >
+                        {v}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               <div className="flex items-center justify-between">
                 <span className="font-black text-slate-800 text-lg">পরিমাণ:</span>
                 <div className="flex items-center gap-6 bg-slate-50 px-6 py-2 rounded-2xl border border-slate-100">

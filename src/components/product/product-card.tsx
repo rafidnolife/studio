@@ -21,6 +21,8 @@ export interface Product {
   stock: number;
   isFeatured?: boolean;
   description?: string;
+  unit?: string;
+  variants?: string[];
 }
 
 export function ProductCard({ product }: { product: Product }) {
@@ -58,7 +60,6 @@ export function ProductCard({ product }: { product: Product }) {
       "group relative overflow-hidden border-none transition-all duration-700 bg-white glass rounded-[2rem] md:rounded-[3rem] flex flex-col h-full shadow-lg hover:shadow-[0_40px_80px_-20px_rgba(16,185,129,0.25)] hover:-translate-y-2",
       product.isFeatured && "ring-1 ring-primary/30"
     )}>
-      {/* Small & Tighter Discount Tag - Won't cover image */}
       {hasDiscount && (
         <div className="absolute top-2 left-2 z-20">
           <Badge className="bg-red-500 text-white border-none px-1.5 py-0.5 rounded-md font-black text-[8px] md:text-[10px] shadow-xl uppercase tracking-tighter">
@@ -67,7 +68,6 @@ export function ProductCard({ product }: { product: Product }) {
         </div>
       )}
       
-      {/* Wishlist Button */}
       <div className="absolute top-2 right-2 z-20">
         <button 
           className={cn(
@@ -80,7 +80,6 @@ export function ProductCard({ product }: { product: Product }) {
         </button>
       </div>
 
-      {/* Product Image - Maximized for visibility */}
       <div className="relative aspect-square overflow-hidden bg-slate-50/50 flex items-center justify-center p-0">
         <Link href={`/product/${product.id}`} className="block w-full h-full relative z-10">
           <div className="relative w-full h-full transition-all duration-700 group-hover:scale-105">
