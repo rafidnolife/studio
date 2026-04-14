@@ -31,6 +31,27 @@
         "createdAt": { "type": "string", "format": "date-time" }
       }
     },
+    "Order": {
+      "title": "Order",
+      "description": "A customer order",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string" },
+        "items": { "type": "array" },
+        "subtotal": { "type": "number" },
+        "deliveryCharge": { "type": "number" },
+        "appCharge": { "type": "number" },
+        "totalAmount": { "type": "number" },
+        "phoneNumber": { "type": "string" },
+        "location": { "type": "object", "properties": {
+          "lat": { "type": "number" },
+          "lng": { "type": "number" },
+          "address": { "type": "string" }
+        }},
+        "status": { "type": "string", "enum": ["pending", "confirmed", "cancelled"] },
+        "createdAt": { "type": "string", "format": "date-time" }
+      }
+    },
     "SiteSettings": {
       "title": "Site Settings",
       "description": "Customizable content for the website",
@@ -54,6 +75,10 @@
     "/users/{userId}": {
       "schema": "UserProfile",
       "description": "User profiles and customer details"
+    },
+    "/orders/{orderId}": {
+      "schema": "Order",
+      "description": "Customer orders"
     },
     "/settings/site": {
       "schema": "SiteSettings",
