@@ -54,6 +54,7 @@ export default function Home() {
       { name: 'অন্যান্য', icon: '📦', color: 'bg-slate-500' },
     ];
     
+    if (!allProducts) return [];
     const existingCatNames = new Set(allProducts.map(p => p.category?.trim()).filter(Boolean));
     return hardcodedCats.filter(cat => existingCatNames.has(cat.name));
   }, [allProducts]);
@@ -63,7 +64,7 @@ export default function Home() {
       <Navbar />
       
       <main className="flex-grow pb-20 pt-8">
-        {/* Minimal Headline - Fully Responsive */}
+        {/* Responsive Headline */}
         <section className="container mx-auto px-4 mb-12">
           <div className="flex items-center gap-3 bg-white/60 glass w-fit max-w-full px-5 md:px-8 py-3 md:py-4 rounded-[1.5rem] md:rounded-[2rem] shadow-xl border-primary/10 overflow-hidden">
             <div className="w-8 h-8 md:w-10 md:h-10 bg-primary/20 rounded-full flex items-center justify-center text-primary shrink-0">

@@ -65,7 +65,6 @@
   scrollbar-width: none;
 }
 
-/* Fix for horizontal scroll on small devices */
 .overflow-x-hidden {
   overflow-x: hidden;
 }

@@ -4,14 +4,18 @@
 import Link from 'next/link';
 import { useUser } from '@/firebase';
 import { Button } from '@/components/ui/button';
-import { Home, ShoppingBag, User, ShieldCheck, Heart, LogIn, Sparkles, Package } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { Home, ShoppingBag, User, ShieldCheck, Heart, LogIn, Package, LogOut } from 'lucide-react';
+import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
+import { signOut } from 'firebase/auth';
+import { useAuth } from '@/firebase';
 
 export function Navbar() {
   const { user, loading } = useUser();
+  const auth = useAuth();
   const pathname = usePathname();
+  const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
@@ -20,13 +24,18 @@ export function Navbar() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  const handleLogout = async () => {
+    await signOut(auth);
+    router.push('/');
+  };
+
   const navItems = [
     { name: 'হোম', href: '/', icon: Home },
     { name: 'সব পণ্য', href: '/products', icon: ShoppingBag },
   ];
 
   if (user) {
-    navItems.push({ name: 'আমার অর্ডার', href: '/orders', icon: Package });
+    navItems.push({ name: 'অর্ডার', href: '/orders', icon: Package });
     navItems.push({ name: 'প্রোফাইল', href: '/profile', icon: User });
   }
 
@@ -41,18 +50,29 @@ export function Navbar() {
     )}>
       <div className="container mx-auto px-4 h-full flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3">
-          <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-primary/20">
-            ড
-          </div>
-          <div className="flex flex-col leading-none hidden sm:flex">
-            <span className="font-black text-2xl tracking-tighter text-slate-900 uppercase">
-              DOKAAN <span className="text-primary">EXPRESS</span>
-            </span>
-            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Jhenaidah Luxury</span>
-          </div>
+          {!loading && user ? (
+            <div className="flex flex-col">
+              <span className="text-[10px] font-black text-primary uppercase tracking-[0.2em]">স্বাগতম</span>
+              <span className="font-black text-lg md:text-2xl text-slate-900 tracking-tighter truncate max-w-[150px] md:max-w-none">
+                {user.displayName?.split(' ')[0]} <span className="text-primary">!</span>
+              </span>
+            </div>
+          ) : (
+            <>
+              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white font-black text-2xl shadow-xl shadow-primary/20">
+                ড
+              </div>
+              <div className="flex flex-col leading-none hidden sm:flex">
+                <span className="font-black text-2xl tracking-tighter text-slate-900 uppercase">
+                  DOKAAN <span className="text-primary">EXPRESS</span>
+                </span>
+                <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Jhenaidah Luxury</span>
+              </div>
+            </>
+          )}
         </Link>
 
-        <div className="hidden md:flex items-center gap-10">
+        <div className="hidden md:flex items-center gap-8">
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -72,21 +92,21 @@ export function Navbar() {
         </div>
 
         <div className="flex items-center gap-2 md:gap-4">
-          <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12" asChild>
+          <Button variant="ghost" size="icon" className="rounded-2xl h-12 w-12 hover:bg-red-50 hover:text-red-500" asChild>
             <Link href="/wishlist">
-              <Heart className="w-6 h-6 text-slate-400" />
+              <Heart className="w-6 h-6" />
             </Link>
           </Button>
           {!loading && !user ? (
             <Button className="rounded-2xl px-8 h-12 font-black text-sm shadow-xl shadow-primary/20 uppercase tracking-widest" asChild>
               <Link href="/login">LOGIN</Link>
             </Button>
-          ) : (
-            <div className="flex items-center gap-3 bg-white/60 glass px-4 py-2 rounded-full border border-primary/10">
-              <User className="w-5 h-5 text-primary" />
-              <span className="font-black text-xs text-slate-900 hidden lg:inline">{user?.displayName || user?.phoneNumber}</span>
-            </div>
-          )}
+          ) : user ? (
+            <Button variant="ghost" onClick={handleLogout} className="rounded-full h-12 w-12 md:w-auto md:px-6 font-black text-red-500 hover:bg-red-50">
+               <LogOut className="w-5 h-5 md:mr-2" />
+               <span className="hidden md:inline">Logout</span>
+            </Button>
+          ) : null}
         </div>
       </div>
 
