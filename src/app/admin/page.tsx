@@ -14,15 +14,13 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Settings, Users, Star, Save, Eye, EyeOff, Sparkles, TrendingUp, Package, Image as ImageIcon, ShoppingCart, CheckCircle, XCircle, MapPin } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, Users, Star, Save, Eye, EyeOff, Sparkles, TrendingUp, Package, Image as ImageIcon, ShoppingCart, CheckCircle, XCircle, MapPin, LocateFixed, ExternalLink } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
-import { errorEmitter } from '@/firebase/error-emitter';
-import { FirestorePermissionError } from '@/firebase/errors';
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useUser();
@@ -41,7 +39,6 @@ export default function AdminDashboard() {
   const [loading, setLoading] = useState(true);
   const [productDialogOpen, setProductDialogOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
 
   const [formData, setFormData] = useState({
     name: '',
@@ -117,8 +114,24 @@ export default function AdminDashboard() {
     action.then(() => {
       toast({ title: 'সফল' });
       setProductDialogOpen(false);
+      setEditingProduct(null);
+      setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''] });
       fetchData();
     });
+  };
+
+  const deleteProduct = async (id: string) => {
+    if (confirm('আপনি কি নিশ্চিত যে পণ্যটি মুছে ফেলতে চান?')) {
+      try {
+        await deleteDoc(doc(db, 'products', id));
+        toast({ title: 'পণ্য মুছে ফেলা হয়েছে' });
+        // Optimistic update
+        setProducts(products.filter(p => p.id !== id));
+      } catch (err) {
+        console.error(err);
+        toast({ variant: 'destructive', title: 'ব্যর্থ', description: 'পণ্যটি মুছে ফেলা সম্ভব হয়নি।' });
+      }
+    }
   };
 
   if (authLoading || !user || user.role !== 'admin') return null;
@@ -128,29 +141,55 @@ export default function AdminDashboard() {
       <Navbar />
       <main className="container mx-auto px-4 py-6 md:py-10 max-w-7xl">
         <header className="mb-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter">অ্যাডমিন <span className="text-primary">প্যানেল</span></h1>
+          <div className="space-y-1">
+            <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter">অ্যাডমিন <span className="text-primary">প্যানেল</span></h1>
+            <p className="text-slate-500 font-bold uppercase tracking-widest text-xs">Dokaan Express Management</p>
+          </div>
           <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="rounded-2xl h-14 px-8 bg-primary font-black text-lg text-white">
-                <Plus className="mr-2" /> নতুন পণ্য
+              <Button className="rounded-2xl h-14 px-8 bg-primary font-black text-lg text-white shadow-xl shadow-primary/20 transition-all hover:scale-105">
+                <Plus className="mr-2" /> নতুন পণ্য যোগ করুন
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2rem]">
-              <DialogHeader><DialogTitle>পণ্যের তথ্য</DialogTitle></DialogHeader>
-              <form onSubmit={handleProductSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 py-6">
-                <div className="space-y-4">
-                  <Input placeholder="নাম" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required />
-                  <Input type="number" placeholder="মূল্য" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required />
-                  <Input placeholder="ক্যাটাগরি" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required />
-                  <Input placeholder="ছবি ইউআরএল" value={formData.imageUrls[0]} onChange={e => setFormData({...formData, imageUrls: [e.target.value]})} required />
-                </div>
-                <div className="space-y-4">
-                  <Textarea placeholder="বিবরণ" value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
-                  <div className="flex items-center space-x-4 p-4 bg-slate-50 rounded-xl">
-                    <Switch checked={formData.isFeatured} onCheckedChange={c => setFormData({...formData, isFeatured: c})} />
-                    <Label className="font-bold">স্পেশাল পণ্য</Label>
+            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2rem] border-none shadow-2xl">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-black">পণ্যের তথ্য</DialogTitle>
+                <DialogDescription className="font-bold">সঠিক তথ্য দিয়ে পণ্যটি আপডেট করুন।</DialogDescription>
+              </DialogHeader>
+              <form onSubmit={handleProductSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-8 py-6">
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="font-bold">পণ্যের নাম</Label>
+                    <Input placeholder="নাম" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required className="rounded-xl h-12" />
                   </div>
-                  <Button type="submit" className="w-full h-14 rounded-xl font-black">সেভ করুন</Button>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label className="font-bold">মূল্য</Label>
+                      <Input type="number" placeholder="৳" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required className="rounded-xl h-12" />
+                    </div>
+                    <div className="space-y-2">
+                      <Label className="font-bold">ক্যাটাগরি</Label>
+                      <Input placeholder="ক্যাটাগরি" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required className="rounded-xl h-12" />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label className="font-bold">ছবি ইউআরএল</Label>
+                    <Input placeholder="https://..." value={formData.imageUrls[0]} onChange={e => setFormData({...formData, imageUrls: [e.target.value]})} required className="rounded-xl h-12" />
+                  </div>
+                </div>
+                <div className="space-y-6">
+                  <div className="space-y-2">
+                    <Label className="font-bold">বিবরণ</Label>
+                    <Textarea placeholder="পণ্যের বিস্তারিত বিবরণ..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="rounded-xl min-h-[120px]" />
+                  </div>
+                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                    <div className="space-y-0.5">
+                      <Label className="font-black">স্পেশাল কালেকশন</Label>
+                      <p className="text-[10px] text-slate-400 font-bold">হোম পেজে হাইলাইট করা হবে</p>
+                    </div>
+                    <Switch checked={formData.isFeatured} onCheckedChange={c => setFormData({...formData, isFeatured: c})} />
+                  </div>
+                  <Button type="submit" className="w-full h-16 rounded-2xl font-black text-xl shadow-lg">পণ্য সেভ করুন</Button>
                 </div>
               </form>
             </DialogContent>
@@ -158,58 +197,110 @@ export default function AdminDashboard() {
         </header>
 
         <Tabs defaultValue="orders" className="space-y-8">
-          <TabsList className="bg-white/60 glass p-1 rounded-full h-16 flex overflow-x-auto">
-            <TabsTrigger value="orders" className="rounded-full px-8 font-black">অর্ডারসমূহ</TabsTrigger>
-            <TabsTrigger value="products" className="rounded-full px-8 font-black">পণ্যসমূহ</TabsTrigger>
-            <TabsTrigger value="customers" className="rounded-full px-8 font-black">ইউজারসমূহ</TabsTrigger>
+          <TabsList className="bg-white/60 glass p-1.5 rounded-full h-20 flex overflow-x-auto scrollbar-hide border border-white/40 shadow-xl">
+            <TabsTrigger value="orders" className="rounded-full px-10 font-black h-full data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+              <ShoppingCart className="w-4 h-4 mr-2" /> অর্ডারসমূহ
+            </TabsTrigger>
+            <TabsTrigger value="products" className="rounded-full px-10 font-black h-full data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+              <Package className="w-4 h-4 mr-2" /> পণ্যসমূহ
+            </TabsTrigger>
+            <TabsTrigger value="customers" className="rounded-full px-10 font-black h-full data-[state=active]:bg-primary data-[state=active]:text-white transition-all">
+              <Users className="w-4 h-4 mr-2" /> ইউজারসমূহ
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="orders">
-            <Card className="rounded-[2rem] border-none shadow-xl overflow-hidden bg-white">
-              <Table>
-                <TableHeader><TableRow><TableHead>অর্ডার তথ্য</TableHead><TableHead>কাস্টমার</TableHead><TableHead>মোট মূল্য</TableHead><TableHead>অবস্থা</TableHead><TableHead className="text-right">অ্যাকশন</TableHead></TableRow></TableHeader>
-                <TableBody>
-                  {orders.map(o => (
-                    <TableRow key={o.id}>
-                      <TableCell className="font-bold">
-                        {o.items.map((i: any) => `${i.name} (${i.qty})`).join(', ')}
-                        <p className="text-xs text-slate-400 flex items-center gap-1"><MapPin className="w-3" /> {o.location.address}</p>
-                      </TableCell>
-                      <TableCell className="font-mono">{o.phoneNumber}</TableCell>
-                      <TableCell className="font-black">৳{o.totalAmount}</TableCell>
-                      <TableCell>
-                        <Badge className={cn("font-black", o.status === 'pending' ? 'bg-amber-100 text-amber-600' : o.status === 'confirmed' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600')}>
-                          {o.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right space-x-2">
-                        {o.status === 'pending' && (
-                          <>
-                            <Button size="icon" variant="ghost" className="text-emerald-500" onClick={() => updateOrderStatus(o.id, 'confirmed')}><CheckCircle /></Button>
-                            <Button size="icon" variant="ghost" className="text-red-500" onClick={() => updateOrderStatus(o.id, 'cancelled')}><XCircle /></Button>
-                          </>
-                        )}
-                      </TableCell>
+            <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white/80 glass">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader className="bg-slate-50/50">
+                    <TableRow className="border-b border-slate-100">
+                      <TableHead className="font-black uppercase tracking-widest text-[10px] py-6">অর্ডার ও লোকেশন</TableHead>
+                      <TableHead className="font-black uppercase tracking-widest text-[10px]">কাস্টমার</TableHead>
+                      <TableHead className="font-black uppercase tracking-widest text-[10px]">মোট মূল্য</TableHead>
+                      <TableHead className="font-black uppercase tracking-widest text-[10px]">অবস্থা</TableHead>
+                      <TableHead className="text-right font-black uppercase tracking-widest text-[10px]">অ্যাকশন</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHeader>
+                  <TableBody>
+                    {orders.map(o => (
+                      <TableRow key={o.id} className="hover:bg-primary/5 transition-colors">
+                        <TableCell className="py-6">
+                          <div className="space-y-2">
+                            <span className="font-black text-slate-900 block">
+                              {o.items.map((i: any) => `${i.name} (${i.qty})`).join(', ')}
+                            </span>
+                            <div className="space-y-1.5">
+                              <p className="text-xs text-slate-500 font-bold flex items-start gap-2 max-w-xs">
+                                <MapPin className="w-3.5 h-3.5 text-primary shrink-0 mt-0.5" /> 
+                                {o.location?.address}
+                              </p>
+                              {o.location?.lat && (
+                                <a 
+                                  href={`https://www.google.com/maps/search/?api=1&query=${o.location.lat},${o.location.lng}`} 
+                                  target="_blank" 
+                                  rel="noopener noreferrer"
+                                  className="inline-flex items-center gap-1.5 px-3 py-1 bg-primary text-white text-[10px] font-black rounded-full hover:bg-slate-900 transition-all shadow-md"
+                                >
+                                  <LocateFixed className="w-3 h-3" /> ম্যাপে দেখুন <ExternalLink className="w-2.5 h-2.5" />
+                                </a>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-mono font-bold text-slate-600">{o.phoneNumber}</TableCell>
+                        <TableCell className="font-black text-lg text-primary">৳{o.totalAmount}</TableCell>
+                        <TableCell>
+                          <Badge className={cn(
+                            "font-black text-[10px] px-3 py-1 rounded-full border-none shadow-sm", 
+                            o.status === 'pending' ? 'bg-amber-100 text-amber-600' : 
+                            o.status === 'confirmed' ? 'bg-emerald-100 text-emerald-600' : 
+                            'bg-red-100 text-red-600'
+                          )}>
+                            {o.status.toUpperCase()}
+                          </Badge>
+                        </TableCell>
+                        <TableCell className="text-right space-x-2">
+                          {o.status === 'pending' && (
+                            <div className="flex justify-end gap-2">
+                              <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full text-emerald-500 hover:bg-emerald-50" onClick={() => updateOrderStatus(o.id, 'confirmed')}><CheckCircle className="w-6 h-6" /></Button>
+                              <Button size="icon" variant="ghost" className="h-10 w-10 rounded-full text-red-500 hover:bg-red-50" onClick={() => updateOrderStatus(o.id, 'cancelled')}><XCircle className="w-6 h-6" /></Button>
+                            </div>
+                          )}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             </Card>
           </TabsContent>
 
           <TabsContent value="products">
-            <Card className="rounded-[2rem] border-none shadow-xl overflow-hidden bg-white">
+            <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white/80 glass">
               <Table>
-                <TableHeader><TableRow><TableHead>পণ্য</TableHead><TableHead>ক্যাটাগরি</TableHead><TableHead>মূল্য</TableHead><TableHead className="text-right">অ্যাকশন</TableHead></TableRow></TableHeader>
+                <TableHeader className="bg-slate-50/50">
+                  <TableRow>
+                    <TableHead className="font-black py-6">পণ্য</TableHead>
+                    <TableHead className="font-black">ক্যাটাগরি</TableHead>
+                    <TableHead className="font-black">মূল্য</TableHead>
+                    <TableHead className="text-right font-black">অ্যাকশন</TableHead>
+                  </TableRow>
+                </TableHeader>
                 <TableBody>
                   {products.map(p => (
-                    <TableRow key={p.id}>
-                      <TableCell className="font-black">{p.name}</TableCell>
-                      <TableCell><Badge variant="outline">{p.category}</Badge></TableCell>
-                      <TableCell className="font-black">৳{p.discountPrice || p.price}</TableCell>
+                    <TableRow key={p.id} className="hover:bg-slate-50/80 transition-all">
+                      <TableCell className="py-6 flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden shrink-0 border border-slate-200">
+                          <img src={p.imageUrls[0]} alt="" className="object-cover w-full h-full" />
+                        </div>
+                        <span className="font-black text-slate-900">{p.name}</span>
+                      </TableCell>
+                      <TableCell><Badge variant="outline" className="rounded-full font-bold">{p.category}</Badge></TableCell>
+                      <TableCell className="font-black text-lg text-primary">৳{p.discountPrice || p.price}</TableCell>
                       <TableCell className="text-right space-x-2">
-                        <Button variant="ghost" size="icon" onClick={() => { setEditingProduct(p); setFormData(p as any); setProductDialogOpen(true); }}><Pencil /></Button>
-                        <Button variant="ghost" size="icon" className="text-red-500" onClick={async () => { if(confirm('মুছে ফেলবেন?')){ await deleteDoc(doc(db, 'products', p.id)); fetchData(); } }}><Trash2 /></Button>
+                        <Button variant="ghost" size="icon" className="rounded-full hover:bg-primary/10 hover:text-primary" onClick={() => { setEditingProduct(p); setFormData(p as any); setProductDialogOpen(true); }}><Pencil className="w-5 h-5" /></Button>
+                        <Button variant="ghost" size="icon" className="rounded-full text-red-500 hover:bg-red-50" onClick={() => deleteProduct(p.id)}><Trash2 className="w-5 h-5" /></Button>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -219,15 +310,25 @@ export default function AdminDashboard() {
           </TabsContent>
           
           <TabsContent value="customers">
-            <Card className="rounded-[2rem] border-none shadow-xl overflow-hidden bg-white">
+            <Card className="rounded-[2.5rem] border-none shadow-2xl overflow-hidden bg-white/80 glass">
               <Table>
-                <TableHeader><TableRow><TableHead>নাম</TableHead><TableHead>ফোন</TableHead><TableHead className="text-right">রোল</TableHead></TableRow></TableHeader>
+                <TableHeader className="bg-slate-50/50">
+                  <TableRow>
+                    <TableHead className="font-black py-6">নাম</TableHead>
+                    <TableHead className="font-black">ফোন নম্বর</TableHead>
+                    <TableHead className="text-right font-black">রোল</TableHead>
+                  </TableRow>
+                </TableHeader>
                 <TableBody>
                   {customers.map(c => (
-                    <TableRow key={c.id}>
-                      <TableCell className="font-black">{c.name}</TableCell>
-                      <TableCell className="font-mono">{c.phoneNumber}</TableCell>
-                      <TableCell className="text-right"><Badge>{c.role}</Badge></TableCell>
+                    <TableRow key={c.id} className="hover:bg-slate-50/80 transition-all">
+                      <TableCell className="font-black py-6 text-slate-900">{c.name}</TableCell>
+                      <TableCell className="font-mono font-bold text-slate-600">{c.phoneNumber}</TableCell>
+                      <TableCell className="text-right">
+                        <Badge className={cn("rounded-full font-black uppercase text-[10px] px-4 py-1", c.role === 'admin' ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-100 text-slate-600')}>
+                          {c.role}
+                        </Badge>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
