@@ -5,7 +5,7 @@ import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
 import { useFirestore, useUser } from '@/firebase';
-import { doc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, where } from 'firebase/firestore';
+import { doc, getDoc, addDoc, collection, serverTimestamp, getDocs, query, where, Firestore } from 'firebase/firestore';
 import { Product } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,6 +14,8 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { MapPin, Phone, CreditCard, ShoppingBag, Truck, Info, LocateFixed, CheckCircle, Navigation } from 'lucide-react';
 import { sendPushNotification } from '@/ai/flows/send-notification-flow';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 function CheckoutContent() {
   const searchParams = useSearchParams();
@@ -84,7 +86,26 @@ function CheckoutContent() {
     }
   };
 
-  const handlePlaceOrder = async () => {
+  const sendAdminNotifications = async (db: Firestore, userName: string, total: number) => {
+    try {
+      const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
+      const adminSnapshot = await getDocs(adminQuery);
+      adminSnapshot.forEach((adminDoc) => {
+        const adminData = adminDoc.data();
+        if (adminData.fcmToken) {
+          sendPushNotification({
+            recipientToken: adminData.fcmToken,
+            title: 'নতুন অর্ডার এসেছে!',
+            body: `${userName} একটি নতুন অর্ডার করেছেন (৳${total})।`
+          }).catch(e => console.error("Notification failed", e));
+        }
+      });
+    } catch (e) {
+      console.error("Admin query failed", e);
+    }
+  };
+
+  const handlePlaceOrder = () => {
     if (!phoneNumber || !address) {
       toast({ variant: "destructive", title: "তথ্য অসম্পূর্ণ", description: "ফোন নম্বর এবং সঠিক ঠিকানা দিন।" });
       return;
@@ -98,51 +119,45 @@ function CheckoutContent() {
     const subtotal = (product?.discountPrice || product?.price || 0) * initialQty;
     const total = subtotal + deliveryCharge + appCharge;
 
-    try {
-      const orderRef = await addDoc(collection(db, 'orders'), {
-        userId: user?.uid,
-        items: [{
-          id: product?.id,
-          name: product?.name,
-          price: product?.discountPrice || product?.price,
-          qty: initialQty
-        }],
-        subtotal,
-        deliveryCharge,
-        appCharge,
-        totalAmount: total,
-        phoneNumber,
-        location: {
-          lat: location.lat,
-          lng: location.lng,
-          address: address
-        },
-        status: 'pending',
-        createdAt: serverTimestamp()
-      });
+    const orderData = {
+      userId: user?.uid,
+      items: [{
+        id: product?.id,
+        name: product?.name,
+        price: product?.discountPrice || product?.price,
+        qty: initialQty
+      }],
+      subtotal,
+      deliveryCharge,
+      appCharge,
+      totalAmount: total,
+      phoneNumber,
+      location: {
+        lat: location.lat,
+        lng: location.lng,
+        address: address
+      },
+      status: 'pending',
+      createdAt: serverTimestamp()
+    };
 
-      // Send notification to admin
-      const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
-      const adminSnapshot = await getDocs(adminQuery);
-      adminSnapshot.forEach(async (adminDoc) => {
-        const adminData = adminDoc.data();
-        if (adminData.fcmToken) {
-          sendPushNotification({
-            recipientToken: adminData.fcmToken,
-            title: 'নতুন অর্ডার এসেছে!',
-            body: `${user?.displayName || 'একজন ক্রেতা'} একটি নতুন অর্ডার করেছেন (৳${total})।`
-          });
-        }
+    addDoc(collection(db, 'orders'), orderData)
+      .then(() => {
+        toast({ title: "অডার সফল", description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই কল দেওয়া হবে।" });
+        router.push('/orders');
+        
+        // Non-blocking notification
+        sendAdminNotifications(db, user?.displayName || 'একজন ক্রেতা', total);
+      })
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: 'orders',
+          operation: 'create',
+          requestResourceData: orderData,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+        setOrderLoading(false);
       });
-
-      toast({ title: "অর্ডার সফল", description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই কল দেওয়া হবে।" });
-      router.push('/orders');
-    } catch (err) {
-      console.error(err);
-      toast({ variant: "destructive", title: "ত্রুটি", description: "অর্ডার করা সম্ভব হয়নি।" });
-    } finally {
-      setOrderLoading(false);
-    }
   };
 
   if (loading || authLoading) return <div className="p-20 text-center font-black text-2xl animate-pulse">প্রসেসিং...</div>;

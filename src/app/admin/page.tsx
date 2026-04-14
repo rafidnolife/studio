@@ -21,6 +21,8 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { sendPushNotification } from '@/ai/flows/send-notification-flow';
+import { errorEmitter } from '@/firebase/error-emitter';
+import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
 
 export default function AdminDashboard() {
   const { user, loading: authLoading } = useUser();
@@ -85,29 +87,51 @@ export default function AdminDashboard() {
     if (user?.role === 'admin') fetchData();
   }, [user, db]);
 
-  const updateOrderStatus = async (orderId: string, customerId: string, status: 'confirmed' | 'cancelled') => {
+  const updateOrderStatus = (orderId: string, customerId: string, status: 'confirmed' | 'cancelled') => {
     const orderRef = doc(db, 'orders', orderId);
-    try {
-      await updateDoc(orderRef, { status });
-      
-      // Send notification to customer
-      const customerSnap = await getDoc(doc(db, 'users', customerId));
-      if (customerSnap.exists()) {
-        const customerData = customerSnap.data();
-        if (customerData.fcmToken) {
-          sendPushNotification({
-            recipientToken: customerData.fcmToken,
-            title: `অর্ডার ${status === 'confirmed' ? 'নিশ্চিত' : 'বাতিল'} হয়েছে`,
-            body: `আপনার অর্ডার #${orderId.slice(0, 8)} এখন ${status === 'confirmed' ? 'কনফার্মড' : 'ক্যানসেলড'}।`
-          });
+    updateDoc(orderRef, { status })
+      .then(async () => {
+        toast({ title: `অর্ডার ${status === 'confirmed' ? 'কনফার্ম' : 'ক্যানসেল'} হয়েছে` });
+        fetchData();
+        
+        // Send notification to customer
+        const customerSnap = await getDoc(doc(db, 'users', customerId));
+        if (customerSnap.exists()) {
+          const customerData = customerSnap.data();
+          if (customerData.fcmToken) {
+            sendPushNotification({
+              recipientToken: customerData.fcmToken,
+              title: `অর্ডার ${status === 'confirmed' ? 'নিশ্চিত' : 'বাতিল'} হয়েছে`,
+              body: `আপনার অর্ডার #${orderId.slice(0, 8)} এখন ${status === 'confirmed' ? 'কনফার্মড' : 'ক্যানসেলড'}।`
+            });
+          }
         }
-      }
+      })
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: orderRef.path,
+          operation: 'update',
+          requestResourceData: { status },
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
+  };
 
-      toast({ title: `অর্ডার ${status === 'confirmed' ? 'কনফার্ম' : 'ক্যানসেল'} হয়েছে` });
-      fetchData();
-    } catch (err) {
-      console.error(err);
-    }
+  const deleteOrder = (id: string) => {
+    if (!confirm('আপনি কি নিশ্চিত যে এই অর্ডারটি মুছে ফেলতে চান?')) return;
+    const orderRef = doc(db, 'orders', id);
+    deleteDoc(orderRef)
+      .then(() => {
+        toast({ title: 'অর্ডারটি মুছে ফেলা হয়েছে' });
+        setOrders(prev => prev.filter(o => o.id !== id));
+      })
+      .catch(async (serverError) => {
+        const permissionError = new FirestorePermissionError({
+          path: orderRef.path,
+          operation: 'delete',
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
   const handleProductSubmit = (e: React.FormEvent) => {
@@ -123,43 +147,74 @@ export default function AdminDashboard() {
 
     if (!editingProduct) data.createdAt = serverTimestamp();
 
-    const action = editingProduct 
-      ? updateDoc(doc(db, 'products', editingProduct.id), data) 
-      : addDoc(collection(db, 'products'), data);
-
-    action.then(() => {
-      toast({ title: 'সফলভাবে সেভ হয়েছে' });
-      setProductDialogOpen(false);
-      setEditingProduct(null);
-      setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''] });
-      fetchData();
-    }).catch(err => {
-      console.error(err);
-      toast({ variant: 'destructive', title: 'ব্যর্থ হয়েছে' });
-    });
+    if (editingProduct) {
+      const pRef = doc(db, 'products', editingProduct.id);
+      updateDoc(pRef, data)
+        .then(() => {
+          toast({ title: 'সফলভাবে সেভ হয়েছে' });
+          setProductDialogOpen(false);
+          setEditingProduct(null);
+          setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''] });
+          fetchData();
+        })
+        .catch(async (err) => {
+          const permissionError = new FirestorePermissionError({
+            path: pRef.path,
+            operation: 'update',
+            requestResourceData: data,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
+    } else {
+      addDoc(collection(db, 'products'), data)
+        .then(() => {
+          toast({ title: 'সফলভাবে সেভ হয়েছে' });
+          setProductDialogOpen(false);
+          setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''] });
+          fetchData();
+        })
+        .catch(async (err) => {
+          const permissionError = new FirestorePermissionError({
+            path: 'products',
+            operation: 'create',
+            requestResourceData: data,
+          } satisfies SecurityRuleContext);
+          errorEmitter.emit('permission-error', permissionError);
+        });
+    }
   };
 
-  const deleteProduct = async (id: string) => {
+  const deleteProduct = (id: string) => {
     if (!confirm('আপনি কি নিশ্চিত যে পণ্যটি মুছে ফেলতে চান?')) return;
-    
-    try {
-      await deleteDoc(doc(db, 'products', id));
-      toast({ title: 'পণ্যটি মুছে ফেলা হয়েছে' });
-      setProducts(prev => prev.filter(p => p.id !== id));
-    } catch (err) {
-      console.error(err);
-      toast({ variant: 'destructive', title: 'মুছে ফেলা সম্ভব হয়নি' });
-    }
+    const pRef = doc(db, 'products', id);
+    deleteDoc(pRef)
+      .then(() => {
+        toast({ title: 'পণ্যটি মুছে ফেলা হয়েছে' });
+        setProducts(prev => prev.filter(p => p.id !== id));
+      })
+      .catch(async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: pRef.path,
+          operation: 'delete',
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
-  const saveSettings = async () => {
-    try {
-      await setDoc(doc(db, 'settings', 'site'), siteSettings, { merge: true });
-      toast({ title: 'সাইট সেটিংস আপডেট করা হয়েছে' });
-    } catch (err) {
-      console.error(err);
-      toast({ variant: 'destructive', title: 'সেটিংস সেভ করতে সমস্যা হয়েছে' });
-    }
+  const saveSettings = () => {
+    const sRef = doc(db, 'settings', 'site');
+    setDoc(sRef, siteSettings, { merge: true })
+      .then(() => {
+        toast({ title: 'সাইট সেটিংস আপডেট করা হয়েছে' });
+      })
+      .catch(async (err) => {
+        const permissionError = new FirestorePermissionError({
+          path: sRef.path,
+          operation: 'write',
+          requestResourceData: siteSettings,
+        } satisfies SecurityRuleContext);
+        errorEmitter.emit('permission-error', permissionError);
+      });
   };
 
   const stats = {
@@ -329,14 +384,15 @@ export default function AdminDashboard() {
                         </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-1">
-                            {o.status === 'pending' ? (
+                            {o.status === 'pending' && (
                               <>
                                 <Button size="icon" variant="ghost" className="h-8 w-8 md:h-10 md:w-10 rounded-full text-emerald-500 hover:bg-emerald-50" onClick={() => updateOrderStatus(o.id, o.userId, 'confirmed')}><CheckCircle className="w-5 h-5" /></Button>
                                 <Button size="icon" variant="ghost" className="h-8 w-8 md:h-10 md:w-10 rounded-full text-red-500 hover:bg-red-50" onClick={() => updateOrderStatus(o.id, o.userId, 'cancelled')}><XCircle className="w-5 h-5" /></Button>
                               </>
-                            ) : (
-                              <Badge variant="outline" className="rounded-full text-[8px] md:text-[9px] uppercase font-black opacity-50 whitespace-nowrap">COMPLETED</Badge>
                             )}
+                            <Button size="icon" variant="ghost" className="h-8 w-8 md:h-10 md:w-10 rounded-full text-slate-400 hover:bg-red-50 hover:text-red-500" onClick={() => deleteOrder(o.id)} title="মুছে ফেলুন">
+                              <Trash2 className="w-4 h-4 md:w-5 md:h-5" />
+                            </Button>
                           </div>
                         </TableCell>
                       </TableRow>
