@@ -14,7 +14,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Settings, Users, Save, Package, ShoppingCart, CheckCircle, XCircle, MapPin, LocateFixed, Activity, ExternalLink, ZoomIn, TrendingUp, DollarSign } from 'lucide-react';
+import { Plus, Pencil, Trash2, Settings, Users, Save, Package, ShoppingCart, CheckCircle, XCircle, MapPin, LocateFixed, Activity, ExternalLink, ZoomIn, DollarSign } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -103,6 +103,7 @@ export default function AdminDashboard() {
         toast({ title: `অর্ডার ${status === 'confirmed' ? 'কনফার্ম' : 'ক্যানসেল'} হয়েছে` });
         fetchData();
         
+        // Notify Customer directly on their phone
         const customerSnap = await getDoc(doc(db, 'users', customerId));
         if (customerSnap.exists()) {
           const customerData = customerSnap.data();

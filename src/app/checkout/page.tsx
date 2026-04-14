@@ -12,7 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
-import { MapPin, Phone, CreditCard, ShoppingBag, Truck, Info, LocateFixed, CheckCircle, Navigation } from 'lucide-react';
+import { MapPin, Phone, CreditCard, ShoppingBag, Truck, LocateFixed, CheckCircle, Navigation } from 'lucide-react';
 import { sendPushNotification } from '@/ai/flows/send-notification-flow';
 import { errorEmitter } from '@/firebase/error-emitter';
 import { FirestorePermissionError, type SecurityRuleContext } from '@/firebase/errors';
@@ -96,8 +96,8 @@ function CheckoutContent() {
         if (adminData.fcmToken) {
           sendPushNotification({
             recipientToken: adminData.fcmToken,
-            title: 'নতুন অর্ডার এসেছে!',
-            body: `${userName} একটি নতুন অর্ডার করেছেন (৳${total})।`
+            title: 'নতুন অর্ডার এসেছে! 🔔',
+            body: `${userName} একটি নতুন অর্ডার করেছেন (৳${total})। এখনই চেক করুন!`
           }).catch(e => console.error("Notification failed", e));
         }
       });
@@ -148,6 +148,7 @@ function CheckoutContent() {
         toast({ title: "অডার সফল", description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই কল দেওয়া হবে।" });
         router.push('/orders');
         
+        // Notify Admin directly on their phone
         sendAdminNotifications(db, user?.displayName || 'একজন ক্রেতা', total);
       })
       .catch(async (serverError) => {
