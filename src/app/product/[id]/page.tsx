@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle, Info, Zap, ShieldCheck, ArrowLeft, ShoppingCart, MapPin, Truck, ChevronRight } from 'lucide-react';
+import { CheckCircle, Info, ShoppingCart, Truck, ArrowLeft, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -90,15 +90,16 @@ export default function ProductDetail() {
   };
 
   if (loading) return (
-    <div className="min-h-screen flex flex-col">
+    <div className="min-h-screen flex flex-col bg-slate-50">
       <Navbar />
-      <div className="container mx-auto px-4 py-8 lg:py-16 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-20">
-          <Skeleton className="aspect-square w-full rounded-[2.5rem]" />
-          <div className="space-y-6">
-            <Skeleton className="h-12 w-3/4" />
+      <div className="container mx-auto px-4 py-8 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          <Skeleton className="aspect-square w-full rounded-2xl" />
+          <div className="space-y-4">
+            <Skeleton className="h-10 w-3/4" />
             <Skeleton className="h-6 w-1/4" />
-            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-24 w-full" />
+            <Skeleton className="h-12 w-full" />
           </div>
         </div>
       </div>
@@ -108,11 +109,11 @@ export default function ProductDetail() {
   if (!product) return (
     <div className="min-h-screen flex flex-col">
       <Navbar />
-      <div className="flex-grow flex flex-col items-center justify-center p-8 text-center space-y-6">
-        <Info className="w-10 h-10 text-slate-400" />
-        <h2 className="text-2xl font-black text-slate-800">পণ্যটি খুঁজে পাওয়া যায়নি!</h2>
+      <div className="flex-grow flex flex-col items-center justify-center p-8 text-center space-y-4">
+        <Info className="w-12 h-12 text-slate-300" />
+        <h2 className="text-xl font-bold text-slate-800">পণ্যটি খুঁজে পাওয়া যায়নি!</h2>
         <Button onClick={() => router.push('/products')} variant="outline" className="rounded-full">
-          <ArrowLeft className="mr-2" /> সব পণ্য দেখুন
+          <ArrowLeft className="mr-2 w-4 h-4" /> সব পণ্য দেখুন
         </Button>
       </div>
     </div>
@@ -121,32 +122,33 @@ export default function ProductDetail() {
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
 
   return (
-    <div className="min-h-screen pb-24 md:pb-12 bg-[#F8FAFC]">
+    <div className="min-h-screen pb-20 bg-slate-50">
       <Navbar />
-      <main className="container mx-auto px-4 py-6 md:py-12 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-start">
-          <div className="space-y-6">
-            <div className="relative aspect-square w-full rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-white border border-slate-100 shadow-2xl transition-all duration-700">
+      <main className="container mx-auto px-4 py-6 md:py-10 max-w-6xl">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 lg:gap-12 items-start">
+          {/* Left: Images */}
+          <div className="space-y-4 sticky top-24">
+            <div className="relative aspect-square w-full rounded-2xl md:rounded-[2rem] overflow-hidden bg-white border shadow-sm">
               <ImageWithFallback 
                 src={product.imageUrls[activeImageIndex]} 
                 alt={product.name} 
-                className="object-contain p-4 md:p-12" 
+                className="object-contain p-4 md:p-8" 
               />
               {hasDiscount && (
-                <Badge className="absolute top-6 left-6 bg-red-500 text-white font-black px-6 py-2 rounded-2xl text-lg shadow-xl border-none">
+                <Badge className="absolute top-4 left-4 bg-red-500 text-white font-black px-3 py-1 rounded-lg text-xs shadow-md border-none">
                   {Math.round(((product.price - product.discountPrice!) / product.price) * 100)}% ছাড়
                 </Badge>
               )}
             </div>
             
-            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide px-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
               {product.imageUrls.map((url, idx) => (
                 <button
                   key={idx}
                   onClick={() => setActiveImageIndex(idx)}
                   className={cn(
-                    "w-20 h-20 md:w-28 md:h-28 rounded-[1.5rem] overflow-hidden bg-white border-4 transition-all shrink-0 shadow-lg",
-                    activeImageIndex === idx ? "border-primary scale-110 shadow-primary/20" : "border-transparent opacity-60 grayscale hover:opacity-100 hover:grayscale-0"
+                    "w-16 h-16 md:w-20 md:h-20 rounded-xl overflow-hidden bg-white border-2 transition-all shrink-0",
+                    activeImageIndex === idx ? "border-primary shadow-md scale-105" : "border-slate-100 opacity-60 hover:opacity-100"
                   )}
                 >
                   <img src={url} alt="" className="object-cover w-full h-full" />
@@ -155,39 +157,42 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          <div className="flex flex-col space-y-8 md:space-y-10">
-            <div className="space-y-4">
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-black px-6 py-2 rounded-full uppercase tracking-[0.2em] text-[10px] md:text-xs">{product.category}</Badge>
-              <h1 className="text-4xl md:text-6xl font-black text-slate-900 leading-none tracking-tighter">{product.name}</h1>
-              <div className="flex items-center gap-6">
-                <span className="text-4xl md:text-6xl font-black text-primary">৳{hasDiscount ? product.discountPrice : product.price}</span>
-                {hasDiscount && <span className="text-xl md:text-2xl text-slate-300 line-through font-bold">৳{product.price}</span>}
+          {/* Right: Info */}
+          <div className="flex flex-col space-y-6">
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-bold px-3 py-0.5 rounded-full text-[10px] uppercase tracking-wider">{product.category}</Badge>
+                {product.stock > 0 ? (
+                  <Badge className="bg-emerald-50 text-emerald-600 border-none font-bold text-[10px] px-3 py-0.5 rounded-full">স্টকে আছে</Badge>
+                ) : (
+                  <Badge variant="destructive" className="font-bold text-[10px] px-3 py-0.5 rounded-full">স্টক আউট</Badge>
+                )}
+              </div>
+              <h1 className="text-2xl md:text-3xl font-black text-slate-900 leading-tight tracking-tight">{product.name}</h1>
+              <div className="flex items-center gap-4">
+                <span className="text-3xl md:text-4xl font-black text-primary">৳{hasDiscount ? product.discountPrice : product.price}</span>
+                {hasDiscount && <span className="text-lg text-slate-300 line-through font-bold">৳{product.price}</span>}
               </div>
             </div>
 
-            <Card className="p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border-none shadow-2xl bg-white space-y-10">
+            <Card className="p-5 md:p-8 rounded-[1.5rem] border-none shadow-lg bg-white space-y-6">
               {product.variants && product.variants.length > 0 && (
-                <div className="space-y-5">
-                  <div className="flex items-center justify-between">
-                    <span className="font-black text-slate-800 text-xl">{product.unit || 'বিকল্প'} বেছে নিন:</span>
-                    <Badge variant="outline" className="rounded-full font-black text-[10px] tracking-widest text-primary border-primary/20 bg-primary/5 px-4 py-1.5">
-                      {selectedVariant || 'REQUIRED'}
-                    </Badge>
-                  </div>
-                  <div className="flex flex-wrap gap-3">
+                <div className="space-y-3">
+                  <span className="font-bold text-slate-700 text-sm">{product.unit || 'বিকল্প'} বেছে নিন:</span>
+                  <div className="flex flex-wrap gap-2">
                     {product.variants.map((v) => (
                       <button
                         key={v}
                         onClick={() => setSelectedVariant(v)}
                         className={cn(
-                          "px-6 py-4 rounded-2xl font-black text-sm md:text-lg border-2 transition-all flex items-center gap-2",
+                          "px-4 py-2 rounded-xl font-bold text-xs md:text-sm border transition-all flex items-center gap-2",
                           selectedVariant === v 
-                            ? "bg-primary text-white border-primary shadow-2xl scale-105 shadow-primary/30" 
-                            : "bg-slate-50 border-slate-100 text-slate-600 hover:border-primary/30"
+                            ? "bg-primary text-white border-primary shadow-md" 
+                            : "bg-slate-50 border-slate-100 text-slate-600 hover:border-primary/20"
                         )}
                       >
                         {v}
-                        {selectedVariant === v && <CheckCircle className="w-5 h-5" />}
+                        {selectedVariant === v && <CheckCircle className="w-3 h-3" />}
                       </button>
                     ))}
                   </div>
@@ -195,61 +200,59 @@ export default function ProductDetail() {
               )}
 
               {product.colors && product.colors.length > 0 && (
-                <div className="space-y-5">
-                  <span className="font-black text-slate-800 text-xl">কালার বেছে নিন:</span>
-                  <div className="flex flex-wrap gap-3">
+                <div className="space-y-3">
+                  <span className="font-bold text-slate-700 text-sm">কালার বেছে নিন:</span>
+                  <div className="flex flex-wrap gap-2">
                     {product.colors.map((c) => (
                       <button
                         key={c}
                         onClick={() => setSelectedColor(c)}
                         className={cn(
-                          "px-6 py-4 rounded-2xl font-black text-sm md:text-lg border-2 transition-all flex items-center gap-2",
+                          "px-4 py-2 rounded-xl font-bold text-xs md:text-sm border transition-all flex items-center gap-2",
                           selectedColor === c 
-                            ? "bg-primary text-white border-primary shadow-2xl scale-105 shadow-primary/30" 
-                            : "bg-slate-50 border-slate-100 text-slate-600 hover:border-primary/30"
+                            ? "bg-primary text-white border-primary shadow-md" 
+                            : "bg-slate-50 border-slate-100 text-slate-600 hover:border-primary/20"
                         )}
                       >
                         {c}
-                        {selectedColor === c && <CheckCircle className="w-5 h-5" />}
+                        {selectedColor === c && <CheckCircle className="w-3 h-3" />}
                       </button>
                     ))}
                   </div>
                 </div>
               )}
 
-              <div className="flex items-center justify-between">
-                <span className="font-black text-slate-800 text-xl">পরিমাণ:</span>
-                <div className="flex items-center gap-8 bg-slate-50 px-8 py-3 rounded-3xl border-none shadow-inner">
-                  <button onClick={() => setQty(q => Math.max(1, q - 1))} className="text-3xl font-black text-slate-400 hover:text-primary transition-colors">-</button>
-                  <span className="text-3xl font-black w-10 text-center text-slate-900">{qty}</span>
-                  <button onClick={() => setQty(q => q + 1)} className="text-3xl font-black text-slate-400 hover:text-primary transition-colors">+</button>
+              <div className="flex items-center justify-between pt-2 border-t border-slate-50">
+                <span className="font-bold text-slate-700 text-sm">পরিমাণ:</span>
+                <div className="flex items-center gap-6 bg-slate-50 px-4 py-2 rounded-xl border">
+                  <button onClick={() => setQty(q => Math.max(1, q - 1))} className="text-xl font-bold text-slate-400 hover:text-primary">-</button>
+                  <span className="text-lg font-black w-6 text-center text-slate-900">{qty}</span>
+                  <button onClick={() => setQty(q => q + 1)} className="text-xl font-bold text-slate-400 hover:text-primary">+</button>
                 </div>
               </div>
               
-              <div className="space-y-6 pt-4">
+              <div className="space-y-3 pt-2">
                 <Button 
                   onClick={handleOrderRedirect} 
                   disabled={product.stock <= 0}
-                  className="w-full h-20 md:h-24 rounded-[1.5rem] md:rounded-[2rem] text-2xl md:text-3xl font-black gap-6 shadow-[0_25px_50px_-12px_rgba(16,185,129,0.4)] bg-primary group transition-all active:scale-95"
+                  className="w-full h-14 md:h-16 rounded-xl md:rounded-2xl text-lg md:text-xl font-black gap-3 shadow-lg bg-primary transition-all active:scale-95"
                 >
-                  <ShoppingCart className="w-8 h-8 md:w-10 md:h-10 group-hover:rotate-12 transition-transform" />
+                  <ShoppingCart className="w-5 h-5 md:w-6 md:h-6" />
                   অর্ডার করুন
                 </Button>
-                <div className="flex items-center justify-center gap-3 text-xs md:text-sm text-primary font-black uppercase tracking-widest">
-                  <Truck className="w-5 h-5 animate-bounce-horizontal" />
+                <div className="flex items-center justify-center gap-2 text-[10px] md:text-xs text-slate-400 font-bold uppercase tracking-widest">
+                  <Truck className="w-4 h-4 text-primary" />
                   সারা বাংলাদেশে ক্যাশ অন ডেলিভারি
                 </div>
               </div>
             </Card>
 
-            <div className="space-y-6">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-lg">
-                   <Info className="w-6 h-6" />
-                </div>
-                <h3 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter">পণ্যের বিবরণ</h3>
+            <div className="space-y-3">
+              <div className="flex items-center gap-2 text-slate-800 font-bold border-b pb-2">
+                 <Info className="w-4 h-4 text-primary" />
+                 <span>পণ্যের বিবরণ</span>
               </div>
-              <p className="text-slate-600 leading-relaxed font-bold text-lg md:text-xl bg-white/70 glass p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-xl">
+              <p className="text-slate-600 leading-relaxed text-sm md:text-base bg-white p-5 rounded-2xl border shadow-sm">
                 {product.description || 'এই পণ্যটির কোনো বিস্তারিত বিবরণ বর্তমানে পাওয়া যায়নি। তবে এটি অত্যন্ত প্রিমিয়াম কোয়ালিটির পণ্য যা সরাসরি আমদানিকৃত।'}
               </p>
             </div>

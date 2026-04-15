@@ -61,84 +61,82 @@ function ProductCardComponent({ product }: { product: Product }) {
 
   return (
     <Card className={cn(
-      "group relative overflow-hidden border-none transition-all duration-700 bg-white glass rounded-[2rem] md:rounded-[3rem] flex flex-col h-full shadow-lg hover:shadow-[0_40px_80px_-20px_rgba(16,185,129,0.25)] hover:-translate-y-2",
-      product.isFeatured && "ring-1 ring-primary/30"
+      "group relative overflow-hidden border-none transition-all duration-500 bg-white rounded-[1.5rem] md:rounded-[2rem] flex flex-col h-full shadow-md hover:shadow-xl",
+      product.isFeatured && "ring-1 ring-primary/20"
     )}>
       {hasDiscount && (
-        <div className="absolute top-4 left-4 z-20">
-          <Badge className="bg-red-500 text-white border-none px-3 py-1 rounded-xl font-black text-[10px] md:text-xs shadow-xl uppercase tracking-widest">
+        <div className="absolute top-3 left-3 z-20">
+          <Badge className="bg-red-500 text-white border-none px-2 py-0.5 rounded-lg font-black text-[9px] md:text-[10px] uppercase">
             {discountPercent}% OFF
           </Badge>
         </div>
       )}
       
-      <div className="absolute top-4 right-4 z-20">
+      <div className="absolute top-3 right-3 z-20">
         <button 
           className={cn(
-            "rounded-2xl h-10 w-10 md:h-14 md:w-14 bg-white/80 backdrop-blur-xl flex items-center justify-center transition-all hover:scale-110 shadow-lg border border-white/50",
+            "rounded-xl h-8 w-8 md:h-10 md:w-10 bg-white/90 backdrop-blur-sm flex items-center justify-center transition-all hover:scale-110 shadow-sm border border-white/50",
             isWishlisted ? "text-red-500" : "text-slate-400"
           )}
           onClick={toggleWishlist}
         >
-          <Heart className={cn("w-5 h-5 md:w-7 md:h-7", isWishlisted && "fill-current")} />
+          <Heart className={cn("w-4 h-4 md:w-5 md:h-5", isWishlisted && "fill-current")} />
         </button>
       </div>
 
-      <div className="relative aspect-square overflow-hidden bg-slate-50/50 flex items-center justify-center p-0">
-        <Link href={`/product/${product.id}`} className="block w-full h-full relative z-10">
-          <div className="relative w-full h-full transition-all duration-1000 group-hover:scale-110">
-             <ImageWithFallback
-                src={displayImage}
-                alt={product.name}
-                className="object-contain drop-shadow-[0_15px_30px_rgba(0,0,0,0.1)] group-hover:drop-shadow-[0_30px_50px_rgba(0,0,0,0.2)] p-4 md:p-8"
-              />
-          </div>
-        </Link>
+      <Link href={`/product/${product.id}`} className="block relative aspect-square overflow-hidden bg-slate-50/30">
+        <div className="w-full h-full transition-all duration-700 group-hover:scale-105">
+           <ImageWithFallback
+              src={displayImage}
+              alt={product.name}
+              className="object-contain p-2 md:p-3" 
+            />
+        </div>
         
         {product.stock <= 0 && (
-          <div className="absolute inset-0 bg-white/80 flex items-center justify-center backdrop-blur-sm z-30">
-            <span className="text-slate-900 border-slate-900 border-4 font-black text-xs md:text-xl px-6 py-2 rounded-2xl uppercase tracking-[0.2em] rotate-12 shadow-2xl">
+          <div className="absolute inset-0 bg-white/60 flex items-center justify-center backdrop-blur-[2px] z-30">
+            <span className="text-slate-900 border-slate-900 border-2 font-black text-[10px] md:text-sm px-3 py-1 rounded-lg uppercase tracking-widest rotate-12 shadow-lg bg-white/80">
               STOCK OUT
             </span>
           </div>
         )}
-      </div>
+      </Link>
 
-      <CardContent className="p-4 md:p-8 flex flex-col flex-grow space-y-3 md:space-y-6 bg-white/40">
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[8px] md:text-[10px] font-black text-primary/70 uppercase tracking-widest px-2 py-1 bg-primary/5 rounded-lg border border-primary/10">
+      <CardContent className="p-3 md:p-5 flex flex-col flex-grow space-y-2">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-1.5">
+            <span className="text-[7px] md:text-[9px] font-black text-primary/80 uppercase tracking-widest px-1.5 py-0.5 bg-primary/5 rounded border border-primary/10">
               {product.category}
             </span>
             {product.isFeatured && (
-              <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[7px] md:text-[10px] px-2 py-1 rounded-full flex items-center gap-1 shadow-sm">
-                <Sparkles className="w-2.5 h-2.5" /> SPECIAL
+              <Badge className="bg-amber-100 text-amber-600 border-none font-black text-[7px] md:text-[9px] px-1.5 py-0.5 rounded-full flex items-center gap-0.5">
+                <Sparkles className="w-2 h-2" /> SPECIAL
               </Badge>
             )}
           </div>
           <Link href={`/product/${product.id}`}>
-            <h3 className="font-black text-xs md:text-2xl text-slate-900 line-clamp-1 leading-tight group-hover:text-primary transition-colors tracking-tighter">
+            <h3 className="font-bold text-[11px] md:text-lg text-slate-800 line-clamp-1 leading-tight group-hover:text-primary transition-colors">
               {product.name}
             </h3>
           </Link>
         </div>
         
-        <div className="pt-2 mt-auto flex items-center justify-between gap-2">
+        <div className="pt-1 mt-auto flex items-center justify-between gap-1">
           <div className="flex flex-col">
-            <div className="flex items-baseline gap-1 md:gap-3">
-              <span className="font-black text-base md:text-3xl text-slate-900">
+            <div className="flex items-baseline gap-1 md:gap-2">
+              <span className="font-black text-xs md:text-xl text-slate-900">
                 ৳{hasDiscount ? product.discountPrice : product.price}
               </span>
               {hasDiscount && (
-                <span className="text-[10px] md:text-sm text-slate-300 line-through font-bold">
+                <span className="text-[9px] md:text-xs text-slate-300 line-through font-bold">
                   ৳{product.price}
                 </span>
               )}
             </div>
           </div>
-          <Button size="icon" className="h-9 w-9 md:h-16 md:w-16 rounded-xl md:rounded-[1.5rem] shadow-xl shadow-primary/20 bg-primary group-hover:scale-110 transition-all border-none shrink-0" asChild>
+          <Button size="icon" className="h-7 w-7 md:h-10 md:w-10 rounded-lg md:rounded-xl shadow-md shadow-primary/10 bg-primary group-hover:translate-x-0.5 transition-all border-none" asChild>
              <Link href={`/product/${product.id}`}>
-              <ArrowRight className="w-5 h-5 md:w-8 md:h-8 text-white" />
+              <ArrowRight className="w-4 h-4 md:w-5 md:h-5 text-white" />
              </Link>
           </Button>
         </div>
