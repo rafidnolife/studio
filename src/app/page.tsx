@@ -111,34 +111,33 @@ export default function Home() {
         </section>
 
         {settings.apkUrl && (
-          <section className="container mx-auto px-4 mb-12 md:mb-20">
-            <div className="relative overflow-hidden bg-slate-900 rounded-[2rem] md:rounded-[3rem] p-8 md:p-16 text-white shadow-2xl flex flex-col md:flex-row items-center gap-10">
-              <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 blur-[100px] rounded-full -mr-20 -mt-20"></div>
-              <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/10 blur-[80px] rounded-full -ml-20 -mb-20"></div>
+          <section className="container mx-auto px-4 mb-10 md:mb-16">
+            <div className="relative overflow-hidden bg-slate-900 rounded-[2rem] p-6 md:p-12 text-white shadow-2xl flex flex-col md:flex-row items-center gap-6 md:gap-12">
+              <div className="absolute top-0 right-0 w-48 h-48 bg-primary/20 blur-[80px] rounded-full -mr-16 -mt-16"></div>
               
-              <div className="relative z-10 w-24 h-24 md:w-40 md:h-40 bg-white/10 backdrop-blur-xl rounded-[2rem] flex items-center justify-center border border-white/20 shadow-2xl shrink-0 animate-bounce-slow">
-                <Smartphone className="w-12 h-12 md:w-20 md:h-20 text-primary" />
+              <div className="relative z-10 w-20 h-20 md:w-28 md:h-28 bg-white/10 backdrop-blur-xl rounded-[1.5rem] flex items-center justify-center border border-white/20 shadow-2xl shrink-0">
+                <Smartphone className="w-10 h-10 md:w-16 md:h-16 text-primary" />
               </div>
               
-              <div className="relative z-10 flex-grow text-center md:text-left space-y-4 md:space-y-6">
-                <div className="space-y-2">
-                  <Badge className="bg-primary text-white border-none font-black text-[10px] md:text-xs tracking-widest px-4 py-1.5 rounded-full">OFFICIAL APP</Badge>
-                  <h2 className="text-3xl md:text-6xl font-black tracking-tighter leading-none">এখনই <span className="text-primary">অ্যাপটি</span> ডাউনলোড করুন!</h2>
-                  <p className="text-slate-400 font-bold text-sm md:text-lg max-w-xl">সবচেয়ে দ্রুত কেনাকাটার অভিজ্ঞতা এবং স্পেশাল অফার পেতে আমাদের অফিসিয়াল অ্যান্ড্রয়েড অ্যাপটি ব্যবহার করুন।</p>
+              <div className="relative z-10 flex-grow text-center md:text-left space-y-4">
+                <div className="space-y-1.5">
+                  <Badge className="bg-primary text-white border-none font-black text-[9px] tracking-widest px-3 py-1 rounded-full uppercase">Official App</Badge>
+                  <h2 className="text-2xl md:text-4xl font-black tracking-tight leading-tight">এখনই <span className="text-primary">অ্যাপটি</span> ডাউনলোড করুন!</h2>
+                  <p className="text-slate-400 font-bold text-xs md:text-sm max-w-md">সবচেয়ে দ্রুত কেনাকাটার অভিজ্ঞতা পেতে আমাদের অফিসিয়াল অ্যান্ড্রয়েড অ্যাপটি ব্যবহার করুন।</p>
                 </div>
                 
                 <div className="flex flex-col sm:flex-row items-center gap-4">
                   <Button 
                     asChild 
-                    className="h-16 md:h-20 px-10 md:px-14 rounded-2xl md:rounded-[1.5rem] bg-primary text-white font-black text-xl md:text-2xl gap-3 shadow-2xl shadow-primary/40 hover:scale-105 transition-all w-full sm:w-auto"
+                    className="h-12 md:h-14 px-8 md:px-10 rounded-xl bg-primary text-white font-black text-lg gap-2 shadow-xl shadow-primary/30 hover:scale-105 transition-all w-full sm:w-auto"
                   >
                     <a href={settings.apkUrl} target="_blank" rel="noopener noreferrer">
-                      <Download className="w-6 h-6 md:w-8 md:h-8" /> ডাউনলোড অ্যাপ
+                      <Download className="w-5 h-5" /> ডাউনলোড অ্যাপ
                     </a>
                   </Button>
-                  <div className="text-[10px] md:text-xs font-black text-slate-500 uppercase tracking-widest text-center sm:text-left">
-                    * ডাউনলোড করার পর ইনস্টল করুন <br className="hidden sm:block" /> (Enable "Install from Unknown Sources")
-                  </div>
+                  <span className="text-[9px] font-black text-slate-500 uppercase tracking-widest text-center sm:text-left">
+                    * ডাউনলোড করার পর ইনস্টল করুন
+                  </span>
                 </div>
               </div>
             </div>
