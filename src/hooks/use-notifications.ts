@@ -11,15 +11,25 @@ export function useNotifications() {
   const db = useFirestore();
   const { toast } = useToast();
   
+  // Track when the hook was mounted to avoid showing old notifications
   const mountedAt = useRef(Date.now());
 
   useEffect(() => {
     if (!user || !db) return;
 
+    // Request notification permission as soon as user is logged in
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        Notification.requestPermission();
+      }
+    }
+
+    // Query for unread notifications for the current user
     const q = query(
       collection(db, 'notifications'),
       where('recipientId', '==', user.uid),
-      limit(20)
+      where('read', '==', false),
+      limit(10)
     );
 
     const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -28,40 +38,47 @@ export function useNotifications() {
           const data = change.doc.data();
           const createdAt = data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now();
           
-          if (!data.read && createdAt > mountedAt.current - 5000) {
-            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
-              try {
-                new Notification(data.title, {
-                  body: data.body,
-                  icon: 'https://picsum.photos/seed/dokaan/100/100',
-                });
-                
-                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                audio.play().catch(e => console.log('Audio play failed', e));
-              } catch (e) {
-                console.error('Browser notification failed', e);
-              }
-            }
-
+          // Only show if it's unread and was created after the app was loaded
+          if (!data.read && createdAt > mountedAt.current - 10000) {
+            
+            // 1. Show In-App Toast
             toast({
               title: data.title,
               description: data.body,
             });
 
+            // 2. Trigger Original Phone/System Notification
+            if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
+              try {
+                const n = new Notification(data.title, {
+                  body: data.body,
+                  icon: 'https://picsum.photos/seed/dokaan/192/192',
+                  tag: change.doc.id, // Prevent duplicate notification grouping issues
+                  requireInteraction: true,
+                });
+                
+                // Play notification sound
+                const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                audio.play().catch(e => console.log('Audio playback blocked by browser', e));
+                
+                n.onclick = () => {
+                  window.focus();
+                  n.close();
+                };
+              } catch (e) {
+                console.error('Failed to trigger system notification:', e);
+              }
+            }
+
+            // Mark as read in Firestore so it doesn't trigger again
             const notificationRef = doc(db, 'notifications', change.doc.id);
-            updateDoc(notificationRef, { read: true }).catch(err => console.error('Update failed', err));
+            updateDoc(notificationRef, { read: true }).catch(err => console.error('Failed to update read status', err));
           }
         }
       });
     }, (error: any) => {
       console.error('Notification listener error:', error.message);
     });
-
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      if (Notification.permission === 'default') {
-        Notification.requestPermission();
-      }
-    }
 
     return () => unsubscribe();
   }, [user, db, toast]);
