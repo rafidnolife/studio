@@ -9,6 +9,7 @@ import { doc, getDoc } from 'firebase/firestore';
 import { Product } from '@/components/product/product-card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Card } from '@/components/ui/card';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Skeleton } from '@/components/ui/skeleton';
 import { CheckCircle, Info, Zap, ShieldCheck, ArrowLeft, ShoppingCart, MapPin, Truck, ChevronRight } from 'lucide-react';
