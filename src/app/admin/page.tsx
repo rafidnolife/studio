@@ -271,37 +271,37 @@ export default function AdminDashboard() {
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="font-bold">পণ্যের নাম</Label>
-                    <Input placeholder="নাম" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required className="rounded-xl h-12" />
+                    <input placeholder="নাম" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required className="rounded-xl h-12 w-full border border-input bg-background px-3" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label className="font-bold">মূল্য (৳)</Label>
-                      <Input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required className="rounded-xl h-12" />
+                      <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required className="rounded-xl h-12 w-full border border-input bg-background px-3" />
                     </div>
                     <div className="space-y-2">
                       <Label className="font-bold">ক্যাটাগরি</Label>
-                      <Input value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required className="rounded-xl h-12" />
+                      <input value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required className="rounded-xl h-12 w-full border border-input bg-background px-3" />
                     </div>
                   </div>
                   <div className="space-y-2">
                     <Label className="font-bold">ছবি ইউআরএল</Label>
-                    <Input value={formData.imageUrls[0]} onChange={e => setFormData({...formData, imageUrls: [e.target.value]})} className="rounded-xl h-12" />
+                    <input value={formData.imageUrls[0]} onChange={e => setFormData({...formData, imageUrls: [e.target.value]})} className="rounded-xl h-12 w-full border border-input bg-background px-3" />
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label className="font-bold">ইউনিট (যেমন: সাইজ)</Label>
-                      <Input value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} className="rounded-xl h-12" />
+                      <input value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} className="rounded-xl h-12 w-full border border-input bg-background px-3" />
                     </div>
                     <div className="space-y-2">
                       <Label className="font-bold">ভেরিয়েন্ট (M, L, XL)</Label>
-                      <Input value={formData.variants} onChange={e => setFormData({...formData, variants: e.target.value})} className="rounded-xl h-12" />
+                      <input value={formData.variants} onChange={e => setFormData({...formData, variants: e.target.value})} className="rounded-xl h-12 w-full border border-input bg-background px-3" />
                     </div>
                   </div>
                 </div>
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <Label className="font-bold">বিবরণ</Label>
-                    <Textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="rounded-xl min-h-[120px]" />
+                    <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="rounded-xl min-h-[120px] w-full border border-input bg-background p-3" />
                   </div>
                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
                     <Label className="font-black">স্পেশাল কালেকশন</Label>
@@ -495,15 +495,15 @@ export default function AdminDashboard() {
               <div className="grid gap-6">
                 <div className="space-y-2">
                   <Label className="font-black">হিরো টাইটেল</Label>
-                  <Input value={siteSettings.heroTitle} onChange={e => setSiteSettings({...siteSettings, heroTitle: e.target.value})} className="rounded-xl h-14 font-bold" />
+                  <input value={siteSettings.heroTitle} onChange={e => setSiteSettings({...siteSettings, heroTitle: e.target.value})} className="rounded-xl h-14 font-bold w-full border border-input bg-background px-3" />
                 </div>
                 <div className="space-y-2">
                   <Label className="font-black">হোয়াটসঅ্যাপ নম্বর</Label>
-                  <Input value={siteSettings.whatsappNumber} onChange={e => setSiteSettings({...siteSettings, whatsappNumber: e.target.value})} className="rounded-xl h-14 font-bold" />
+                  <input value={siteSettings.whatsappNumber} onChange={e => setSiteSettings({...siteSettings, whatsappNumber: e.target.value})} className="rounded-xl h-14 font-bold w-full border border-input bg-background px-3" />
                 </div>
                 <div className="space-y-2">
                   <Label className="font-black">অ্যাপ ডাউনলোড ইউআরএল (APK Link)</Label>
-                  <Input value={siteSettings.apkUrl} onChange={e => setSiteSettings({...siteSettings, apkUrl: e.target.value})} className="rounded-xl h-14 font-mono text-xs" />
+                  <input value={siteSettings.apkUrl} onChange={e => setSiteSettings({...siteSettings, apkUrl: e.target.value})} className="rounded-xl h-14 font-mono text-xs w-full border border-input bg-background px-3" />
                 </div>
                 <Button onClick={saveSettings} className="h-16 rounded-2xl font-black text-lg gap-2 shadow-xl shadow-primary/20 bg-primary">
                   <Save className="w-5 h-5" /> পরিবর্তন সেভ করুন

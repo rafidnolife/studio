@@ -16,7 +16,7 @@ export function useNotifications() {
   useEffect(() => {
     if (!user || !db) return;
 
-    // Simplified query to avoid the need for complex composite indexes
+    // Listen for notifications for the current user
     const q = query(
       collection(db, 'notifications'),
       where('recipientId', '==', user.uid),
@@ -54,7 +54,7 @@ export function useNotifications() {
               description: data.body,
             });
 
-            // Mark as read to prevent repeat notifications on remount/refresh
+            // Mark as read automatically or keep it for the notification center
             const notificationRef = doc(db, 'notifications', change.doc.id);
             updateDoc(notificationRef, { read: true }).catch(err => console.error('Update failed', err));
           }

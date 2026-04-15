@@ -48,7 +48,9 @@ export function ImageWithFallback({
     }
   };
 
-  // We destructure fill so it doesn't get passed to the native img element
+  // Filter out the 'fill' prop from the img element to prevent the non-boolean attribute error
+  const { fill: _, ...restProps } = props;
+
   return (
     <div className={cn(
       "relative overflow-hidden flex items-center justify-center w-full h-full min-h-[inherit]", 
@@ -73,8 +75,8 @@ export function ImageWithFallback({
           loading ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0',
           error ? 'opacity-40 grayscale' : 'opacity-100'
         )}
-        style={fill ? { width: '100%', height: '100%' } : props.style}
-        // Native img doesn't accept 'fill' boolean
+        style={fill ? { width: '100%', height: '100%' } : restProps.style}
+        {...restProps}
       />
     </div>
   );

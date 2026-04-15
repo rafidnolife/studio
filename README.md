@@ -3,7 +3,7 @@
 
 এটি একটি প্রিমিয়াম নেক্সট-জেএস ই-কমার্স প্ল্যাটফর্ম।
 
-## GitHub-এ কোড পুশ করার নিয়ম:
+## GitHub-এ কোড পুশ করার নিয়ম (Rafid-v1 Branch):
 
 যদি GitHub-এ কোড পুশ করতে সমস্যা হয়, তবে নিচের কমান্ডগুলো আপনার পিসির টার্মিনালে এক এক করে লিখুন:
 
@@ -13,18 +13,18 @@
    git config --global user.name "Your Name"
    ```
 
-2. **গিট ইনিশিয়ালাইজ করুন:**
+2. **গিট ইনিশিয়ালাইজ করুন ও ব্রাঞ্চ সেট করুন:**
    ```bash
    git init
    git add .
-   git commit -m "Initial commit - Website Perfect"
+   git commit -m "Initial commit - Rafid-v1 Perfect"
    ```
 
-3. **গিটহাবের সাথে কানেক্ট করুন:**
+3. **গিটহাবের সাথে কানেক্ট করুন (আপনার লিংক দিন):**
    ```bash
    git remote add origin https://github.com/your-username/your-repo-name.git
-   git branch -M main
-   git push -u origin main
+   git branch -M Rafid-v1
+   git push -u origin Rafid-v1
    ```
 
 **নোট:** আমি একটি `.gitignore` ফাইল যোগ করেছি যা আপনার `node_modules` এবং `.next` ফোল্ডারকে গিটে যেতে বাধা দেবে, ফলে আপলোড অনেক দ্রুত হবে।
