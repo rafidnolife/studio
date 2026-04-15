@@ -1,10 +1,9 @@
-
 "use client";
 
 import Link from 'next/link';
 import { useUser, useAuth, useFirestore } from '@/firebase';
 import { Button } from '@/components/ui/button';
-import { Home, ShoppingBag, User, ShieldCheck, Heart, LogIn, Package, LogOut, Sparkles, Download } from 'lucide-react';
+import { Home, ShoppingBag, User, ShieldCheck, Heart, Package, LogOut, Sparkles, Download } from 'lucide-react';
 import { usePathname, useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
@@ -59,32 +58,32 @@ export function Navbar() {
     <>
       <nav className={cn(
         "sticky top-0 z-50 w-full transition-all duration-700",
-        scrolled ? "bg-white/95 backdrop-blur-2xl shadow-xl h-14 md:h-16" : "bg-white/40 h-16 md:h-20"
+        scrolled ? "bg-white/95 backdrop-blur-2xl shadow-xl h-14" : "bg-white/40 h-16"
       )}>
         <div className="container mx-auto px-4 h-full flex items-center justify-between gap-4">
           <Link href="/" className="flex items-center gap-2 group shrink-0">
             {!loading && user ? (
-              <div className="flex items-center gap-2 md:gap-3 bg-white/80 glass px-3 md:px-5 py-1.5 md:py-2.5 rounded-full shadow-lg border border-primary/10 transition-all hover:scale-105">
-                <div className="w-5 h-5 md:w-8 md:h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0 shadow-inner">
-                  <Sparkles className="w-3 md:w-5 h-3 md:h-5 animate-pulse" />
+              <div className="flex items-center gap-2 bg-white/80 glass px-3 py-1.5 rounded-full shadow-lg border border-primary/10 transition-all hover:scale-105">
+                <div className="w-6 h-6 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0 shadow-inner">
+                  <Sparkles className="w-3 h-3 animate-pulse" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[6px] md:text-[8px] font-black text-primary uppercase tracking-widest">স্বাগতম</span>
-                  <span className="font-black text-[9px] md:text-sm text-slate-900 tracking-tighter truncate max-w-[60px] sm:max-w-[80px]">
+                  <span className="text-[6px] font-black text-primary uppercase tracking-widest">স্বাগতম</span>
+                  <span className="font-black text-[10px] text-slate-900 tracking-tighter truncate max-w-[60px]">
                     {user.displayName?.split(' ')[0]} <span className="text-primary">!</span>
                   </span>
                 </div>
               </div>
             ) : (
               <>
-                <div className="w-7 h-7 md:w-10 md:h-10 bg-primary rounded-lg flex items-center justify-center text-white font-black text-sm md:text-xl shadow-lg">
+                <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center text-white font-black text-sm shadow-lg">
                   ড
                 </div>
                 <div className="flex flex-col leading-none hidden sm:flex">
-                  <span className="font-black text-sm md:text-lg tracking-tighter text-slate-900 uppercase">
+                  <span className="font-black text-sm tracking-tighter text-slate-900 uppercase">
                     DOKAAN <span className="text-primary">EXPRESS</span>
                   </span>
-                  <span className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">Premium Shop</span>
+                  <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">Premium Shop</span>
                 </div>
               </>
             )}
@@ -111,33 +110,33 @@ export function Navbar() {
 
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
             {apkUrl && (
-              <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 md:h-10 md:w-10 hover:bg-primary/5 text-primary hidden sm:flex" asChild>
+              <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 hover:bg-primary/5 text-primary hidden sm:flex" asChild>
                 <a href={apkUrl} target="_blank" rel="noopener noreferrer" title="ডাউনলোড অ্যাপ">
-                  <Download className="w-4 h-4 md:w-5 md:h-5" />
+                  <Download className="w-4 h-4" />
                 </a>
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 md:h-10 md:w-10 hover:bg-red-50 hover:text-red-500" asChild>
+            <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 hover:bg-red-50 hover:text-red-500" asChild>
               <Link href="/wishlist">
-                <Heart className={cn("w-4 h-4 md:w-5 md:h-5", pathname === '/wishlist' && "fill-red-500 text-red-500")} />
+                <Heart className={cn("w-4 h-4", pathname === '/wishlist' && "fill-red-500 text-red-500")} />
               </Link>
             </Button>
             {!loading && !user ? (
-              <Button className="rounded-xl px-4 md:px-6 h-8 md:h-10 font-black text-[9px] md:text-xs shadow-lg bg-primary uppercase tracking-widest" asChild>
+              <Button className="rounded-xl px-4 h-8 font-black text-[9px] shadow-lg bg-primary uppercase tracking-widest" asChild>
                 <Link href="/login">LOGIN</Link>
               </Button>
             ) : user ? (
-              <Button variant="ghost" onClick={handleLogout} className="rounded-full h-8 w-8 md:h-10 md:w-auto md:px-4 font-black text-red-500 hover:bg-red-50 group">
-                <LogOut className="w-4 h-4 md:mr-2 group-hover:-translate-x-1 transition-transform" />
-                <span className="hidden md:inline text-[9px] md:text-xs">Logout</span>
+              <Button variant="ghost" onClick={handleLogout} className="rounded-full h-8 px-3 font-black text-red-500 hover:bg-red-50 group">
+                <LogOut className="w-4 h-4 mr-1 group-hover:-translate-x-1 transition-transform" />
+                <span className="hidden md:inline text-[9px]">Logout</span>
               </Button>
             ) : null}
           </div>
         </div>
       </nav>
 
-      {/* Thin Fixed Mobile Bottom Navigation Bar */}
-      <div className="md:hidden fixed bottom-0 left-0 right-0 h-11 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] px-8 flex justify-between items-center z-40">
+      {/* FIXED Bottom Navigation Bar for Mobile - FIXED bottom-0 */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-11 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] px-8 flex justify-between items-center z-[40]">
         {navItems.map((item) => (
           <Link
             key={item.href}

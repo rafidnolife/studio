@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, useMemo } from 'react';
@@ -39,40 +38,40 @@ export default function OrdersPage() {
     if (!authLoading && !user) router.push('/login');
   }, [user, authLoading, router]);
 
-  if (authLoading || ordersLoading) return <div className="p-20 text-center font-black">লোড হচ্ছে...</div>;
+  if (authLoading || ordersLoading) return <div className="p-20 text-center font-black text-xs uppercase tracking-widest">লোড হচ্ছে...</div>;
 
   return (
     <div className="min-h-screen">
       <Navbar />
-      <main className="container mx-auto px-4 py-6 max-w-3xl space-y-6">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-primary/10 rounded-xl flex items-center justify-center text-primary shadow-md border border-primary/20">
-            <Package className="w-5 h-5" />
+      <main className="container mx-auto px-4 py-6 max-w-3xl space-y-4">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-primary/10 rounded-lg flex items-center justify-center text-primary shadow-sm">
+            <Package className="w-4 h-4" />
           </div>
-          <h1 className="text-2xl font-black text-slate-900 tracking-tight">আমার অর্ডারসমূহ</h1>
+          <h1 className="text-lg font-black text-slate-900 tracking-tight">আমার অর্ডারসমূহ</h1>
         </div>
 
         {orders.length === 0 ? (
-          <div className="py-16 text-center space-y-4 bg-white/60 glass rounded-3xl border-none shadow-xl">
-            <ShoppingBag className="w-12 h-12 mx-auto text-slate-200" />
-            <h3 className="text-lg font-black text-slate-800">আপনি এখনো কোনো অর্ডার করেননি!</h3>
+          <div className="py-12 text-center space-y-3 bg-white/60 glass rounded-2xl border-none shadow-lg">
+            <ShoppingBag className="w-10 h-10 mx-auto text-slate-200" />
+            <h3 className="text-sm font-black text-slate-800">আপনি এখনো কোনো অর্ডার করেননি!</h3>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {orders.map((order) => (
-              <Card key={order.id} className="rounded-2xl border-none shadow-md bg-white/80 glass overflow-hidden transition-all hover:shadow-lg hover:-translate-y-0.5">
+              <Card key={order.id} className="rounded-xl border-none shadow-md bg-white/80 glass overflow-hidden">
                 <div className={cn(
-                  "h-1.5 w-full",
+                  "h-1 w-full",
                   order.status === 'pending' ? "bg-amber-400" :
                   order.status === 'confirmed' ? "bg-blue-400" :
                   order.status === 'completed' ? "bg-emerald-500" : "bg-red-500"
                 )} />
-                <CardContent className="p-4 md:p-6 flex flex-col md:flex-row justify-between gap-4">
-                  <div className="space-y-3">
+                <CardContent className="p-3 md:p-4 flex flex-col md:flex-row justify-between gap-3">
+                  <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="font-black text-slate-400 text-[8px] uppercase tracking-widest">আইডি: #{order.id.slice(0, 8)}</span>
+                      <span className="font-black text-slate-400 text-[7px] uppercase tracking-widest">ID: #{order.id.slice(0, 6)}</span>
                       <Badge className={cn(
-                        "rounded-full font-black text-[8px] px-3 py-0.5 border-none",
+                        "rounded-full font-black text-[7px] px-2 py-0 border-none uppercase",
                         order.status === 'pending' ? "bg-amber-50 text-amber-600" :
                         order.status === 'confirmed' ? "bg-blue-50 text-blue-600" :
                         order.status === 'completed' ? "bg-emerald-50 text-emerald-600" : "bg-red-50 text-red-600"
@@ -82,26 +81,22 @@ export default function OrdersPage() {
                          order.status === 'completed' ? 'সফল' : 'বাতিল'}
                       </Badge>
                     </div>
-                    <div className="space-y-1">
+                    <div className="space-y-0.5">
                       {order.items.map((item: any, i: number) => (
-                        <div key={i}>
-                          <h3 className="text-base font-black text-slate-900 leading-tight">
-                            {item.name} <span className="text-primary text-sm">x {item.qty}</span>
-                          </h3>
-                          {item.variant && <p className="text-[10px] font-bold text-primary">বিকল্প: {item.variant}</p>}
-                        </div>
+                        <h3 key={i} className="text-xs font-black text-slate-900">
+                          {item.name} <span className="text-primary text-[10px]">x {item.qty}</span>
+                        </h3>
                       ))}
-                      <p className="text-slate-500 font-bold text-xs flex items-center gap-1 mt-1">
-                        <Package className="w-3 h-3 text-primary" /> {order.location?.address}, {order.location?.upazila}
+                      <p className="text-slate-500 font-bold text-[9px] flex items-center gap-1 mt-0.5">
+                        <Package className="w-2.5 h-2.5 text-primary" /> {order.location?.district}
                       </p>
                     </div>
                   </div>
 
-                  <div className="flex flex-col md:items-end justify-center space-y-1">
-                    <span className="text-[8px] font-black text-slate-400 uppercase tracking-widest">পরিশোধযোগ্য</span>
-                    <span className="text-2xl font-black text-primary">৳{order.totalAmount}</span>
-                    <div className="flex items-center gap-1.5 text-[10px] font-bold text-slate-500 bg-slate-100/50 px-2 py-0.5 rounded-full">
-                      <Clock className="w-3 h-3" />
+                  <div className="flex flex-col md:items-end justify-center">
+                    <span className="text-lg font-black text-primary">৳{order.totalAmount}</span>
+                    <div className="flex items-center gap-1 text-[8px] font-bold text-slate-400">
+                      <Clock className="w-2.5 h-2.5" />
                       {order.createdAt?.toDate().toLocaleDateString('bn-BD')}
                     </div>
                   </div>

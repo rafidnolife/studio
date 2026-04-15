@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useMemo, Suspense, useEffect } from 'react';
@@ -72,28 +71,27 @@ function ProductListingContent() {
   return (
     <main className="container mx-auto px-4 py-4 space-y-4 max-w-7xl">
       <section className="space-y-3">
-        <div className="flex flex-col gap-3">
+        <div className="flex flex-col gap-2">
           <div className="relative flex-grow">
-            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-primary" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-primary" />
             <Input 
               placeholder="পণ্য খুঁজুন..." 
-              className="pl-11 h-11 rounded-xl bg-white border-none shadow-md text-sm font-medium focus:ring-2 ring-primary/5"
+              className="pl-9 h-10 rounded-xl bg-white border-none shadow-md text-xs font-medium"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
           
-          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide px-0.5">
+          <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
             {categories.map(cat => (
               <Button 
                 key={cat} 
+                size="sm"
                 variant={selectedCategory === cat ? 'default' : 'outline'} 
                 onClick={() => setSelectedCategory(cat)}
                 className={cn(
-                  "rounded-full flex-shrink-0 h-9 px-4 font-black text-[9px] uppercase tracking-widest transition-all",
-                  selectedCategory === cat 
-                    ? "bg-primary text-white shadow-lg" 
-                    : "bg-white/70 glass border-slate-100 text-slate-500"
+                  "rounded-full flex-shrink-0 h-8 px-4 font-black text-[8px] uppercase tracking-widest transition-all",
+                  selectedCategory === cat ? "bg-primary text-white" : "bg-white/70 glass border-slate-100 text-slate-500"
                 )}
               >
                 {cat}
@@ -105,29 +103,29 @@ function ProductListingContent() {
 
       <div className="flex items-center justify-between border-b border-primary/5 pb-2">
         <div className="flex flex-col">
-          <h2 className="text-lg md:text-xl font-black tracking-tighter text-slate-900">
+          <h2 className="text-sm font-black text-slate-900">
             {selectedCategory === 'সব' ? 'সব পণ্য' : selectedCategory}
           </h2>
-          <p className="text-[7px] font-black text-slate-400 uppercase tracking-widest">
-            {filteredProducts.length}টি পণ্য পাওয়া গেছে
+          <p className="text-[7px] font-black text-slate-400 uppercase">
+            {filteredProducts.length}টি পণ্য
           </p>
         </div>
         
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant="ghost" className="gap-2 rounded-full h-9 px-3 font-black text-[9px] uppercase tracking-widest text-primary hover:bg-primary/5">
-              <SlidersHorizontal className="w-3.5 h-3.5" />
+            <Button variant="ghost" size="sm" className="gap-1.5 rounded-full h-8 px-3 font-black text-[8px] uppercase tracking-widest text-primary">
+              <SlidersHorizontal className="w-3 h-3" />
               ফিল্টার
             </Button>
           </SheetTrigger>
-          <SheetContent side="bottom" className="rounded-t-[2rem] p-6 pb-10 z-[60]">
+          <SheetContent side="bottom" className="rounded-t-3xl p-6 pb-12 z-[100]">
             <SheetHeader className="mb-4">
-              <SheetTitle className="text-xl font-black text-slate-900">পণ্য সাজান</SheetTitle>
+              <SheetTitle className="text-lg font-black">পণ্য সাজান</SheetTitle>
             </SheetHeader>
             <RadioGroup 
               value={sortBy} 
               onValueChange={(val: any) => setSortBy(val)}
-              className="space-y-3"
+              className="space-y-2"
             >
               {[
                 { id: 'newest', label: 'নতুন পণ্য (Newest)' },
@@ -135,13 +133,13 @@ function ProductListingContent() {
                 { id: 'price-high', label: 'দাম: বেশি থেকে কম' }
               ].map(opt => (
                 <div key={opt.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-xl">
-                  <Label htmlFor={opt.id} className="font-bold text-slate-700 flex-grow cursor-pointer text-sm">{opt.label}</Label>
+                  <Label htmlFor={opt.id} className="font-bold text-slate-700 flex-grow cursor-pointer text-xs">{opt.label}</Label>
                   <RadioGroupItem value={opt.id} id={opt.id} />
                 </div>
               ))}
             </RadioGroup>
             <SheetClose asChild>
-              <Button className="w-full mt-6 h-12 rounded-xl font-black text-base bg-primary shadow-lg">
+              <Button className="w-full mt-6 h-11 rounded-xl font-black text-sm bg-primary shadow-lg">
                 প্রয়োগ করুন
               </Button>
             </SheetClose>
@@ -149,29 +147,23 @@ function ProductListingContent() {
         </Sheet>
       </div>
 
-      <section className="pb-20 md:pb-8">
+      <section className="pb-20">
         {loading ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
-            {Array(8).fill(0).map((_, i) => (
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            {Array(4).fill(0).map((_, i) => (
               <Skeleton key={i} className="aspect-square w-full rounded-xl" />
             ))}
           </div>
         ) : filteredProducts.length > 0 ? (
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             {filteredProducts.map(product => (
               <ProductCard key={product.id} product={product} />
             ))}
           </div>
         ) : (
-          <div className="py-16 text-center space-y-4 bg-white/50 glass rounded-2xl border-2 border-dashed border-primary/10 max-w-sm mx-auto">
-            <ShoppingBag className="w-10 h-10 text-primary/20 mx-auto" />
-            <h3 className="text-lg font-black text-slate-800">কোনো পণ্য নেই!</h3>
-            <Button 
-              className="rounded-full px-6 h-10 text-[10px] font-black shadow-md bg-primary" 
-              onClick={() => { setSearchTerm(''); setSelectedCategory('সব'); }}
-            >
-              সব পণ্য দেখুন
-            </Button>
+          <div className="py-12 text-center space-y-4 bg-white/50 glass rounded-2xl border-2 border-dashed border-primary/10 max-w-sm mx-auto">
+            <ShoppingBag className="w-8 h-8 text-primary/20 mx-auto" />
+            <h3 className="text-sm font-black text-slate-800">কোনো পণ্য নেই!</h3>
           </div>
         )}
       </section>
@@ -183,11 +175,7 @@ export default function ProductListing() {
   return (
     <div className="min-h-screen bg-[#F8FAFC]">
       <Navbar />
-      <Suspense fallback={
-        <div className="container mx-auto px-4 py-20 flex items-center justify-center">
-          <div className="w-6 h-6 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
-        </div>
-      }>
+      <Suspense fallback={<div className="p-20 text-center font-black text-xs">লোড হচ্ছে...</div>}>
         <ProductListingContent />
       </Suspense>
     </div>
