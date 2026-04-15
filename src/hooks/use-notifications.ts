@@ -16,7 +16,7 @@ export function useNotifications() {
   useEffect(() => {
     if (!user || !db) return;
 
-    // Use a simplified query to avoid the need for a composite index
+    // Simplified query to avoid the need for complex composite indexes
     const q = query(
       collection(db, 'notifications'),
       where('recipientId', '==', user.uid),
@@ -29,8 +29,10 @@ export function useNotifications() {
           const data = change.doc.data();
           const createdAt = data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now();
           
+          // Only notify for new items added after the component mounted
           if (!data.read && createdAt > mountedAt.current - 5000) {
             
+            // Try browser native notification
             if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
               try {
                 new Notification(data.title, {
@@ -38,6 +40,7 @@ export function useNotifications() {
                   icon: 'https://picsum.photos/seed/dokaan/100/100',
                 });
                 
+                // Play notification sound
                 const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
                 audio.play().catch(e => console.log('Audio play failed', e));
               } catch (e) {
@@ -45,11 +48,13 @@ export function useNotifications() {
               }
             }
 
+            // Always show toast
             toast({
               title: data.title,
               description: data.body,
             });
 
+            // Mark as read to prevent repeat notifications on remount/refresh
             const notificationRef = doc(db, 'notifications', change.doc.id);
             updateDoc(notificationRef, { read: true }).catch(err => console.error('Update failed', err));
           }
@@ -59,6 +64,7 @@ export function useNotifications() {
       console.error('Notification listener error:', error.message);
     });
 
+    // Request permission on first load
     if (typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'default') {
         Notification.requestPermission();
