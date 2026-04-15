@@ -13,7 +13,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Save, Package, ShoppingCart, CheckCircle, XCircle, Activity, DollarSign, Users, PackageCheck, Image as ImageIcon, Check } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, Package, ShoppingCart, CheckCircle, Activity, DollarSign, Users, Image as ImageIcon } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -526,6 +526,42 @@ export default function AdminDashboard() {
                           }}><Pencil className="w-3 h-3" /></Button>
                           <Button variant="ghost" size="icon" className="h-7 w-7 text-red-500" onClick={() => deleteProduct(p.id)}><Trash2 className="w-3 h-3" /></Button>
                         </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="customers">
+            <Card className="rounded-2xl border-none shadow-lg overflow-hidden bg-white/80 glass">
+              <Table>
+                <TableHeader className="bg-slate-50/50">
+                  <TableRow>
+                    <TableHead className="font-black py-3 text-[9px]">নাম</TableHead>
+                    <TableHead className="font-black text-[9px]">ফোন নম্বর</TableHead>
+                    <TableHead className="font-black text-[9px]">রোল</TableHead>
+                    <TableHead className="font-black text-[9px]">যোগদানের তারিখ</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {customers.map(c => (
+                    <TableRow key={c.id}>
+                      <TableCell className="py-3">
+                        <span className="font-black text-slate-900 text-[10px]">{c.name || 'নাম নেই'}</span>
+                      </TableCell>
+                      <TableCell className="font-bold text-slate-500 text-[9px]">{c.phoneNumber}</TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className={cn(
+                          "font-black text-[7px] px-1.5 py-0 rounded-full border-none",
+                          c.role === 'admin' ? "bg-primary text-white" : "bg-slate-100 text-slate-600"
+                        )}>
+                          {c.role === 'admin' ? 'অ্যাডমিন' : 'ক্রেতা'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-slate-400 text-[8px] font-bold">
+                        {c.createdAt?.toDate ? c.createdAt.toDate().toLocaleDateString('bn-BD') : 'N/A'}
                       </TableCell>
                     </TableRow>
                   ))}

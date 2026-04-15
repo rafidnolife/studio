@@ -1,4 +1,3 @@
-
 'use server';
 /**
  * @fileOverview A Genkit flow that sends a notification by writing to Firestore.
@@ -7,7 +6,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { initializeFirebase } from '@/firebase';
+import { initializeFirebase } from '@/firebase/init';
 import { collection, addDoc, serverTimestamp } from 'firebase/firestore';
 
 const SendNotificationInputSchema = z.object({
@@ -28,10 +27,9 @@ const sendNotificationFlow = ai.defineFlow(
     outputSchema: z.void(),
   },
   async (input) => {
+    // Import from /init to avoid client hook dependency errors on the server
     const { db } = initializeFirebase();
     
-    // We write to a Firestore collection called 'notifications'
-    // The client hook (useNotifications) listens to this collection in real-time.
     await addDoc(collection(db, 'notifications'), {
       recipientId: input.recipientId,
       title: input.title,
