@@ -16,7 +16,7 @@ export function useNotifications() {
   useEffect(() => {
     if (!user || !db) return;
 
-    // Listen for notifications for the current user
+    // Listen for new notifications for the current user
     const q = query(
       collection(db, 'notifications'),
       where('recipientId', '==', user.uid),

@@ -14,6 +14,7 @@ export function ImageWithFallback({
   alt, 
   className, 
   fallbackSrc = 'https://placehold.co/800x800?text=ইমেজ+পাওয়া+যায়নি',
+  fill,
   ...props 
 }: ImageWithFallbackProps) {
   const [error, setError] = useState(false);
