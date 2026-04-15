@@ -456,21 +456,31 @@ export default function AdminDashboard() {
                         <div className="space-y-2">
                           {o.items?.map((i: any, idx: number) => (
                             <div key={idx} className="bg-slate-50 p-1.5 rounded-lg border border-slate-100 space-y-1">
-                              <div className="flex justify-between items-start gap-2">
-                                <span className="font-black text-[9px] text-slate-800 leading-tight">{i.name}</span>
-                                <span className="font-black text-[9px] text-primary whitespace-nowrap">x {i.qty}</span>
-                              </div>
-                              <div className="flex flex-wrap gap-1 mt-1">
-                                {i.variant && (
-                                  <Badge variant="outline" className="text-[7px] font-black uppercase py-0 px-1 rounded-md bg-white border-primary/20 text-primary">
-                                    {i.variant}
-                                  </Badge>
+                              <div className="flex gap-2 items-start">
+                                {/* Display the specific image selected for the order */}
+                                {i.selectedImage && (
+                                  <div className="w-8 h-8 rounded bg-slate-200 overflow-hidden shrink-0 border">
+                                    <img src={i.selectedImage} alt="" className="w-full h-full object-cover" />
+                                  </div>
                                 )}
-                                {i.color && (
-                                  <Badge variant="outline" className="text-[7px] font-black uppercase py-0 px-1 rounded-md bg-white border-emerald-200 text-emerald-600">
-                                    {i.color}
-                                  </Badge>
-                                )}
+                                <div className="flex-grow min-w-0">
+                                  <div className="flex justify-between items-start gap-2">
+                                    <span className="font-black text-[9px] text-slate-800 leading-tight truncate">{i.name}</span>
+                                    <span className="font-black text-[9px] text-primary whitespace-nowrap">x {i.qty}</span>
+                                  </div>
+                                  <div className="flex flex-wrap gap-1 mt-1">
+                                    {i.variant && (
+                                      <Badge variant="outline" className="text-[7px] font-black uppercase py-0 px-1 rounded-md bg-white border-primary/20 text-primary">
+                                        {i.variant}
+                                      </Badge>
+                                    )}
+                                    {i.color && (
+                                      <Badge variant="outline" className="text-[7px] font-black uppercase py-0 px-1 rounded-md bg-white border-emerald-200 text-emerald-600">
+                                        {i.color}
+                                      </Badge>
+                                    )}
+                                  </div>
+                                </div>
                               </div>
                             </div>
                           ))}

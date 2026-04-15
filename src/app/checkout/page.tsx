@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState, Suspense, useMemo } from 'react';
@@ -96,6 +95,7 @@ function CheckoutContent() {
   const initialQty = Number(searchParams.get('qty')) || 1;
   const variant = searchParams.get('variant');
   const color = searchParams.get('color');
+  const imgIdx = Number(searchParams.get('imgIdx')) || 0;
 
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
@@ -163,7 +163,9 @@ function CheckoutContent() {
         price: product?.discountPrice || product?.price,
         qty: initialQty,
         variant: variant || null,
-        color: color || null
+        color: color || null,
+        // Store the specific image URL selected
+        selectedImage: product?.imageUrls[imgIdx] || product?.imageUrls[0] || ''
       }],
       subtotal,
       deliveryCharge,
@@ -326,7 +328,7 @@ function CheckoutContent() {
             <CardContent className="px-0 space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-slate-100 relative overflow-hidden shrink-0 shadow-md">
-                  <img src={product?.imageUrls[0]} alt="" className="object-cover w-full h-full" />
+                  <img src={product?.imageUrls[imgIdx] || product?.imageUrls[0]} alt="" className="object-cover w-full h-full" />
                 </div>
                 <div className="min-w-0">
                   <h4 className="font-black text-base truncate leading-tight">{product?.name}</h4>

@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -87,7 +86,8 @@ export default function ProductDetail() {
 
     const variantParam = selectedVariant ? `&variant=${encodeURIComponent(selectedVariant)}` : '';
     const colorParam = selectedColor ? `&color=${encodeURIComponent(selectedColor)}` : '';
-    router.push(`/checkout?productId=${product?.id}&qty=${qty}${variantParam}${colorParam}`);
+    // Pass the selected image index to checkout
+    router.push(`/checkout?productId=${product?.id}&qty=${qty}${variantParam}${colorParam}&imgIdx=${activeImageIndex}`);
   };
 
   if (loading) return (
