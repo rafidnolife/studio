@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useState, useMemo, Suspense } from 'react';
+import { useState, useMemo, Suspense, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Navbar } from '@/components/layout/navbar';
 import { useFirestore, useCollection } from '@/firebase';
@@ -9,23 +9,39 @@ import { collection, query, orderBy } from 'firebase/firestore';
 import { Product, ProductCard } from '@/components/product/product-card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, SlidersHorizontal, ShoppingBag } from 'lucide-react';
+import { Search, SlidersHorizontal, ShoppingBag, Check } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from "@/components/ui/sheet";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
 
 function ProductListingContent() {
   const searchParams = useSearchParams();
-  const initialCategory = searchParams.get('category') || 'সব';
-  
   const db = useFirestore();
+  
   const productsQuery = useMemo(() => {
     if (!db) return null;
     return query(collection(db, 'products'), orderBy('createdAt', 'desc'));
   }, [db]);
+  
   const { data: products, loading } = useCollection<Product>(productsQuery);
 
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState(initialCategory);
+  const [selectedCategory, setSelectedCategory] = useState('সব');
+  const [sortBy, setSortBy] = useState<'newest' | 'price-low' | 'price-high'>('newest');
+
+  // Sync category from URL
+  useEffect(() => {
+    const cat = searchParams.get('category');
+    if (cat) setSelectedCategory(cat);
+  }, [searchParams]);
 
   const categories = useMemo(() => {
     if (!products) return ['সব'];
@@ -37,12 +53,21 @@ function ProductListingContent() {
 
   const filteredProducts = useMemo(() => {
     if (!products) return [];
-    return products.filter(p => {
+    
+    let filtered = products.filter(p => {
       const matchesSearch = p.name.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesCategory = selectedCategory === 'সব' || p.category?.trim() === selectedCategory;
       return matchesSearch && matchesCategory;
     });
-  }, [searchTerm, selectedCategory, products]);
+
+    if (sortBy === 'price-low') {
+      filtered.sort((a, b) => (a.discountPrice || a.price) - (b.discountPrice || b.price));
+    } else if (sortBy === 'price-high') {
+      filtered.sort((a, b) => (b.discountPrice || b.price) - (a.discountPrice || a.price));
+    }
+    
+    return filtered;
+  }, [searchTerm, selectedCategory, products, sortBy]);
 
   return (
     <main className="container mx-auto px-4 py-4 md:py-8 space-y-6 max-w-7xl">
@@ -88,10 +113,41 @@ function ProductListingContent() {
             Total <span className="text-primary">{filteredProducts.length}</span> Products
           </p>
         </div>
-        <Button variant="ghost" className="gap-2 rounded-full h-10 px-4 font-black text-[10px] uppercase tracking-widest hover:bg-primary/5 text-primary">
-          <SlidersHorizontal className="w-4 h-4" />
-          ফিল্টার
-        </Button>
+        
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button variant="ghost" className="gap-2 rounded-full h-10 px-4 font-black text-[10px] uppercase tracking-widest hover:bg-primary/5 text-primary">
+              <SlidersHorizontal className="w-4 h-4" />
+              ফিল্টার
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="bottom" className="rounded-t-[2rem] p-8">
+            <SheetHeader className="mb-6">
+              <SheetTitle className="text-2xl font-black text-slate-900">পণ্য সাজান</SheetTitle>
+            </SheetHeader>
+            <RadioGroup 
+              value={sortBy} 
+              onValueChange={(val: any) => setSortBy(val)}
+              className="space-y-4"
+            >
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                <Label htmlFor="newest" className="font-bold text-slate-700 flex-grow cursor-pointer">নতুন পণ্য (Newest)</Label>
+                <RadioGroupItem value="newest" id="newest" />
+              </div>
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                <Label htmlFor="price-low" className="font-bold text-slate-700 flex-grow cursor-pointer">দাম: কম থেকে বেশি (Low to High)</Label>
+                <RadioGroupItem value="price-low" id="price-low" />
+              </div>
+              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                <Label htmlFor="price-high" className="font-bold text-slate-700 flex-grow cursor-pointer">দাম: বেশি থেকে কম (High to Low)</Label>
+                <RadioGroupItem value="price-high" id="price-high" />
+              </div>
+            </RadioGroup>
+            <Button className="w-full mt-8 h-14 rounded-2xl font-black text-lg bg-primary shadow-xl" onClick={() => {}}>
+              ফিল্টার প্রয়োগ করুন
+            </Button>
+          </SheetContent>
+        </Sheet>
       </div>
 
       <section>

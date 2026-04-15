@@ -158,7 +158,7 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Right: Info - Shrunk & Neat */}
+          {/* Right: Info */}
           <div className="flex flex-col space-y-5">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
