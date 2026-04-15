@@ -13,7 +13,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Save, Package, ShoppingCart, CheckCircle, Activity, DollarSign, Users, Image as ImageIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, Package, ShoppingCart, CheckCircle, Activity, DollarSign, Users, Image as ImageIcon, MapPin, Phone, User as UserIcon } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -427,52 +427,95 @@ export default function AdminDashboard() {
               <Table>
                 <TableHeader className="bg-slate-50/50">
                   <TableRow>
-                    <TableHead className="font-black py-3 text-[9px]">ক্রেতা ও অর্ডার</TableHead>
-                    <TableHead className="font-black text-[9px]">ঠিকানা</TableHead>
-                    <TableHead className="font-black text-[9px]">মূল্য</TableHead>
-                    <TableHead className="font-black text-[9px]">অবস্থা</TableHead>
+                    <TableHead className="font-black py-3 text-[9px]">ক্রেতা তথ্য</TableHead>
+                    <TableHead className="font-black text-[9px]">পণ্য ও বিবরণ</TableHead>
+                    <TableHead className="font-black text-[9px]">ডেলিভারি ঠিকানা</TableHead>
+                    <TableHead className="font-black text-[9px]">মূল্য ও অবস্থা</TableHead>
                     <TableHead className="text-right font-black text-[9px]">অ্যাকশন</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {orders.map(o => (
-                    <TableRow key={o.id} className="hover:bg-primary/5 transition-colors">
-                      <TableCell className="py-3">
-                        <div className="space-y-0.5">
-                          <span className="font-black text-slate-900 block text-[10px]">{o.customerName || 'ক্রেতা'}</span>
-                          <span className="text-[8px] text-slate-500 font-bold uppercase">{o.phoneNumber}</span>
-                          <div className="flex flex-wrap gap-1 mt-0.5">
-                            {o.items?.map((i: any, idx: number) => (
-                              <Badge key={idx} variant="outline" className="text-[6px] font-black uppercase py-0 px-1 rounded-md">
-                                {i.name} ({i.qty})
-                              </Badge>
-                            ))}
+                    <TableRow key={o.id} className="hover:bg-primary/5 transition-colors items-start">
+                      <TableCell className="py-3 align-top min-w-[140px]">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1.5">
+                             <UserIcon className="w-3 h-3 text-slate-400" />
+                             <span className="font-black text-slate-900 block text-[10px]">{o.customerName || 'ক্রেতা'}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                             <Phone className="w-3 h-3 text-primary" />
+                             <span className="text-[9px] text-slate-600 font-bold">{o.phoneNumber}</span>
+                          </div>
+                          <div className="pt-1 text-[7px] text-slate-400 font-black uppercase">
+                            {o.createdAt?.toDate ? o.createdAt.toDate().toLocaleString('bn-BD') : 'N/A'}
                           </div>
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <div className="space-y-0.5">
-                          <p className="text-[9px] font-black text-slate-700">{o.location?.district}</p>
-                          <p className="text-[7px] text-slate-500 max-w-[100px] truncate">{o.location?.address}</p>
+                      <TableCell className="align-top">
+                        <div className="space-y-2">
+                          {o.items?.map((i: any, idx: number) => (
+                            <div key={idx} className="bg-slate-50 p-1.5 rounded-lg border border-slate-100 space-y-1">
+                              <div className="flex justify-between items-start gap-2">
+                                <span className="font-black text-[9px] text-slate-800 leading-tight">{i.name}</span>
+                                <span className="font-black text-[9px] text-primary whitespace-nowrap">x {i.qty}</span>
+                              </div>
+                              <div className="flex flex-wrap gap-1 mt-1">
+                                {i.variant && (
+                                  <Badge variant="outline" className="text-[7px] font-black uppercase py-0 px-1 rounded-md bg-white border-primary/20 text-primary">
+                                    {i.variant}
+                                  </Badge>
+                                )}
+                                {i.color && (
+                                  <Badge variant="outline" className="text-[7px] font-black uppercase py-0 px-1 rounded-md bg-white border-emerald-200 text-emerald-600">
+                                    {i.color}
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                          ))}
                         </div>
                       </TableCell>
-                      <TableCell className="font-black text-xs text-primary">৳{o.totalAmount}</TableCell>
-                      <TableCell>
-                        <Badge className={cn(
-                          "font-black text-[7px] px-1.5 py-0 rounded-full border-none", 
-                          o.status === 'pending' ? 'bg-amber-100 text-amber-600' : 
-                          o.status === 'confirmed' ? 'bg-blue-100 text-blue-600' : 
-                          o.status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
-                        )}>
-                          {o.status === 'pending' ? 'পেন্ডিং' : o.status === 'confirmed' ? 'নিশ্চিত' : o.status === 'completed' ? 'সফল' : 'বাতিল'}
-                        </Badge>
+                      <TableCell className="align-top">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-1 text-slate-900 font-black text-[9px]">
+                            <MapPin className="w-3 h-3 text-red-500" />
+                            {o.location?.district}
+                          </div>
+                          <div className="text-[8px] font-bold text-slate-600 pl-4">
+                            উপজেলা: {o.location?.upazila || 'N/A'}
+                          </div>
+                          <div className="text-[8px] text-slate-500 font-medium pl-4 max-w-[150px] leading-relaxed">
+                            {o.location?.address}
+                          </div>
+                        </div>
                       </TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex justify-end gap-0.5">
+                      <TableCell className="align-top">
+                        <div className="space-y-2">
+                          <div className="space-y-0.5">
+                            <div className="text-[8px] text-slate-400 font-black uppercase">Total Amount</div>
+                            <div className="font-black text-xs text-primary">৳{o.totalAmount}</div>
+                          </div>
+                          <Badge className={cn(
+                            "font-black text-[7px] px-2 py-0.5 rounded-full border-none shadow-sm block w-fit", 
+                            o.status === 'pending' ? 'bg-amber-100 text-amber-600' : 
+                            o.status === 'confirmed' ? 'bg-blue-100 text-blue-600' : 
+                            o.status === 'completed' ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600'
+                          )}>
+                            {o.status === 'pending' ? 'পেন্ডিং' : o.status === 'confirmed' ? 'নিশ্চিত' : o.status === 'completed' ? 'সফল' : 'বাতিল'}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right align-top">
+                        <div className="flex justify-end gap-1">
                           {o.status === 'pending' && (
-                            <Button size="icon" variant="ghost" className="h-6 w-6 text-blue-500" onClick={() => updateOrderStatus(o.id, o.userId, 'confirmed')}><CheckCircle className="w-3 h-3" /></Button>
+                            <Button size="icon" variant="outline" className="h-7 w-7 rounded-lg text-blue-500 border-blue-200 hover:bg-blue-50" onClick={() => updateOrderStatus(o.id, o.userId, 'confirmed')}>
+                               <CheckCircle className="w-3.5 h-3.5" />
+                            </Button>
                           )}
-                          <Button size="icon" variant="ghost" className="h-6 w-6 text-slate-400" onClick={() => deleteOrder(o.id)}><Trash2 className="w-3 h-3" /></Button>
+                          <Button size="icon" variant="outline" className="h-7 w-7 rounded-lg text-slate-400 border-slate-200 hover:bg-slate-50" onClick={() => deleteOrder(o.id)}>
+                             <Trash2 className="w-3.5 h-3.5" />
+                          </Button>
                         </div>
                       </TableCell>
                     </TableRow>
