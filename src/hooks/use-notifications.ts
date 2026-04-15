@@ -53,7 +53,7 @@ export function useNotifications() {
                 const n = new Notification(data.title, {
                   body: data.body,
                   icon: 'https://picsum.photos/seed/dokaan/192/192',
-                  tag: change.doc.id, // Prevent duplicate notification grouping issues
+                  tag: change.doc.id,
                   requireInteraction: true,
                 });
                 

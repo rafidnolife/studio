@@ -18,10 +18,21 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
+  const [isAtBottom, setIsAtBottom] = useState(false);
   const [apkUrl, setApkUrl] = useState<string | null>(null);
 
   useEffect(() => {
-    const handleScroll = () => setScrolled(window.scrollY > 20);
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20);
+      
+      const scrollHeight = document.documentElement.scrollHeight;
+      const scrollTop = window.scrollY || document.documentElement.scrollTop;
+      const clientHeight = window.innerHeight;
+      
+      // If we are within 100px of the bottom
+      setIsAtBottom(scrollTop + clientHeight >= scrollHeight - 100);
+    };
+    
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
@@ -56,95 +67,98 @@ export function Navbar() {
     <>
       <nav className={cn(
         "sticky top-0 z-50 w-full transition-all duration-700",
-        scrolled ? "bg-white/95 backdrop-blur-2xl shadow-2xl h-16 md:h-20" : "bg-white/40 h-20 md:h-28"
+        scrolled ? "bg-white/95 backdrop-blur-2xl shadow-xl h-14 md:h-16" : "bg-white/40 h-16 md:h-20"
       )}>
         <div className="container mx-auto px-4 h-full flex items-center justify-between gap-4">
-          <Link href="/" className="flex items-center gap-3 group shrink-0">
+          <Link href="/" className="flex items-center gap-2 group shrink-0">
             {!loading && user ? (
-              <div className="flex items-center gap-2 md:gap-4 bg-white/80 glass px-3 md:px-7 py-1.5 md:py-3.5 rounded-full shadow-2xl border border-primary/20 transition-all hover:scale-105 hover:bg-white active:scale-95">
-                <div className="w-6 h-6 md:w-11 md:h-11 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0 shadow-inner">
-                  <Sparkles className="w-3.5 h-3.5 md:w-6 md:h-6 animate-pulse" />
+              <div className="flex items-center gap-2 md:gap-3 bg-white/80 glass px-3 md:px-5 py-1.5 md:py-2.5 rounded-full shadow-lg border border-primary/10 transition-all hover:scale-105">
+                <div className="w-5 h-5 md:w-8 md:h-8 bg-primary/10 rounded-full flex items-center justify-center text-primary shrink-0 shadow-inner">
+                  <Sparkles className="w-3 md:w-5 h-3 md:h-5 animate-pulse" />
                 </div>
                 <div className="flex flex-col min-w-0">
-                  <span className="text-[7px] md:text-[10px] font-black text-primary uppercase tracking-[0.2em]">স্বাগতম</span>
-                  <span className="font-black text-[10px] md:text-lg text-slate-900 tracking-tighter truncate max-w-[70px] sm:max-w-[100px] md:max-w-none">
+                  <span className="text-[6px] md:text-[8px] font-black text-primary uppercase tracking-widest">স্বাগতম</span>
+                  <span className="font-black text-[9px] md:text-sm text-slate-900 tracking-tighter truncate max-w-[60px] sm:max-w-[80px]">
                     {user.displayName?.split(' ')[0]} <span className="text-primary">!</span>
                   </span>
                 </div>
               </div>
             ) : (
               <>
-                <div className="w-8 h-8 md:w-14 md:h-14 bg-primary rounded-xl md:rounded-[1.5rem] flex items-center justify-center text-white font-black text-lg md:text-3xl shadow-2xl shadow-primary/30 group-hover:rotate-12 transition-transform">
+                <div className="w-7 h-7 md:w-10 md:h-10 bg-primary rounded-lg flex items-center justify-center text-white font-black text-sm md:text-xl shadow-lg">
                   ড
                 </div>
                 <div className="flex flex-col leading-none hidden sm:flex">
-                  <span className="font-black text-lg md:text-2xl tracking-tighter text-slate-900 uppercase">
+                  <span className="font-black text-sm md:text-lg tracking-tighter text-slate-900 uppercase">
                     DOKAAN <span className="text-primary">EXPRESS</span>
                   </span>
-                  <span className="text-[8px] md:text-[10px] font-black text-slate-400 uppercase tracking-widest">Premium Luxury Shop</span>
+                  <span className="text-[7px] md:text-[9px] font-black text-slate-400 uppercase tracking-widest">Premium Shop</span>
                 </div>
               </>
             )}
           </Link>
 
-          <div className="hidden md:flex items-center gap-10">
+          <div className="hidden md:flex items-center gap-6">
             {navItems.map((item) => (
               <Link
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "text-[12px] font-black uppercase tracking-widest transition-all hover:text-primary relative group",
+                  "text-[10px] font-black uppercase tracking-widest transition-all hover:text-primary relative group",
                   pathname === item.href ? "text-primary" : "text-slate-500"
                 )}
               >
                 {item.name}
                 <span className={cn(
-                  "absolute -bottom-2 left-0 h-[4px] bg-primary rounded-full transition-all duration-700",
+                  "absolute -bottom-1 left-0 h-[2px] bg-primary rounded-full transition-all duration-500",
                   pathname === item.href ? "w-full" : "w-0 group-hover:w-full"
                 )} />
               </Link>
             ))}
           </div>
 
-          <div className="flex items-center gap-2 md:gap-5 shrink-0">
+          <div className="flex items-center gap-2 md:gap-4 shrink-0">
             {apkUrl && (
-              <Button variant="ghost" size="icon" className="rounded-xl md:rounded-2xl h-9 w-9 md:h-14 md:w-14 hover:bg-primary/5 text-primary shadow-sm hidden sm:flex" asChild>
+              <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 md:h-10 md:w-10 hover:bg-primary/5 text-primary hidden sm:flex" asChild>
                 <a href={apkUrl} target="_blank" rel="noopener noreferrer" title="ডাউনলোড অ্যাপ">
-                  <Download className="w-4 h-4 md:w-7 md:h-7" />
+                  <Download className="w-4 h-4 md:w-5 md:h-5" />
                 </a>
               </Button>
             )}
-            <Button variant="ghost" size="icon" className="rounded-xl md:rounded-2xl h-9 w-9 md:h-14 md:w-14 hover:bg-red-50 hover:text-red-500 shadow-sm" asChild>
+            <Button variant="ghost" size="icon" className="rounded-xl h-8 w-8 md:h-10 md:w-10 hover:bg-red-50 hover:text-red-500" asChild>
               <Link href="/wishlist">
-                <Heart className={cn("w-4 h-4 md:w-7 md:h-7", pathname === '/wishlist' && "fill-red-500 text-red-500")} />
+                <Heart className={cn("w-4 h-4 md:w-5 md:h-5", pathname === '/wishlist' && "fill-red-500 text-red-500")} />
               </Link>
             </Button>
             {!loading && !user ? (
-              <Button className="rounded-xl md:rounded-[1.5rem] px-4 md:px-10 h-9 md:h-14 font-black text-[10px] md:text-sm shadow-2xl shadow-primary/30 uppercase tracking-[0.2em] bg-primary transition-all active:scale-95" asChild>
+              <Button className="rounded-xl px-4 md:px-6 h-8 md:h-10 font-black text-[9px] md:text-xs shadow-lg bg-primary uppercase tracking-widest" asChild>
                 <Link href="/login">LOGIN</Link>
               </Button>
             ) : user ? (
-              <Button variant="ghost" onClick={handleLogout} className="rounded-full h-9 w-9 md:h-14 md:w-auto md:px-8 font-black text-red-500 hover:bg-red-50 group">
+              <Button variant="ghost" onClick={handleLogout} className="rounded-full h-8 w-8 md:h-10 md:w-auto md:px-4 font-black text-red-500 hover:bg-red-50 group">
                 <LogOut className="w-4 h-4 md:mr-2 group-hover:-translate-x-1 transition-transform" />
-                <span className="hidden md:inline text-[10px] md:text-sm">Logout</span>
+                <span className="hidden md:inline text-[9px] md:text-xs">Logout</span>
               </Button>
             ) : null}
           </div>
         </div>
       </nav>
 
-      {/* Truly Fixed Mobile Bottom Navigation Bar */}
-      <div className="md:hidden fixed bottom-6 left-6 right-6 h-16 glass border-white/50 shadow-[0_20px_50px_rgba(0,0,0,0.15)] rounded-3xl px-8 flex justify-between items-center z-[100] animate-in slide-in-from-bottom-10 duration-700">
+      {/* Dynamic Mobile Bottom Navigation Bar - Lower z-index so Sheets can appear over it */}
+      <div className={cn(
+        "md:hidden fixed left-6 right-6 h-14 glass border-white/50 shadow-2xl rounded-2xl px-6 flex justify-between items-center z-40 transition-all duration-500",
+        isAtBottom ? "bottom-20" : "bottom-4"
+      )}>
         {navItems.map((item) => (
           <Link
             key={item.href}
             href={item.href}
             className={cn(
-              "flex flex-col items-center gap-1 transition-all duration-500",
-              pathname === item.href ? "text-primary scale-110 -translate-y-1" : "text-slate-400"
+              "flex flex-col items-center gap-0.5 transition-all duration-300",
+              pathname === item.href ? "text-primary scale-110" : "text-slate-400"
             )}
           >
-            <item.icon className="w-6 h-6" />
+            <item.icon className="w-5 h-5" />
             <span className="text-[7px] font-black uppercase tracking-tighter">{item.name}</span>
           </Link>
         ))}
@@ -153,9 +167,9 @@ export function Navbar() {
             href={apkUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center gap-1 text-primary animate-pulse"
+            className="flex flex-col items-center gap-0.5 text-primary animate-pulse"
           >
-            <Download className="w-6 h-6" />
+            <Download className="w-5 h-5" />
             <span className="text-[7px] font-black uppercase tracking-tighter">App</span>
           </a>
         )}
