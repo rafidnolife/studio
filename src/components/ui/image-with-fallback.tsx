@@ -54,7 +54,7 @@ export function ImageWithFallback({
     )}>
       {loading && (
         <div className="absolute inset-0 bg-slate-100/50 animate-pulse z-10 flex items-center justify-center">
-          <div className="w-8 h-8 border-2 border-primary/20 border-t-primary rounded-full animate-spin"></div>
+          <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin"></div>
         </div>
       )}
       <img
@@ -66,8 +66,8 @@ export function ImageWithFallback({
         decoding="async"
         loading="eager"
         className={cn(
-          "transition-all duration-300 w-full h-full object-contain",
-          loading ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0',
+          "transition-all duration-700 w-full h-full",
+          loading ? 'opacity-0 scale-95 blur-md' : 'opacity-100 scale-100 blur-0',
           error ? 'opacity-40 grayscale' : 'opacity-100'
         )}
         {...props}

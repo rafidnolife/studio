@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ImageWithFallback } from '@/components/ui/image-with-fallback';
 import { Skeleton } from '@/components/ui/skeleton';
-import { CheckCircle, Info, Zap, ShieldCheck, ArrowLeft, ShoppingCart, MapPin, Truck } from 'lucide-react';
+import { CheckCircle, Info, Zap, ShieldCheck, ArrowLeft, ShoppingCart, MapPin, Truck, ChevronRight } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +24,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -35,6 +36,7 @@ export default function ProductDetail() {
         if (docSnap.exists()) {
           const productData = { id: docSnap.id, ...docSnap.data() } as Product;
           setProduct(productData);
+          setActiveImageIndex(productData.mainImageIndex || 0);
 
           // Save to Recently Viewed
           const recent = JSON.parse(localStorage.getItem('recently_viewed') || '[]');
@@ -105,46 +107,73 @@ export default function ProductDetail() {
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
 
   return (
-    <div className="min-h-screen pb-24 md:pb-12 overflow-x-hidden">
+    <div className="min-h-screen pb-24 md:pb-12 bg-[#F8FAFC]">
       <Navbar />
       <main className="container mx-auto px-4 py-6 md:py-12 max-w-7xl">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
-          <div className="relative aspect-square w-full rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-white border border-slate-100 shadow-2xl">
-            <ImageWithFallback src={product.imageUrls[0]} alt={product.name} className="object-contain p-4 md:p-8" />
-            {hasDiscount && (
-              <Badge className="absolute top-4 left-4 bg-red-500 text-white font-black px-4 py-1.5 rounded-xl">
-                {Math.round(((product.price - product.discountPrice!) / product.price) * 100)}% ছাড়
-              </Badge>
-            )}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-20 items-start">
+          <div className="space-y-6">
+            <div className="relative aspect-square w-full rounded-[2.5rem] md:rounded-[3.5rem] overflow-hidden bg-white border border-slate-100 shadow-2xl transition-all duration-700">
+              <ImageWithFallback 
+                src={product.imageUrls[activeImageIndex]} 
+                alt={product.name} 
+                className="object-contain p-4 md:p-12" 
+              />
+              {hasDiscount && (
+                <Badge className="absolute top-6 left-6 bg-red-500 text-white font-black px-6 py-2 rounded-2xl text-lg shadow-xl border-none">
+                  {Math.round(((product.price - product.discountPrice!) / product.price) * 100)}% ছাড়
+                </Badge>
+              )}
+            </div>
+            
+            <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide px-2">
+              {product.imageUrls.map((url, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => setActiveImageIndex(idx)}
+                  className={cn(
+                    "w-20 h-20 md:w-28 md:h-28 rounded-[1.5rem] overflow-hidden bg-white border-4 transition-all shrink-0 shadow-lg",
+                    activeImageIndex === idx ? "border-primary scale-110 shadow-primary/20" : "border-transparent opacity-60 grayscale hover:opacity-100 hover:grayscale-0"
+                  )}
+                >
+                  <img src={url} alt="" className="object-cover w-full h-full" />
+                </button>
+              ))}
+            </div>
           </div>
 
-          <div className="flex flex-col space-y-6 md:space-y-8">
-            <div className="space-y-3">
-              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-black px-4 py-1.5 rounded-full uppercase tracking-widest">{product.category}</Badge>
-              <h1 className="text-3xl md:text-5xl font-black text-slate-900 leading-tight tracking-tighter">{product.name}</h1>
-              <div className="flex items-center gap-4">
-                <span className="text-3xl md:text-5xl font-black text-primary">৳{hasDiscount ? product.discountPrice : product.price}</span>
-                {hasDiscount && <span className="text-lg md:text-xl text-slate-300 line-through font-bold">৳{product.price}</span>}
+          <div className="flex flex-col space-y-8 md:space-y-10">
+            <div className="space-y-4">
+              <Badge variant="secondary" className="bg-primary/10 text-primary border-none font-black px-6 py-2 rounded-full uppercase tracking-[0.2em] text-[10px] md:text-xs">{product.category}</Badge>
+              <h1 className="text-4xl md:text-6xl font-black text-slate-900 leading-none tracking-tighter">{product.name}</h1>
+              <div className="flex items-center gap-6">
+                <span className="text-4xl md:text-6xl font-black text-primary">৳{hasDiscount ? product.discountPrice : product.price}</span>
+                {hasDiscount && <span className="text-xl md:text-2xl text-slate-300 line-through font-bold">৳{product.price}</span>}
               </div>
             </div>
 
-            <div className="p-6 md:p-10 bg-white rounded-[2rem] border border-slate-100 shadow-2xl space-y-6">
+            <Card className="p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border-none shadow-2xl bg-white space-y-10">
               {product.variants && product.variants.length > 0 && (
-                <div className="space-y-3">
-                  <span className="font-black text-slate-800 text-lg">{product.unit || 'বিকল্প'} বেছে নিন:</span>
-                  <div className="flex flex-wrap gap-2">
+                <div className="space-y-5">
+                  <div className="flex items-center justify-between">
+                    <span className="font-black text-slate-800 text-xl">{product.unit || 'বিকল্প'} বেছে নিন:</span>
+                    <Badge variant="outline" className="rounded-full font-black text-[10px] tracking-widest text-primary border-primary/20 bg-primary/5 px-4 py-1.5">
+                      {selectedVariant || 'REQUIRED'}
+                    </Badge>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
                     {product.variants.map((v) => (
                       <button
                         key={v}
                         onClick={() => setSelectedVariant(v)}
                         className={cn(
-                          "px-4 py-2 rounded-xl font-bold border-2 transition-all",
+                          "px-6 py-4 rounded-2xl font-black text-sm md:text-lg border-2 transition-all flex items-center gap-2",
                           selectedVariant === v 
-                            ? "bg-primary text-white border-primary shadow-lg scale-105" 
+                            ? "bg-primary text-white border-primary shadow-2xl scale-105 shadow-primary/30" 
                             : "bg-slate-50 border-slate-100 text-slate-600 hover:border-primary/30"
                         )}
                       >
                         {v}
+                        {selectedVariant === v && <CheckCircle className="w-5 h-5" />}
                       </button>
                     ))}
                   </div>
@@ -152,36 +181,39 @@ export default function ProductDetail() {
               )}
 
               <div className="flex items-center justify-between">
-                <span className="font-black text-slate-800 text-lg">পরিমাণ:</span>
-                <div className="flex items-center gap-6 bg-slate-50 px-6 py-2 rounded-2xl border border-slate-100">
-                  <button onClick={() => setQty(q => Math.max(1, q - 1))} className="text-2xl font-black text-slate-400">-</button>
-                  <span className="text-2xl font-black w-8 text-center">{qty}</span>
-                  <button onClick={() => setQty(q => q + 1)} className="text-2xl font-black text-slate-400">+</button>
+                <span className="font-black text-slate-800 text-xl">পরিমাণ:</span>
+                <div className="flex items-center gap-8 bg-slate-50 px-8 py-3 rounded-3xl border-none shadow-inner">
+                  <button onClick={() => setQty(q => Math.max(1, q - 1))} className="text-3xl font-black text-slate-400 hover:text-primary transition-colors">-</button>
+                  <span className="text-3xl font-black w-10 text-center text-slate-900">{qty}</span>
+                  <button onClick={() => setQty(q => q + 1)} className="text-3xl font-black text-slate-400 hover:text-primary transition-colors">+</button>
                 </div>
               </div>
               
-              <div className="space-y-4">
+              <div className="space-y-6 pt-4">
                 <Button 
                   onClick={handleOrderRedirect} 
                   disabled={product.stock <= 0}
-                  className="w-full h-16 md:h-20 rounded-2xl text-lg md:text-2xl font-black gap-4 shadow-xl shadow-primary/30 bg-primary"
+                  className="w-full h-20 md:h-24 rounded-[1.5rem] md:rounded-[2rem] text-2xl md:text-3xl font-black gap-6 shadow-[0_25px_50px_-12px_rgba(16,185,129,0.4)] bg-primary group transition-all active:scale-95"
                 >
-                  <ShoppingCart className="w-6 h-6 md:w-8 md:h-8" />
+                  <ShoppingCart className="w-8 h-8 md:w-10 md:h-10 group-hover:rotate-12 transition-transform" />
                   অর্ডার করুন
                 </Button>
-                <div className="flex items-center justify-center gap-2 text-[10px] text-primary font-black uppercase tracking-widest">
-                  <Truck className="w-3.5 h-3.5" />
+                <div className="flex items-center justify-center gap-3 text-xs md:text-sm text-primary font-black uppercase tracking-widest">
+                  <Truck className="w-5 h-5 animate-bounce-horizontal" />
                   সারা বাংলাদেশে ক্যাশ অন ডেলিভারি
                 </div>
               </div>
-            </div>
+            </Card>
 
-            <div className="space-y-4">
-              <h3 className="text-xl md:text-2xl font-black text-slate-800 flex items-center gap-2">
-                <Info className="w-6 h-6 text-primary" /> পণ্যের বিবরণ
-              </h3>
-              <p className="text-slate-600 leading-relaxed font-medium bg-white/60 glass p-6 rounded-[2rem] border border-slate-100">
-                {product.description || 'এই পণ্যটির কোনো বিস্তারিত বিবরণ বর্তমানে পাওয়া যায়নি। তবে এটি অত্যন্ত প্রিমিয়াম কোয়ালিটির পণ্য।'}
+            <div className="space-y-6">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center text-primary shadow-lg">
+                   <Info className="w-6 h-6" />
+                </div>
+                <h3 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tighter">পণ্যের বিবরণ</h3>
+              </div>
+              <p className="text-slate-600 leading-relaxed font-bold text-lg md:text-xl bg-white/70 glass p-8 md:p-12 rounded-[2.5rem] md:rounded-[3.5rem] border border-slate-100 shadow-xl">
+                {product.description || 'এই পণ্যটির কোনো বিস্তারিত বিবরণ বর্তমানে পাওয়া যায়নি। তবে এটি অত্যন্ত প্রিমিয়াম কোয়ালিটির পণ্য যা সরাসরি আমদানিকৃত।'}
               </p>
             </div>
           </div>

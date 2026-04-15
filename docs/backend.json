@@ -13,9 +13,11 @@
         "category": { "type": "string" },
         "stock": { "type": "number" },
         "imageUrls": { "type": "array", "items": { "type": "string" } },
+        "mainImageIndex": { "type": "number", "default": 0 },
         "isFeatured": { "type": "boolean" },
         "unit": { "type": "string", "description": "e.g., Size, Weight, Color" },
         "variants": { "type": "array", "items": { "type": "string" } },
+        "colors": { "type": "array", "items": { "type": "string" } },
         "createdAt": { "type": "string", "format": "date-time" },
         "updatedAt": { "type": "string", "format": "date-time" }
       },

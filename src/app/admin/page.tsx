@@ -14,7 +14,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Save, Package, ShoppingCart, CheckCircle, XCircle, Activity, DollarSign, Users, PackageCheck } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, Package, ShoppingCart, CheckCircle, XCircle, Activity, DollarSign, Users, PackageCheck, Image as ImageIcon, Check } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -52,8 +52,10 @@ export default function AdminDashboard() {
     stock: '',
     isFeatured: false,
     imageUrls: [''],
-    unit: '',
-    variants: ''
+    mainImageIndex: 0,
+    unit: 'Size',
+    variants: '',
+    colors: ''
   });
 
   useEffect(() => {
@@ -117,11 +119,13 @@ export default function AdminDashboard() {
         toast({ title: title });
         fetchData();
         
-        sendPushNotification({
-          recipientId: customerId,
-          title: title,
-          body: body
-        });
+        if (customerId) {
+          sendPushNotification({
+            recipientId: customerId,
+            title: title,
+            body: body
+          });
+        }
       })
       .catch(async (serverError) => {
         const permissionError = new FirestorePermissionError({
@@ -152,6 +156,12 @@ export default function AdminDashboard() {
 
   const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    const cleanUrls = formData.imageUrls.map(u => u.trim()).filter(u => u !== '');
+    if (cleanUrls.length === 0) {
+      toast({ variant: 'destructive', title: 'ছবি যোগ করুন', description: 'অন্তত একটি ছবির লিঙ্ক দিন।' });
+      return;
+    }
+
     const data: any = {
       name: formData.name,
       price: Number(formData.price),
@@ -160,9 +170,11 @@ export default function AdminDashboard() {
       category: formData.category,
       stock: Number(formData.stock),
       isFeatured: formData.isFeatured,
-      imageUrls: formData.imageUrls.filter(u => u.trim() !== ''),
+      imageUrls: cleanUrls,
+      mainImageIndex: formData.mainImageIndex >= cleanUrls.length ? 0 : formData.mainImageIndex,
       unit: formData.unit,
       variants: formData.variants.split(',').map(v => v.trim()).filter(v => v !== ''),
+      colors: formData.colors.split(',').map(v => v.trim()).filter(v => v !== ''),
       updatedAt: serverTimestamp(),
     };
 
@@ -172,10 +184,10 @@ export default function AdminDashboard() {
       const pRef = doc(db, 'products', editingProduct.id);
       updateDoc(pRef, data)
         .then(() => {
-          toast({ title: 'সফলভাবে সেভ হয়েছে' });
+          toast({ title: 'সফলভাবে আপডেট হয়েছে' });
           setProductDialogOpen(false);
           setEditingProduct(null);
-          setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''], unit: '', variants: '' });
+          resetForm();
           fetchData();
         })
         .catch(async (err) => {
@@ -189,9 +201,9 @@ export default function AdminDashboard() {
     } else {
       addDoc(collection(db, 'products'), data)
         .then(() => {
-          toast({ title: 'সফলভাবে সেভ হয়েছে' });
+          toast({ title: 'সফলভাবে যুক্ত হয়েছে' });
           setProductDialogOpen(false);
-          setFormData({ name: '', price: '', discountPrice: '', description: '', category: '', stock: '', isFeatured: false, imageUrls: [''], unit: '', variants: '' });
+          resetForm();
           fetchData();
         })
         .catch(async (err) => {
@@ -203,6 +215,43 @@ export default function AdminDashboard() {
           errorEmitter.emit('permission-error', permissionError);
         });
     }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      name: '',
+      price: '',
+      discountPrice: '',
+      description: '',
+      category: '',
+      stock: '',
+      isFeatured: false,
+      imageUrls: [''],
+      mainImageIndex: 0,
+      unit: 'Size',
+      variants: '',
+      colors: ''
+    });
+  };
+
+  const addImageUrl = () => {
+    setFormData({ ...formData, imageUrls: [...formData.imageUrls, ''] });
+  };
+
+  const updateImageUrl = (index: number, value: string) => {
+    const urls = [...formData.imageUrls];
+    urls[index] = value;
+    setFormData({ ...formData, imageUrls: urls });
+  };
+
+  const removeImageUrl = (index: number) => {
+    if (formData.imageUrls.length <= 1) return;
+    const urls = [...formData.imageUrls];
+    urls.splice(index, 1);
+    let newMainIndex = formData.mainImageIndex;
+    if (formData.mainImageIndex === index) newMainIndex = 0;
+    else if (formData.mainImageIndex > index) newMainIndex--;
+    setFormData({ ...formData, imageUrls: urls, mainImageIndex: newMainIndex });
   };
 
   const deleteProduct = (id: string) => {
@@ -256,58 +305,106 @@ export default function AdminDashboard() {
             <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tighter">অ্যাডমিন <span className="text-primary">প্যানেল</span></h1>
             <p className="text-slate-500 font-bold uppercase tracking-widest text-[10px]">সবকিছুর পূর্ণ নিয়ন্ত্রণ আপনার হাতে</p>
           </div>
-          <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
+          <Dialog open={productDialogOpen} onOpenChange={(open) => { setProductDialogOpen(open); if(!open) { setEditingProduct(null); resetForm(); } }}>
             <DialogTrigger asChild>
               <Button className="rounded-2xl h-12 md:h-14 px-8 bg-primary font-black text-white shadow-xl hover:scale-105">
                 <Plus className="mr-2 w-5 h-5" /> নতুন পণ্য
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto rounded-[2rem]">
-              <DialogHeader>
-                <DialogTitle className="text-2xl font-black">পণ্যের বিস্তারিত তথ্য</DialogTitle>
-                <DialogDescription>সঠিক তথ্য দিয়ে ইনভেন্টরি আপডেট করুন।</DialogDescription>
+            <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto rounded-[2rem] p-0 border-none shadow-2xl">
+              <DialogHeader className="p-8 bg-slate-50 rounded-t-[2rem]">
+                <DialogTitle className="text-3xl font-black text-slate-900">পণ্যের বিস্তারিত তথ্য</DialogTitle>
+                <DialogDescription className="font-bold text-slate-500">সঠিক তথ্য ও ছবি দিয়ে ইনভেন্টরি আপডেট করুন।</DialogDescription>
               </DialogHeader>
-              <form onSubmit={handleProductSubmit} className="grid grid-cols-1 md:grid-cols-2 gap-6 py-6">
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="font-bold">পণ্যের নাম</Label>
-                    <input placeholder="নাম" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required className="rounded-xl h-12 w-full border border-input bg-background px-3" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="font-bold">মূল্য (৳)</Label>
-                      <input type="number" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required className="rounded-xl h-12 w-full border border-input bg-background px-3" />
+              <form onSubmit={handleProductSubmit} className="p-8 space-y-10">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                  <div className="space-y-6">
+                    <div className="space-y-3">
+                      <Label className="font-black text-slate-700 ml-1">পণ্যের নাম</Label>
+                      <Input placeholder="পণ্যের নাম লিখুন" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required className="rounded-2xl h-14 bg-slate-50 border-none shadow-inner font-bold" />
                     </div>
-                    <div className="space-y-2">
-                      <Label className="font-bold">ক্যাটাগরি</Label>
-                      <input value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required className="rounded-xl h-12 w-full border border-input bg-background px-3" />
+                    
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <Label className="font-black text-slate-700 ml-1">মূল্য (৳)</Label>
+                        <Input type="number" placeholder="৳" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required className="rounded-2xl h-14 bg-slate-50 border-none shadow-inner font-bold" />
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="font-black text-slate-700 ml-1">ক্যাটাগরি</Label>
+                        <Input placeholder="যেমন: ফ্যাশন" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required className="rounded-2xl h-14 bg-slate-50 border-none shadow-inner font-bold" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="font-black text-slate-700 ml-1">পণ্যের বিবরণ</Label>
+                      <Textarea placeholder="পণ্যের গুণাগুণ লিখুন..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="rounded-2xl min-h-[140px] bg-slate-50 border-none shadow-inner font-bold p-5" />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-3">
+                        <Label className="font-black text-slate-700 ml-1">ভেরিয়েন্ট ইউনিট</Label>
+                        <Input placeholder="যেমন: Size" value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} className="rounded-2xl h-14 bg-slate-50 border-none shadow-inner font-bold" />
+                      </div>
+                      <div className="space-y-3">
+                        <Label className="font-black text-slate-700 ml-1">স্টক পরিমাণ</Label>
+                        <Input type="number" placeholder="Qty" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} required className="rounded-2xl h-14 bg-slate-50 border-none shadow-inner font-bold" />
+                      </div>
+                    </div>
+
+                    <div className="space-y-3">
+                      <Label className="font-black text-slate-700 ml-1">ভেরিয়েন্টসমূহ (কমা দিয়ে লিখুন)</Label>
+                      <Input placeholder="M, L, XL" value={formData.variants} onChange={e => setFormData({...formData, variants: e.target.value})} className="rounded-2xl h-14 bg-slate-50 border-none shadow-inner font-bold" />
                     </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label className="font-bold">ছবি ইউআরএল</Label>
-                    <input value={formData.imageUrls[0]} onChange={e => setFormData({...formData, imageUrls: [e.target.value]})} className="rounded-xl h-12 w-full border border-input bg-background px-3" />
-                  </div>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label className="font-bold">ইউনিট (যেমন: সাইজ)</Label>
-                      <input value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} className="rounded-xl h-12 w-full border border-input bg-background px-3" />
+
+                  <div className="space-y-6">
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <Label className="font-black text-slate-700 ml-1">পণ্যের ছবিসমূহ (URL)</Label>
+                        <Button type="button" variant="outline" size="sm" onClick={addImageUrl} className="rounded-full font-black text-[10px] h-8 px-4 border-primary text-primary"><Plus className="w-3.5 h-3.5 mr-1" /> নতুন ছবি</Button>
+                      </div>
+                      
+                      <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 scrollbar-hide">
+                        {formData.imageUrls.map((url, idx) => (
+                          <Card key={idx} className={cn("p-4 rounded-3xl border-2 transition-all", formData.mainImageIndex === idx ? "border-primary bg-primary/5" : "border-slate-100 bg-white")}>
+                            <div className="flex gap-4 items-start">
+                              <div className="w-20 h-20 rounded-2xl bg-slate-100 flex items-center justify-center shrink-0 border overflow-hidden relative group">
+                                {url ? (
+                                  <img src={url} alt="" className="object-cover w-full h-full" />
+                                ) : (
+                                  <ImageIcon className="text-slate-300" />
+                                )}
+                                {formData.mainImageIndex === idx && (
+                                  <div className="absolute inset-0 bg-primary/20 flex items-center justify-center">
+                                    <Check className="text-white w-8 h-8 drop-shadow-lg" />
+                                  </div>
+                                )}
+                              </div>
+                              <div className="flex-grow space-y-2">
+                                <Input placeholder="ছবির ইউআরএল দিন" value={url} onChange={e => updateImageUrl(idx, e.target.value)} className="h-10 rounded-xl bg-slate-50 border-none shadow-inner text-xs font-bold" />
+                                <div className="flex items-center gap-2">
+                                  <Button type="button" variant={formData.mainImageIndex === idx ? "default" : "outline"} className="h-8 rounded-full text-[9px] font-black flex-1" onClick={() => setFormData({...formData, mainImageIndex: idx})}>
+                                    {formData.mainImageIndex === idx ? "হোমপেজে শো করবে" : "Set as Card Image"}
+                                  </Button>
+                                  <Button type="button" variant="ghost" size="icon" className="h-8 w-8 text-red-500" onClick={() => removeImageUrl(idx)}><Trash2 className="w-4 h-4" /></Button>
+                                </div>
+                              </div>
+                            </div>
+                          </Card>
+                        ))}
+                      </div>
                     </div>
-                    <div className="space-y-2">
-                      <Label className="font-bold">ভেরিয়েন্ট (M, L, XL)</Label>
-                      <input value={formData.variants} onChange={e => setFormData({...formData, variants: e.target.value})} className="rounded-xl h-12 w-full border border-input bg-background px-3" />
+
+                    <div className="flex items-center justify-between p-6 bg-slate-50 rounded-3xl shadow-inner">
+                      <div className="space-y-1">
+                        <Label className="font-black text-slate-800">স্পেশাল কালেকশন</Label>
+                        <p className="text-[10px] font-bold text-slate-500">এটি হোমপেজের উপরে ট্রেন্ডিং সেকশনে শো করবে।</p>
+                      </div>
+                      <Switch checked={formData.isFeatured} onCheckedChange={c => setFormData({...formData, isFeatured: c})} />
                     </div>
+
+                    <Button type="submit" className="w-full h-16 rounded-3xl font-black text-xl shadow-2xl shadow-primary/30 bg-primary">পণ্য সেভ করুন</Button>
                   </div>
-                </div>
-                <div className="space-y-4">
-                  <div className="space-y-2">
-                    <Label className="font-bold">বিবরণ</Label>
-                    <textarea value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="rounded-xl min-h-[120px] w-full border border-input bg-background p-3" />
-                  </div>
-                  <div className="flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
-                    <Label className="font-black">স্পেশাল কালেকশন</Label>
-                    <Switch checked={formData.isFeatured} onCheckedChange={c => setFormData({...formData, isFeatured: c})} />
-                  </div>
-                  <Button type="submit" className="w-full h-14 rounded-2xl font-black text-xl">পণ্য সেভ করুন</Button>
                 </div>
               </form>
             </DialogContent>
@@ -360,9 +457,13 @@ export default function AdminDashboard() {
                         <div className="space-y-1">
                           <span className="font-black text-slate-900 block">{o.customerName || 'ক্রেতা'}</span>
                           <span className="text-[10px] text-slate-500 font-bold uppercase">{o.phoneNumber}</span>
-                          <p className="text-xs font-bold text-primary mt-1">
-                            {o.items?.map((i: any) => `${i.name} (${i.qty}) ${i.variant ? `[${i.variant}]` : ''}`).join(', ')}
-                          </p>
+                          <div className="flex flex-wrap gap-1 mt-2">
+                            {o.items?.map((i: any, idx: number) => (
+                              <Badge key={idx} variant="outline" className="text-[8px] font-black uppercase py-0 px-2 rounded-md">
+                                {i.name} ({i.qty}) {i.variant ? `[${i.variant}]` : ''}
+                              </Badge>
+                            ))}
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>
@@ -411,6 +512,7 @@ export default function AdminDashboard() {
                     <TableHead className="font-black py-6">পণ্য</TableHead>
                     <TableHead className="font-black">ক্যাটাগরি</TableHead>
                     <TableHead className="font-black">মূল্য</TableHead>
+                    <TableHead className="font-black">স্টক</TableHead>
                     <TableHead className="text-right font-black">অ্যাকশন</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -419,12 +521,13 @@ export default function AdminDashboard() {
                     <TableRow key={p.id} className="hover:bg-slate-50 transition-all">
                       <TableCell className="py-6 flex items-center gap-4">
                         <div className="w-12 h-12 rounded-xl bg-slate-100 overflow-hidden border">
-                          <img src={p.imageUrls[0]} alt="" className="object-cover w-full h-full" />
+                          <img src={p.imageUrls[p.mainImageIndex || 0] || p.imageUrls[0]} alt="" className="object-cover w-full h-full" />
                         </div>
                         <span className="font-black text-slate-900">{p.name}</span>
                       </TableCell>
                       <TableCell><Badge variant="outline" className="rounded-full font-bold">{p.category}</Badge></TableCell>
                       <TableCell className="font-black text-lg text-primary">৳{p.discountPrice || p.price}</TableCell>
+                      <TableCell className="font-bold text-slate-500">{p.stock}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-1">
                           <Button variant="ghost" size="icon" className="h-10 w-10 hover:text-primary" onClick={() => { 
@@ -438,8 +541,10 @@ export default function AdminDashboard() {
                               stock: p.stock?.toString() || '',
                               isFeatured: p.isFeatured || false,
                               imageUrls: p.imageUrls || [''],
-                              unit: p.unit || '',
-                              variants: p.variants?.join(', ') || ''
+                              mainImageIndex: p.mainImageIndex || 0,
+                              unit: p.unit || 'Size',
+                              variants: p.variants?.join(', ') || '',
+                              colors: p.colors?.join(', ') || ''
                             }); 
                             setProductDialogOpen(true); 
                           }}><Pencil className="w-5 h-5" /></Button>
