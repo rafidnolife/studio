@@ -7,7 +7,6 @@ import { cn } from '@/lib/utils';
 interface ImageWithFallbackProps extends React.ImgHTMLAttributes<HTMLImageElement> {
   src: string;
   fallbackSrc?: string;
-  fill?: boolean;
 }
 
 export function ImageWithFallback({ 
@@ -15,7 +14,6 @@ export function ImageWithFallback({
   alt, 
   className, 
   fallbackSrc = 'https://placehold.co/800x800?text=ইমেজ+পাওয়া+যায়নি',
-  fill,
   ...props 
 }: ImageWithFallbackProps) {
   const [error, setError] = useState(false);
@@ -48,13 +46,9 @@ export function ImageWithFallback({
     }
   };
 
-  // Filter out the 'fill' prop from the img element to prevent the non-boolean attribute error
-  const { fill: _, ...restProps } = props;
-
   return (
     <div className={cn(
       "relative overflow-hidden flex items-center justify-center w-full h-full min-h-[inherit]", 
-      fill && "absolute inset-0",
       className
     )}>
       {loading && (
@@ -75,8 +69,7 @@ export function ImageWithFallback({
           loading ? 'opacity-0 scale-95 blur-sm' : 'opacity-100 scale-100 blur-0',
           error ? 'opacity-40 grayscale' : 'opacity-100'
         )}
-        style={fill ? { width: '100%', height: '100%' } : restProps.style}
-        {...restProps}
+        {...props}
       />
     </div>
   );

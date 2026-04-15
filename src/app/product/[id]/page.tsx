@@ -28,12 +28,19 @@ export default function ProductDetail() {
 
   useEffect(() => {
     async function fetchProduct() {
-      if (!id) return;
+      if (!id || !db) return;
       try {
         const docRef = doc(db, 'products', id as string);
         const docSnap = await getDoc(docRef);
         if (docSnap.exists()) {
-          setProduct({ id: docSnap.id, ...docSnap.data() } as Product);
+          const productData = { id: docSnap.id, ...docSnap.data() } as Product;
+          setProduct(productData);
+
+          // Save to Recently Viewed
+          const recent = JSON.parse(localStorage.getItem('recently_viewed') || '[]');
+          const filtered = recent.filter((p: Product) => p.id !== productData.id);
+          const updated = [productData, ...filtered].slice(0, 10);
+          localStorage.setItem('recently_viewed', JSON.stringify(updated));
         }
       } catch (err) {
         console.error('Error fetching product detail:', err);
@@ -103,7 +110,7 @@ export default function ProductDetail() {
       <main className="container mx-auto px-4 py-6 md:py-12 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-16 items-start">
           <div className="relative aspect-square w-full rounded-[2rem] md:rounded-[3rem] overflow-hidden bg-white border border-slate-100 shadow-2xl">
-            <ImageWithFallback src={product.imageUrls[0]} alt={product.name} fill className="object-contain p-4 md:p-8" />
+            <ImageWithFallback src={product.imageUrls[0]} alt={product.name} className="object-contain p-4 md:p-8" />
             {hasDiscount && (
               <Badge className="absolute top-4 left-4 bg-red-500 text-white font-black px-4 py-1.5 rounded-xl">
                 {Math.round(((product.price - product.discountPrice!) / product.price) * 100)}% ছাড়
