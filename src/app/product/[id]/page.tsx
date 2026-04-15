@@ -40,7 +40,6 @@ export default function ProductDetail() {
           setProduct(productData);
           setActiveImageIndex(productData.mainImageIndex || 0);
 
-          // Save to Recently Viewed
           if (typeof window !== 'undefined') {
             const recent = JSON.parse(localStorage.getItem('recently_viewed') || '[]');
             const filtered = recent.filter((p: any) => p.id !== productData.id);
@@ -124,7 +123,7 @@ export default function ProductDetail() {
   const hasDiscount = product.discountPrice && product.discountPrice < product.price;
 
   return (
-    <div className="min-h-screen pb-20 bg-slate-50">
+    <div className="min-h-screen pb-24 bg-slate-50">
       <Navbar />
       <main className="container mx-auto px-4 py-6 md:py-8 max-w-5xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
@@ -159,7 +158,7 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Right: Info */}
+          {/* Right: Info - Shrunk & Neat */}
           <div className="flex flex-col space-y-5">
             <div className="space-y-1.5">
               <div className="flex items-center gap-2">
