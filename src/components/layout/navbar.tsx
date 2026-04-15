@@ -18,19 +18,11 @@ export function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [scrolled, setScrolled] = useState(false);
-  const [isAtBottom, setIsAtBottom] = useState(false);
   const [apkUrl, setApkUrl] = useState<string | null>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setScrolled(window.scrollY > 20);
-      
-      const scrollHeight = document.documentElement.scrollHeight;
-      const scrollTop = window.scrollY || document.documentElement.scrollTop;
-      const clientHeight = window.innerHeight;
-      
-      // If we are within 100px of the bottom
-      setIsAtBottom(scrollTop + clientHeight >= scrollHeight - 100);
     };
     
     window.addEventListener('scroll', handleScroll);
@@ -144,11 +136,8 @@ export function Navbar() {
         </div>
       </nav>
 
-      {/* Dynamic Mobile Bottom Navigation Bar - Lower z-index so Sheets can appear over it */}
-      <div className={cn(
-        "md:hidden fixed left-6 right-6 h-14 glass border-white/50 shadow-2xl rounded-2xl px-6 flex justify-between items-center z-40 transition-all duration-500",
-        isAtBottom ? "bottom-20" : "bottom-4"
-      )}>
+      {/* Thin Fixed Mobile Bottom Navigation Bar */}
+      <div className="md:hidden fixed bottom-0 left-0 right-0 h-11 bg-white/95 backdrop-blur-xl border-t border-slate-100 shadow-[0_-4px_20px_-5px_rgba(0,0,0,0.1)] px-8 flex justify-between items-center z-40">
         {navItems.map((item) => (
           <Link
             key={item.href}
@@ -158,7 +147,7 @@ export function Navbar() {
               pathname === item.href ? "text-primary scale-110" : "text-slate-400"
             )}
           >
-            <item.icon className="w-5 h-5" />
+            <item.icon className="w-4.5 h-4.5" />
             <span className="text-[7px] font-black uppercase tracking-tighter">{item.name}</span>
           </Link>
         ))}
@@ -167,9 +156,9 @@ export function Navbar() {
             href={apkUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex flex-col items-center gap-0.5 text-primary animate-pulse"
+            className="flex flex-col items-center gap-0.5 text-primary"
           >
-            <Download className="w-5 h-5" />
+            <Download className="w-4.5 h-4.5" />
             <span className="text-[7px] font-black uppercase tracking-tighter">App</span>
           </a>
         )}
