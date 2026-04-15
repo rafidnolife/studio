@@ -355,6 +355,10 @@ export default function AdminDashboard() {
                       <Label className="font-black text-slate-700 ml-1">ভেরিয়েন্টসমূহ (কমা দিয়ে লিখুন)</Label>
                       <Input placeholder="M, L, XL" value={formData.variants} onChange={e => setFormData({...formData, variants: e.target.value})} className="rounded-2xl h-14 bg-slate-50 border-none shadow-inner font-bold" />
                     </div>
+                    <div className="space-y-3">
+                      <Label className="font-black text-slate-700 ml-1">কালারসমূহ (কমা দিয়ে লিখুন)</Label>
+                      <Input placeholder="Red, Black, Blue" value={formData.colors} onChange={e => setFormData({...formData, colors: e.target.value})} className="rounded-2xl h-14 bg-slate-50 border-none shadow-inner font-bold" />
+                    </div>
                   </div>
 
                   <div className="space-y-6">
@@ -460,7 +464,7 @@ export default function AdminDashboard() {
                           <div className="flex flex-wrap gap-1 mt-2">
                             {o.items?.map((i: any, idx: number) => (
                               <Badge key={idx} variant="outline" className="text-[8px] font-black uppercase py-0 px-2 rounded-md">
-                                {i.name} ({i.qty}) {i.variant ? `[${i.variant}]` : ''}
+                                {i.name} ({i.qty}) {i.variant ? `[${i.variant}]` : ''} {i.color ? `[${i.color}]` : ''}
                               </Badge>
                             ))}
                           </div>

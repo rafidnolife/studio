@@ -25,6 +25,7 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [qty, setQty] = useState(1);
   const [selectedVariant, setSelectedVariant] = useState<string | null>(null);
+  const [selectedColor, setSelectedColor] = useState<string | null>(null);
   const [activeImageIndex, setActiveImageIndex] = useState(0);
   const { toast } = useToast();
 
@@ -64,6 +65,7 @@ export default function ProductDetail() {
       router.push('/login');
       return;
     }
+    
     if (product?.variants && product.variants.length > 0 && !selectedVariant) {
       toast({
         variant: "destructive",
@@ -72,8 +74,19 @@ export default function ProductDetail() {
       });
       return;
     }
+
+    if (product?.colors && product.colors.length > 0 && !selectedColor) {
+      toast({
+        variant: "destructive",
+        title: "কালার সিলেক্ট করুন",
+        description: `অনুগ্রহ করে একটি কালার বেছে নিন।`
+      });
+      return;
+    }
+
     const variantParam = selectedVariant ? `&variant=${encodeURIComponent(selectedVariant)}` : '';
-    router.push(`/checkout?productId=${product?.id}&qty=${qty}${variantParam}`);
+    const colorParam = selectedColor ? `&color=${encodeURIComponent(selectedColor)}` : '';
+    router.push(`/checkout?productId=${product?.id}&qty=${qty}${variantParam}${colorParam}`);
   };
 
   if (loading) return (
@@ -175,6 +188,29 @@ export default function ProductDetail() {
                       >
                         {v}
                         {selectedVariant === v && <CheckCircle className="w-5 h-5" />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {product.colors && product.colors.length > 0 && (
+                <div className="space-y-5">
+                  <span className="font-black text-slate-800 text-xl">কালার বেছে নিন:</span>
+                  <div className="flex flex-wrap gap-3">
+                    {product.colors.map((c) => (
+                      <button
+                        key={c}
+                        onClick={() => setSelectedColor(c)}
+                        className={cn(
+                          "px-6 py-4 rounded-2xl font-black text-sm md:text-lg border-2 transition-all flex items-center gap-2",
+                          selectedColor === c 
+                            ? "bg-primary text-white border-primary shadow-2xl scale-105 shadow-primary/30" 
+                            : "bg-slate-50 border-slate-100 text-slate-600 hover:border-primary/30"
+                        )}
+                      >
+                        {c}
+                        {selectedColor === c && <CheckCircle className="w-5 h-5" />}
                       </button>
                     ))}
                   </div>
