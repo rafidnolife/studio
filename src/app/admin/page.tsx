@@ -457,9 +457,9 @@ export default function AdminDashboard() {
                           {o.items?.map((i: any, idx: number) => (
                             <div key={idx} className="bg-slate-50 p-1.5 rounded-lg border border-slate-100 space-y-1">
                               <div className="flex gap-2 items-start">
-                                {/* Display the specific image selected for the order */}
+                                {/* কাস্টমার যেই ছবি সিলেক্ট করেছে সেটি এখানে থাম্বনেইল হিসেবে দেখা যাবে */}
                                 {i.selectedImage && (
-                                  <div className="w-8 h-8 rounded bg-slate-200 overflow-hidden shrink-0 border">
+                                  <div className="w-10 h-10 rounded-lg bg-slate-200 overflow-hidden shrink-0 border-2 border-primary/20">
                                     <img src={i.selectedImage} alt="" className="w-full h-full object-cover" />
                                   </div>
                                 )}

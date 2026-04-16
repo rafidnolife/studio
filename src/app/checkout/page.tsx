@@ -51,8 +51,8 @@ const bdData: Record<string, string[]> = {
   "জয়পুরহাট": ["জয়পুরহাট সদর", "আক্কেলপুর", "কালাই", "ক্ষেতলাল", "পাঁচবিবি"],
   "নওগাঁ": ["নওগাঁ সদর", "আত্রাই", "বদলগাছী", "ধামইরহাট", "মান্দা", "মহাদেবপুর", "নিয়ামতপুর", "পত্নীতলা", "পোরশা", "রানীনগর", "সাপাহার"],
   "নাটোর": ["নাটোর সদর", "বাগাতিপাড়া", "বড়াইগ্রাম", "গুরুদাসপুর", "লালপুর", "সিংড়া"],
-  "পাবনা": ["পাবনা সদর", "আটঘরিয়া", "বেড়া", "ভাঙ্গুড়া", "চাটমোহর", "ফরিদপুর", "ঈশ্বরদী", "সাথিয়া", "সুজানগর"],
-  "সিরাজগঞ্জ": ["সিরাজগঞ্জ সদর", "বেলকুچی", "চৌহালী", "কামারখন্দ", "কাজীপুর", "রায়গঞ্জ", "শাহজাদপুর", "তাড়াশ", "উল্লাপাড়া"],
+  "পাবনা": ["পাবনা সদর", "আটঘরিিয়া", "বেড়া", "ভাঙ্গুড়া", "চাটমোহর", "ফরিদপুর", "ঈশ্বরদী", "সাথিয়া", "সুজানগর"],
+  "সিরাজগঞ্জ": ["সিরাজগঞ্জ সদর", "বেলকুচি", "চৌহালী", "কামারখন্দ", "কাজীপুর", "রায়গঞ্জ", "শাহজাদপুর", "তাড়াশ", "উল্লাপাড়া"],
   "দিনাজপুর": ["দিনাজপুর সদর", "বিরামপুর", "বীরগঞ্জ", "বিরল", "বোচাগঞ্জ", "চিরিরবন্দর", "ফুলবাড়ী", "ঘোড়াঘাট", "হাকিমপুর", "কাহারোল", "খানসামা", "নবাবগঞ্জ", "পার্বতীপুর"],
   "গাইবান্ধা": ["গাইবান্ধা সদর", "ফুলছড়ি", "গোবিন্দগঞ্জ", "পলাশবাড়ী", "সাদুল্লাপুর", "সাঘাটা", "সুন্দরগঞ্জ"],
   "কুড়িগ্রাম": ["কুড়িগ্রাম সদর", "ভুরুঙ্গামারী", "চিলমারী", "ফুলবাড়ী", "নাগেশ্বরী", "রাজারহাট", "রাজিবপুর", "রৌমারী", "উলিপুর"],
@@ -164,7 +164,7 @@ function CheckoutContent() {
         qty: initialQty,
         variant: variant || null,
         color: color || null,
-        // Store the specific image URL selected
+        // কাস্টমারের সিলেক্ট করা নির্দিষ্ট ছবির URL এখানে ডাটাবেজে সেভ হচ্ছে
         selectedImage: product?.imageUrls[imgIdx] || product?.imageUrls[0] || ''
       }],
       subtotal,
@@ -185,7 +185,7 @@ function CheckoutContent() {
         toast({ title: "অর্ডার সফল", description: "আপনার অর্ডারটি গ্রহণ করা হয়েছে। শীঘ্রই কল দেওয়া হবে।" });
         router.push('/orders');
         
-        // Notify Admins in Real-time for Phones
+        // Notify Admins in Real-time
         const adminQuery = query(collection(db, 'users'), where('role', '==', 'admin'));
         getDocs(adminQuery).then(snap => {
           snap.forEach(adminDoc => {
@@ -299,25 +299,6 @@ function CheckoutContent() {
               </div>
             </CardContent>
           </Card>
-
-          <Card className="rounded-[2rem] border-none shadow-xl bg-slate-900 p-8 text-white">
-            <CardHeader className="px-0 pt-0">
-              <CardTitle className="flex items-center gap-2 text-xl font-black text-primary">
-                <CreditCard className="w-7 h-7" /> পেমেন্ট পদ্ধতি
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="px-0 mt-4">
-              <div className="p-6 border-2 border-primary/30 rounded-2xl bg-primary/5 flex items-center justify-between">
-                <div>
-                  <h4 className="font-black text-lg">ক্যাশ অন ডেলিভারি (COD)</h4>
-                  <p className="text-slate-400 text-sm">পণ্য হাতে পেয়ে টাকা পরিশোধ করুন।</p>
-                </div>
-                <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
-                  <Truck className="w-5 h-5 text-white" />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
         </div>
 
         <div className="space-y-6">
@@ -328,6 +309,7 @@ function CheckoutContent() {
             <CardContent className="px-0 space-y-6">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-2xl bg-slate-100 relative overflow-hidden shrink-0 shadow-md">
+                  {/* কাস্টমার যেই ছবি সিলেক্ট করেছে সেটি চেকআউটেও দেখা যাবে */}
                   <img src={product?.imageUrls[imgIdx] || product?.imageUrls[0]} alt="" className="object-cover w-full h-full" />
                 </div>
                 <div className="min-w-0">
@@ -360,7 +342,6 @@ function CheckoutContent() {
               >
                 {orderLoading ? "অর্ডার হচ্ছে..." : "অর্ডার কনফার্ম করুন"}
               </Button>
-              <p className="text-[10px] text-center font-black text-slate-400 uppercase tracking-widest">নিরাপদ ও বিশ্বস্ত শপিং</p>
             </CardContent>
           </Card>
         </div>
