@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -46,7 +47,6 @@ export default function ProfilePage() {
     <div className="min-h-screen pb-20 bg-[#F8FAFC]">
       <Navbar />
       <main className="container mx-auto px-4 py-6 max-w-4xl space-y-6">
-        {/* Luxury Profile Header - Compact */}
         <section className="relative overflow-hidden bg-slate-900 rounded-2xl p-5 md:p-6 text-white shadow-lg">
           <div className="absolute top-0 right-0 w-24 h-24 bg-primary/20 blur-[40px] rounded-full -mr-8 -mt-8"></div>
           
@@ -81,7 +81,6 @@ export default function ProfilePage() {
           </div>
         </section>
 
-        {/* Content Tabs - Compact */}
         <Tabs defaultValue="wishlist" className="space-y-4">
           <TabsList className="bg-white/80 p-0.5 rounded-full h-9 flex border shadow-sm w-full max-w-sm mx-auto glass">
             <TabsTrigger value="wishlist" className="rounded-full flex-1 font-black h-full gap-1 data-[state=active]:bg-primary data-[state=active]:text-white text-[9px] uppercase">

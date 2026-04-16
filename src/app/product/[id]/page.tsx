@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -86,7 +87,6 @@ export default function ProductDetail() {
 
     const variantParam = selectedVariant ? `&variant=${encodeURIComponent(selectedVariant)}` : '';
     const colorParam = selectedColor ? `&color=${encodeURIComponent(selectedColor)}` : '';
-    // Pass the selected image index to checkout
     router.push(`/checkout?productId=${product?.id}&qty=${qty}${variantParam}${colorParam}&imgIdx=${activeImageIndex}`);
   };
 
@@ -127,7 +127,6 @@ export default function ProductDetail() {
       <Navbar />
       <main className="container mx-auto px-4 py-4 md:py-6 max-w-4xl">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
-          {/* Left: Images */}
           <div className="space-y-3 md:sticky md:top-20">
             <div className="relative aspect-square w-full rounded-2xl overflow-hidden bg-white border shadow-sm">
               <ImageWithFallback 
@@ -158,7 +157,6 @@ export default function ProductDetail() {
             </div>
           </div>
 
-          {/* Right: Info */}
           <div className="flex flex-col space-y-4">
             <div className="space-y-1">
               <div className="flex items-center gap-2">

@@ -11,20 +11,17 @@ export function useNotifications() {
   const db = useFirestore();
   const { toast } = useToast();
   
-  // Track when the hook was mounted to avoid showing old notifications
   const mountedAt = useRef(Date.now());
 
   useEffect(() => {
     if (!user || !db) return;
 
-    // Request notification permission as soon as user is logged in
     if (typeof window !== 'undefined' && 'Notification' in window) {
       if (Notification.permission === 'default') {
         Notification.requestPermission();
       }
     }
 
-    // Query for unread notifications for the current user
     const q = query(
       collection(db, 'notifications'),
       where('recipientId', '==', user.uid),
@@ -38,16 +35,12 @@ export function useNotifications() {
           const data = change.doc.data();
           const createdAt = data.createdAt?.toMillis ? data.createdAt.toMillis() : Date.now();
           
-          // Only show if it's unread and was created after the app was loaded
           if (!data.read && createdAt > mountedAt.current - 10000) {
-            
-            // 1. Show In-App Toast
             toast({
               title: data.title,
               description: data.body,
             });
 
-            // 2. Trigger Original Phone/System Notification
             if (typeof window !== 'undefined' && 'Notification' in window && Notification.permission === 'granted') {
               try {
                 const n = new Notification(data.title, {
@@ -57,7 +50,6 @@ export function useNotifications() {
                   requireInteraction: true,
                 });
                 
-                // Play notification sound
                 const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
                 audio.play().catch(e => console.log('Audio playback blocked by browser', e));
                 
@@ -70,7 +62,6 @@ export function useNotifications() {
               }
             }
 
-            // Mark as read in Firestore so it doesn't trigger again
             const notificationRef = doc(db, 'notifications', change.doc.id);
             updateDoc(notificationRef, { read: true }).catch(err => console.error('Failed to update read status', err));
           }

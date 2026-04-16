@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from 'react';
@@ -13,7 +14,7 @@ import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2, Save, Package, ShoppingCart, CheckCircle, Activity, DollarSign, Users, Image as ImageIcon, MapPin, Phone, User as UserIcon } from 'lucide-react';
+import { Plus, Pencil, Trash2, Save, Package, ShoppingCart, CheckCircle, Activity, DollarSign, Users, Image as ImageIcon, MapPin, Phone, User as UserIcon, XCircle } from 'lucide-react';
 import { Product } from '@/components/product/product-card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogDescription } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -52,7 +53,7 @@ export default function AdminDashboard() {
     isFeatured: false,
     imageUrls: [''],
     mainImageIndex: 0,
-    unit: 'Size',
+    unit: '',
     variants: '',
     colors: ''
   });
@@ -156,24 +157,20 @@ export default function AdminDashboard() {
   const handleProductSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const cleanUrls = formData.imageUrls.map(u => u.trim()).filter(u => u !== '');
-    if (cleanUrls.length === 0) {
-      toast({ variant: 'destructive', title: 'ছবি যোগ করুন', description: 'অন্তত একটি ছবির লিঙ্ক দিন।' });
-      return;
-    }
-
+    
     const data: any = {
       name: formData.name,
       price: Number(formData.price),
       discountPrice: formData.discountPrice ? Number(formData.discountPrice) : null,
-      description: formData.description,
+      description: formData.description || '',
       category: formData.category,
       stock: Number(formData.stock),
       isFeatured: formData.isFeatured,
       imageUrls: cleanUrls,
       mainImageIndex: formData.mainImageIndex >= cleanUrls.length ? 0 : formData.mainImageIndex,
-      unit: formData.unit,
-      variants: formData.variants.split(',').map(v => v.trim()).filter(v => v !== ''),
-      colors: formData.colors.split(',').map(v => v.trim()).filter(v => v !== ''),
+      unit: formData.unit || '',
+      variants: formData.variants ? formData.variants.split(',').map(v => v.trim()).filter(v => v !== '') : [],
+      colors: formData.colors ? formData.colors.split(',').map(v => v.trim()).filter(v => v !== '') : [],
       updatedAt: serverTimestamp(),
     };
 
@@ -227,7 +224,7 @@ export default function AdminDashboard() {
       isFeatured: false,
       imageUrls: [''],
       mainImageIndex: 0,
-      unit: 'Size',
+      unit: '',
       variants: '',
       colors: ''
     });
@@ -319,34 +316,45 @@ export default function AdminDashboard() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="space-y-3">
                     <div className="space-y-1">
-                      <Label className="font-black text-slate-700 text-[10px]">পণ্যের নাম</Label>
+                      <Label className="font-black text-slate-700 text-[10px]">পণ্যের নাম *</Label>
                       <Input placeholder="পণ্যের নাম লিখুন" value={formData.name} onChange={e => setFormData({...formData, name: e.target.value})} required className="rounded-xl h-10 bg-slate-50 border-none shadow-inner font-bold text-xs" />
                     </div>
                     
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <Label className="font-black text-slate-700 text-[10px]">মূল্য (৳)</Label>
+                        <Label className="font-black text-slate-700 text-[10px]">মূল্য (৳) *</Label>
                         <Input type="number" placeholder="৳" value={formData.price} onChange={e => setFormData({...formData, price: e.target.value})} required className="rounded-xl h-10 bg-slate-50 border-none shadow-inner font-bold text-xs" />
                       </div>
                       <div className="space-y-1">
-                        <Label className="font-black text-slate-700 text-[10px]">ক্যাটাগরি</Label>
+                        <Label className="font-black text-slate-700 text-[10px]">ক্যাটাগরি *</Label>
                         <Input placeholder="যেমন: ফ্যাশন" value={formData.category} onChange={e => setFormData({...formData, category: e.target.value})} required className="rounded-xl h-10 bg-slate-50 border-none shadow-inner font-bold text-xs" />
                       </div>
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="font-black text-slate-700 text-[10px]">পণ্যের বিবরণ</Label>
+                      <Label className="font-black text-slate-700 text-[10px]">পণ্যের বিবরণ (ঐচ্ছিক)</Label>
                       <Textarea placeholder="পণ্যের গুণাগুণ লিখুন..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} className="rounded-xl min-h-[80px] bg-slate-50 border-none shadow-inner font-bold p-3 text-xs" />
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <div className="space-y-1">
-                        <Label className="font-black text-slate-700 text-[10px]">ভেরিয়েন্ট ইউনিট</Label>
+                        <Label className="font-black text-slate-700 text-[10px]">ভেরিয়েন্ট ইউনিট (উদা: Size/Weight)</Label>
                         <Input placeholder="যেমন: Size" value={formData.unit} onChange={e => setFormData({...formData, unit: e.target.value})} className="rounded-xl h-10 bg-slate-50 border-none shadow-inner font-bold text-xs" />
                       </div>
                       <div className="space-y-1">
-                        <Label className="font-black text-slate-700 text-[10px]">স্টক পরিমাণ</Label>
+                        <Label className="font-black text-slate-700 text-[10px]">স্টক পরিমাণ *</Label>
                         <Input type="number" placeholder="Qty" value={formData.stock} onChange={e => setFormData({...formData, stock: e.target.value})} required className="rounded-xl h-10 bg-slate-50 border-none shadow-inner font-bold text-xs" />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2">
+                      <div className="space-y-1">
+                        <Label className="font-black text-slate-700 text-[10px]">ভেরিয়েন্টসমূহ (কমা দিয়ে লিখুন)</Label>
+                        <Input placeholder="উদা: M, L, XL অথবা 1kg, 2kg" value={formData.variants} onChange={e => setFormData({...formData, variants: e.target.value})} className="rounded-xl h-10 bg-slate-50 border-none shadow-inner font-bold text-xs" />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="font-black text-slate-700 text-[10px]">কালারসমূহ (কমা দিয়ে লিখুন)</Label>
+                        <Input placeholder="উদা: Red, Blue, Black" value={formData.colors} onChange={e => setFormData({...formData, colors: e.target.value})} className="rounded-xl h-10 bg-slate-50 border-none shadow-inner font-bold text-xs" />
                       </div>
                     </div>
                   </div>
@@ -457,7 +465,6 @@ export default function AdminDashboard() {
                           {o.items?.map((i: any, idx: number) => (
                             <div key={idx} className="bg-slate-50 p-1.5 rounded-lg border border-slate-100 space-y-1">
                               <div className="flex gap-2 items-start">
-                                {/* কাস্টমার যেই ছবি সিলেক্ট করেছে সেটি এখানে থাম্বনেইল হিসেবে দেখা যাবে */}
                                 {i.selectedImage && (
                                   <div className="w-10 h-10 rounded-lg bg-slate-200 overflow-hidden shrink-0 border-2 border-primary/20">
                                     <img src={i.selectedImage} alt="" className="w-full h-full object-cover" />
@@ -523,6 +530,16 @@ export default function AdminDashboard() {
                                <CheckCircle className="w-3.5 h-3.5" />
                             </Button>
                           )}
+                          {o.status === 'confirmed' && (
+                            <Button size="icon" variant="outline" className="h-7 w-7 rounded-lg text-emerald-500 border-emerald-200 hover:bg-emerald-50" onClick={() => updateOrderStatus(o.id, o.userId, 'completed')}>
+                               <Package className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
+                          {(o.status === 'pending' || o.status === 'confirmed') && (
+                            <Button size="icon" variant="outline" className="h-7 w-7 rounded-lg text-red-500 border-red-200 hover:bg-red-50" onClick={() => updateOrderStatus(o.id, o.userId, 'cancelled')}>
+                               <XCircle className="w-3.5 h-3.5" />
+                            </Button>
+                          )}
                           <Button size="icon" variant="outline" className="h-7 w-7 rounded-lg text-slate-400 border-slate-200 hover:bg-slate-50" onClick={() => deleteOrder(o.id)}>
                              <Trash2 className="w-3.5 h-3.5" />
                           </Button>
@@ -571,7 +588,7 @@ export default function AdminDashboard() {
                               isFeatured: p.isFeatured || false,
                               imageUrls: p.imageUrls || [''],
                               mainImageIndex: p.mainImageIndex || 0,
-                              unit: p.unit || 'Size',
+                              unit: p.unit || '',
                               variants: p.variants?.join(', ') || '',
                               colors: p.colors?.join(', ') || ''
                             }); 
